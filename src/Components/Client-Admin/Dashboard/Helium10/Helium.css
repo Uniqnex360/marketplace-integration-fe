@@ -1,0 +1,16 @@
+/* Remove shadow for specific generated class
+.css-xt9wxd-MuiPaper-root-MuiCard-root {
+    box-shadow: none !important;
+  }
+   */
+  /* Use the class name more generally */
+  .MuiCard-root.MuiPaper-root {
+    box-shadow: none !important;
+}
+
+.css-1bz4jw-MuiButtonBase-root-MuiTab-root.Mui-selected {
+  color: black !important;
+}
+.MuiCard-root.MuiPaper-root.Mui-selected {
+  color: black;
+}

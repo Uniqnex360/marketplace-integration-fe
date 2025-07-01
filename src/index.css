@@ -1,0 +1,625 @@
+
+
+body {
+  margin: 0;
+  font-family:
+    'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.typography {
+  fontFamily: "'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif",
+}
+
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* Layout container to occupy full height */
+.layout-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Full viewport height */
+}
+
+/* Main content area takes the full available space */
+.content {
+  flex: 1;
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+
+/* Footer styles */
+.footer {
+  background-color: #f5f5f5;
+  text-align: center;
+  padding: 15px;
+  width: 100%;
+  margin-top: auto;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  font-size: 14px;
+  color: #666;
+}
+
+.custom-tabs .Mui-selected {
+  color: #000080 !important; /* !important is used to override existing style*/
+}
+.css-d73u5w-MuiButtonBase-root-MuiPaginationItem-root.Mui-selected {
+  color: #fff;
+  background-color: #000080 !important; 
+}
+
+/* .Mui-selected {
+  background-color: #000080 !important;
+}
+
+.Mui-selected.MuiListItem-button {
+  color: white !important; 
+} */
+
+.MuiInputBase-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #000080 !important; /* !important is usually needed to override MUI's default styles */
+}
+
+.MuiFormLabel-root.Mui-focused {
+  color: #000080 !important;
+}
+
+/* Target the checked state of the checkbox */
+.PrivateSwitchBase-input:checked {
+  color: #000080 !important; /* Set the desired color */
+}
+
+/* Optional: You can also style the color of the checkmark icon */
+.PrivateSwitchBase-input:checked + .MuiSvgIcon-root {
+  fill: #000080 !important; /* Set the desired color */
+}
+
+.css-cokf1l-MuiListItemIcon-root {
+  min-width: 0px !important;
+}
+
+/* Adjust the margin-top of the SVG path inside the legend */
+.recharts-legend-item .recharts-symbols {
+  margin-top: -3px !important; 
+}
+
+.recharts-surface {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0px 4px 0px 0px; /* Adjust the margin as needed */
+}
+
+/* Datepicker size */
+/* Override MUI input field padding */
+.css-1dune0f-MuiInputBase-input-MuiOutlinedInput-input {
+  padding: 4px 6px !important; /* Modify the padding as desired */
+  font-size: 0.75rem !important; /* Optional: Adjust the font size for compactness */
+  height: 2.4375em !important;
+}
+
+/* Override MUI DatePicker label styles */
+.css-19qnlrw-MuiFormLabel-root-MuiInputLabel-root {
+  color: rgba(0, 0, 0, 0.6); /* Lighter label color */
+  font-size: 0.75rem; /* Smaller font size */
+  position: absolute; /* Position label above input */
+  left: 0;
+  right: 0;
+  top: -8px !important; /* Move label slightly above the input field */
+  transform: scale(0.9); /* Scale label down */
+  transform-origin: top center; /* Scale from top center */
+  display: flex; /* Center the label horizontally */
+  justify-content: center; /* Center horizontally */
+}
+
+
+/* Custom Media Query for Grid Component */
+@media (min-width: 1200px) {
+  .css-zbaamk-MuiGrid-root {
+      -webkit-flex-basis: 25%;
+      -ms-flex-preferred-size: 25%;
+      flex-basis: 16% !important;
+      -webkit-box-flex: 0;
+      -webkit-flex-grow: 0;
+      -ms-flex-positive: 0;
+      flex-grow: 0;
+      max-width: 40%;
+  }
+}
+
+/* Remove the outline or focus effect */
+.recharts-pie-sector:focus,
+.recharts-pie-sector:active {
+  outline: none;
+  box-shadow: none; /* Remove the box shadow if it's applied */
+}
+
+/* Optionally, prevent the default color change when a segment is selected */
+.recharts-pie-sector:focus {
+  background-color: transparent !important;
+}
+
+@media (min-width: 1200px) {
+  .css-11b2vr3-MuiGrid-root {
+      flex-basis: 10% !important;
+      /* max-width: 10%; */
+      flex-grow: 0;
+  }
+}
+
+/* Target the Grid container for the date pickers */
+.MuiGrid-root.date-picker-container { /* Add a specific class to your Grid */
+  display: flex;
+  align-items: center; /* Vertically align items */
+  /* Add other alignment properties as needed */
+}
+
+/* Target the TextField within the DatePicker */
+.MuiGrid-root.date-picker-container .MuiTextField-root {
+  width: 100%; /* Ensure full width within the Grid item */
+}
+
+/* Target the Select component's Box container */
+/* .MuiGrid-root.category-select-container .MuiBox-root { 
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: 10px;
+  width: 161px !important;
+} */
+
+/* Target the Select component itself */
+/* .MuiGrid-root.category-select-container .MuiSelect-root {
+  width: 100% !important; 
+  height: 30px !important;
+  color: #121212 !important;
+} */
+
+
+/* Product attributes */
+.date-picker-grid-item {
+  display: flex;
+  align-items: center; /* Vertically align items within the grid item */
+  /* justify-content: flex-end; If you need to align to the end */
+}
+
+/* .category-select-grid-item {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: 10px;
+}
+
+.category-select-grid-item .MuiBox-root {
+  width: 100%; 
+}
+
+.category-select-grid-item .MuiSelect-root {
+  width: 100%;
+  height: 30px;
+  color: #121212;
+} */
+
+
+
+.date-picker-input .MuiInputBase-root {
+  
+  height: 36px !important;
+  font-size: 12px;
+  padding: 0 8px;
+}
+
+.date-picker-input .MuiInputLabel-root {
+  font-size: 0.75rem;
+  /* top: -5px; */
+}
+
+.css-1oy18r0 {
+
+  font-weight: 400;
+  margin-top: 7px !important;
+  height: 38px !important;
+  font-size: 1rem;
+  line-height: 1.4375em;
+  letter-spacing: 0.00938em;
+  color: rgba(0, 0, 0, 0.87);
+  box-sizing: border-box;
+  cursor: text;
+  display: inline-flex;
+  -webkit-box-align: center;
+  align-items: center;
+  position: relative;
+  border-radius: 4px;
+  padding-right: 14px;
+}
+
+
+/* Remove Paper/Card styles for dashboard metric cards */
+/* .MuiCard-root.css-xt9wxd-MuiPaper-root-MuiCard-root {
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  border: none !important;
+} */
+
+
+.custom-tab-box {
+  width: 95% !important; /* Or any value you want */
+  max-width: 1200px;
+}
+
+.no-shadow {
+  box-shadow: none !important;
+}
+
+@media (min-width: 1200px) {
+  .css-f9p5hp {
+      flex-basis: 25%;
+      -webkit-box-flex: 0;
+      flex-grow: 0;
+      max-width: 18% !important;
+  }
+}
+.css-1k80kex {
+  min-width: 28px !important;
+  color: rgba(0, 0, 0, 0.54);
+  flex-shrink: 0;
+  display: inline-flex
+;
+}
+
+.css-w4j1zb-MuiButtonBase-root-MuiTab-root.Mui-selected {
+  color: #121212 !important;
+}
+.css-xbej8j-MuiButtonBase-root-MuiTab-root.Mui-selected {
+  color: #121212 !important;
+}
+
+/* Make the specific grid container sticky */
+.MuiGrid-root.MuiGrid-container.MuiGrid-spacing-xs-2.css-9a65f5-MuiGrid-root {
+  position: sticky;
+  top: 0; /* Make it stick to the top of the viewport */
+  z-index: 1000; /* Ensure it stays on top of other elements */
+  background-color: white; /* Optional: Prevents content overlap */
+}
+
+
+.css-16lal2g-MuiTypography-root {
+  margin: 0;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.5;
+  letter-spacing: 0.00938em;
+  font-size: 14px !important;
+  font-weight: 600;
+}
+
+.css-1v05wc1-MuiTypography-root {
+  margin: 0;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.5;
+  letter-spacing: 0.00938em;
+  font-size: 14px !important;
+  font-weight: normal;
+}
+
+.css-34tio7-MuiTypography-root {
+  font-family:
+  "'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif" !important;
+
+  margin: 0;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.5;
+  letter-spacing: 0.00938em;
+  color: #64748B;
+  font-size: 14px !important;
+}
+
+@media (min-width: 600px) {
+  .css-hhdjsd-MuiContainer-root {
+      padding-left: 24px;
+      padding-right: 24px;
+      width: 103% !important;
+      margin-left: -23px !important;
+  }
+}
+
+.css-1clvvff-MuiTypography-root {
+  margin: 0;
+  /* font-family: "Roboto", "Helvetica", "Arial", sans-serif; */
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 1.235;
+  letter-spacing: 0.00735em;
+  color: #111827;
+  font-family: 'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif;
+}
+
+.css-rizt0-MuiTypography-root {
+  margin: 0;
+  font-family: 'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif !important;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.5;
+  letter-spacing: 0.00938em;
+}
+
+/* .css-1gagiw6 {
+  font-family: 'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif !important;
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  letter-spacing: 0.01071em;
+  display: table-cell;
+  vertical-align: inherit;
+  border-bottom: 1px solid rgb(224, 224, 224);
+  text-align: left;
+  color: rgba(0, 0, 0, 0.87);
+  padding: 6px 16px;
+} */
+
+.css-jiabcu-MuiTableCell-root {
+  font-family: 'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  letter-spacing: 0.01071em;
+  display: table-cell;
+  vertical-align: inherit;
+  border-bottom: 1px solid rgba(224, 224, 224, 1);
+  text-align: left;
+  padding: 16px;
+  color: #2B3948;
+  padding: 6px 16px;
+}
+
+.css-1g7jcvv {
+  margin: 0px;
+  font-family: 'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif !important;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.00938em;
+  color: #485E75;
+  font-size: 14px !important;
+}
+
+.css-rizt0-MuiTypography-root {
+  margin: 0;
+    font-family: 'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif !important;
+
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.5;
+  letter-spacing: 0.00938em;
+}
+
+.css-1gagiw6 {
+  font-family: 'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif !important;
+
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  letter-spacing: 0.01071em;
+  display: table-cell;
+  vertical-align: inherit;
+  border-bottom: 1px solid rgb(224, 224, 224);
+  text-align: left;
+  color: #2B3948 !important;
+  padding: 6px 16px;
+}
+
+.css-fyswvn {
+  margin: 0px;
+  font-family: 'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif !important;
+
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.5;
+  letter-spacing: 0.00938em;
+}
+
+
+
+.css-15cumlv-MuiAutocomplete-root .MuiOutlinedInput-root .MuiAutocomplete-input {
+    font-size: 15px !important;
+}
+.css-dl1h3d-MuiAutocomplete-noOptions {
+  display: none;
+}
+.css-1fu65n9{
+  display: none;
+}
+
+
+/* Dashboard filter */
+.dashboard-filter {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  width: calc(100% + 16px) !important;
+  margin-left: calc(-1 * 16px);
+  margin-top: calc(-1 * 16px);
+  justify-content: center;
+  padding-right: 2%;
+}
+@media (min-width: 1200px) {
+    .css-fotn70-MuiGrid-root {
+        -webkit-flex-basis: 25%;
+        -ms-flex-preferred-size: 25%;
+        flex-basis: 80%;
+        -webkit-box-flex: 0;
+        -webkit-flex-grow: 0;
+        -ms-flex-positive: 0;
+        flex-grow: 0;
+        max-width: 100%;
+    }
+}
+/* sales decreasing and increasing */
+.css-a7kppu-MuiTypography-root {
+    margin: 0;
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.5;
+    letter-spacing: 0.00938em;
+    color: #485E75;
+    font-size: 14px;
+  font-family: 'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif !important;
+}
+.css-1cvshn8 {
+  font-family: 'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif !important;
+  }
+.css-1plsf6o {
+  font-family: 'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif !important;
+}
+
+.css-162tvoi {
+    display: flex;
+    gap: 15px;
+}
+.css-hzcega-MuiTabs-list{
+  gap: 15px;
+}
+
+.css-194m025-MuiTypography-root
+ {
+    margin: 0;
+    font-family: 'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif !important;
+
+ }
+
+ /* Metric card issue */
+ .css-1cmizrj {
+    width: 100%;
+    margin-left: auto;
+    box-sizing: border-box;
+    margin-right: auto;
+    padding-left: 0px !important;
+    padding-right: 10px !important;
+}
+/* Insights card arrangement */
+.css-19midj6 {
+    padding: 14px !important;
+}
+.custom-prod-container {
+  position: fixed;
+  top: 55%;
+  left: 44%;
+  transform: translate(-50%, -50%);
+  z-index: 10000;
+  width: 834px;
+  max-height: 72vh;
+  overflow-y: auto;
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  font-family: 'Nunito Sans',-apple-system,'Segoe UI','Roboto','Helvetica Neue','Arial',sans-serif;
+}
+
+/* Optional backdrop if you want to dim background */
+.custom-prod-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: transparent !important;
+  z-index: 9999;
+}
+
+.image-size-section p {
+  font-weight: bold;
+}
+
+
+.size-btn {
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  background: #f5f5f5;
+  cursor: pointer;
+  border-radius: 20px;
+  transition: background 0.3s;
+}
+
+
+
+.columns-section h3 {
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: black;
+}
+.columns-section {
+    color: #485E75;
+}
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+/* .checkbox-item {
+  margin-bottom: 10px;
+} */
+
+.additional-info {
+  margin-top: 20px;
+}
+
+.additional-info h4 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.image-size-options {
+  display: flex;
+  gap: 12px;
+  background: rgb(217, 224, 232);
+  padding: 6px;
+  border-radius: 32px;
+}
+
+.size-btn.selected {
+  background-color: #ffffff !important;
+  font-weight: 600;
+}
+.css-4nmryk-MuiBackdrop-root-MuiModal-backdrop{
+  background-color: transparent !important;
+}
+/* start date enddate */
+.css-qwdxx6 {
+    color: currentcolor;
+    border: 0px;
+    box-sizing: content-box;
+    font-size: 13px !important;
+}
+/* Cogs font family */
+.css-d1epdx-MuiTableCell-root
+ {
+      font-family: 'Nunito Sans',-apple-system,'Segoe UI','Roboto','Helvetica Neue','Arial',sans-serif !important;
+    font-weight: 400;
+    font-size: 0.875rem;
+    line-height: 1.43;
+    letter-spacing: 0.01071em;
+    display: table-cell;
+    vertical-align: inherit;
+    border-bottom: 1px solid rgba(224, 224, 224, 1);
+    text-align: left;
+    padding: 16px;
+    color: rgba(0, 0, 0, 0.87);
+    text-align: right;
+    -webkit-flex-direction: row-reverse;
+    -ms-flex-direction: row-reverse;
+    flex-direction: row-reverse;
+    color: #485E75;
+    border-bottom: none;
+}
+.css-1i3bngx{
+  font-family: 'Nunito Sans',-apple-system,'Segoe UI','Roboto','Helvetica Neue','Arial',sans-serif !important;
+}
