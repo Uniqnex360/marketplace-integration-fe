@@ -291,6 +291,7 @@ useEffect(() => {
           },
       );
       const items = response.data.data || [];
+      console.log("getproductIdlist",items)
       setAsinList(items);
     } catch (error) {
       console.error("Error fetching ASIN list:", error);
@@ -467,7 +468,8 @@ const fetchManufacturerList = async (searchText) => {
             manufacturer_name:selectedManufacturer,
         }
       );
-        const names = response.data.data || [];        
+        const names = response.data.data || []; 
+        console.log('GETSKULIST',names)       
       setSkuList(names);
     } catch (error) {
       console.error("Error fetching SKU list:", error);
@@ -738,6 +740,7 @@ if (startDate && endDate) {
       });
     }
   };
+  console.log('mergedproducts',mergedProducts)
   const handleClearFilter = () => {
     // Previous state values
     const prevFilterFinal = filterFinal;
@@ -1718,8 +1721,16 @@ options={[
         </Grid> */}
 
         <Grid item xs={12} sm={12}>
-          <MyProductList  widgetData={befePreset} marketPlaceId={selectedCategory == 'all' ? selectedCategory : filterFinal} brand_id={selectedBrandFilter}   product_id={mergedProductsFilter?.id} manufacturer_name={selectedManufacturerFilter} fulfillment_channel={selectedFulfillment}  DateStartDate={appliedStartDate} DateEndDate={appliedEndDate} />
-             </Grid>
+<MyProductList
+  widgetData={befePreset}
+  marketPlaceId={selectedCategory == 'all' ? selectedCategory : filterFinal}
+  brand_id={selectedBrandFilter}
+  product_id={mergedProductsFilter} // <-- correct!
+  manufacturer_name={selectedManufacturerFilter}
+  fulfillment_channel={selectedFulfillment}
+  DateStartDate={appliedStartDate}
+  DateEndDate={appliedEndDate}
+/>             </Grid>
         </Grid> 
         {/* <Grid item xs={12} sm={12}>
           <ProductTableDashboard marketPlaceId={selectedCategory == 'all' ? selectedCategory : filterFinal} DateStartDate={appliedStartDate} DateEndDate={appliedEndDate} />

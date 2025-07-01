@@ -650,7 +650,6 @@ if (loading) {
                   >
                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
             {metrics.map((metric, index) => {
-                console.log('oppo111', metric);
                 const isSelected = visibleMetrics.includes(metric.id);
                 const isProfitMargin = metric.id === 'profitMargin'; // Assuming 'profitMargin' is the id for profit margin
 

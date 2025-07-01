@@ -897,7 +897,6 @@ setBindGraph(mergedGraphData);
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
       {metrics.map((metric, index) => {
 
-        console.log('oppo111',metric.compareValue)
         const isSelected = selectedMetrics[metric.id];
         return (
           <Card

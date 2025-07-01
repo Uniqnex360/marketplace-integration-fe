@@ -444,18 +444,48 @@ useEffect(() => {
 }, [selectedColumns]);
     // This useEffect triggers data fetching when relevant parameters change
     useEffect(() => {
-        console.log('oppo',filterParent, filterSku)
-        const currentParams = JSON.stringify({
-            marketPlaceId, widgetData, rowsPerPage, searchQuery, brand_id, product_id, manufacturer_name, fulfillment_channel, DateStartDate, DateEndDate, tab, activeColumnCategoryTab, sortValues, filterParent, filterSku
-        });
+    console.log('oppo', filterParent, filterSku);
+    const currentParams = JSON.stringify({
+        marketPlaceId,
+        widgetData,
+        rowsPerPage,
+        searchQuery,
+        brand_id,
+        product_id,
+        manufacturer_name,
+        fulfillment_channel,
+        DateStartDate,
+        DateEndDate,
+        tab,
+        activeColumnCategoryTab,
+        sortValues,
+        filterParent,
+        filterSku
+    });
 
-        // Only fetch if parameters have actually changed
-        if (lastParamsRef.current !== currentParams) {
-            lastParamsRef.current = currentParams;
-            fetchMyProducts(1); // Always start from page 1 when filters/sort/tabs change
-        }
+    // Only fetch if parameters have actually changed
+    if (lastParamsRef.current !== currentParams) {
+        lastParamsRef.current = currentParams;
+        fetchMyProducts(1); // Always start from page 1 when filters/sort/tabs change
+    }
 
-    }, [marketPlaceId, widgetData, rowsPerPage, searchQuery, brand_id, product_id, manufacturer_name, fulfillment_channel, DateStartDate, DateEndDate, tab, activeColumnCategoryTab, sortValues, filterParent, filterSku]);
+}, [
+    marketPlaceId,
+    widgetData,
+    rowsPerPage,
+    searchQuery,
+    JSON.stringify(brand_id),
+    JSON.stringify(product_id),
+    JSON.stringify(manufacturer_name),
+    fulfillment_channel,
+    DateStartDate,
+    DateEndDate,
+    tab,
+    activeColumnCategoryTab,
+    JSON.stringify(sortValues),
+    filterParent,
+    filterSku
+]);
 
     
     // Function to fetch product data from the backend

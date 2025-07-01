@@ -305,7 +305,6 @@ const MyProductTable = ({ products, visibleColumns, onSort, isParentType, imageS
         ) : (
           <TableBody>
             {products.map((row) => {
-              console.log('kkkkkk', row)
               const isExpanded = expandedRows[isParentType === 'parent' ? row.id : row.asin];
 
               return (
