@@ -58,7 +58,8 @@ const LoginPage = () => {
     event.preventDefault();
    
     if (!validateForm()) return;
-
+const baseUrl = process.env.REACT_APP_IP;
+console.log('BASEURL',baseUrl)
     setLoading(true);
     try {
       const response = await axios.post(
