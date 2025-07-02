@@ -514,7 +514,7 @@ const SalesDecreasing = ({ userId, marketPlaceId, brand_id, product_id, manufact
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={4} align="center" sx={{ fontSize: '14px', color: '#485E75' }}>
-                                    No data available1
+                                    No data available
                                 </TableCell>
                             </TableRow>
                         )}
