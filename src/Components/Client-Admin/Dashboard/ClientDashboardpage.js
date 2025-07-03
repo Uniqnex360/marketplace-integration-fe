@@ -910,7 +910,6 @@ if (startDate && endDate) {
           }
         }}
         loading={isLoading||isTyping}
-        loadingText={isTyping?"Typing...":"Loading brands"}
         value={selectedBrand}
         onChange={(event, newValue) => {
           setSelectedBrand(newValue);
