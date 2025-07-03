@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useRef, useCallback    } from "react";
+import React, { useState, useEffect,useRef, useCallback, cache    } from "react";
 import { Box, Grid, Typography, Button, Paper,  Tabs,Tab, Tooltip,Select, TextField, MenuItem, FormControl, InputLabel, CircularProgress, ListItemIcon,ListItemText,Menu,Collapse, Autocomplete,  ListSubheader,  Checkbox, Chip
 } from "@mui/material";
 import axios from "axios";
@@ -62,6 +62,8 @@ function ClientDashboardpage() {
   const [isLoading, setIsLoading] = useState(true);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+    const brandRequest=useRef(null)
+
   const [appliedStartDate, setAppliedStartDate] = useState(null);
   const [appliedEndDate, setAppliedEndDate] = useState(null);
   const [filter, setFilter] = useState("all"); // Default filter state
@@ -75,6 +77,7 @@ function ClientDashboardpage() {
   const [endDateHelium, setEndDateHelium] = useState(dayjs());
   localStorage.removeItem('selectedCategory');
   const [anchorEl, setAnchorEl] = useState(null);
+  const [brandCache, setBrandCache] = useState({});
   const [expandedCategories, setExpandedCategories] = useState({});
   const [manufacturerList, setManufacturerList] = useState([]);
   const [selectedManufacturer, setSelectedManufacturer] = useState([]);
@@ -369,13 +372,19 @@ const fetchManufacturerList = async (searchText) => {
     fetchBrandList();
   }, [brandLimit, selectedCategory?.id, userIds]);
   
-  const debouncedFetchBrandList = useCallback(
-    debounce((search) => {
-      setBrandLimit(11); // Reset limit on new search
+ const debouncedFetchBrandList = useCallback(
+  debounce((search) => {
+    if (search.trim().length>=2) {
+      setBrandLimit(5); // Start with smaller chunks
       fetchBrandList(search);
-    }, 300),
-    []
-  );
+    }
+    else if(search.trim()==='')
+    {
+      setBrandLimit([])
+    }
+  }, 300), // Reduced from 500ms to 300ms
+  []
+);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -404,29 +413,60 @@ const fetchManufacturerList = async (searchText) => {
 
 
   const fetchBrandList = async (search = "") => {
+    const cacheKey=`${selectedCategory.id||"all"}-${search}-${brandLimit}`
+    if(brandCache[cacheKey])
+    {
+      setBrandList(brandCache[cacheKey])
+      return
+    }
+    if(brandLimit.current)
+    {
+      brandLimit.current.abort()
+    }
+    brandRequest.current=axios.CancelToken.source()
     setIsLoading(true);
+    setIsTyping(false)
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_IP}getBrandListforfilter/`,
         {
           params: {
             marketplace_id: selectedCategory?.id,
-            search_query: search,
+            search_query: search, 
             user_id: userIds,
             limit: brandLimit,
           },
+          cancelToken:brandRequest.current.token
         }
       );
       const names = response.data.data.brand_list || [];
       setBrandList(names);
       setHasMore(names.length >= brandLimit);
+      setBrandCache(prev=>({
+        ...prev,
+        [cacheKey]:names
+      }))
     } catch (error) {
+      if(!axios.isCancel(error))
+      {
+        console.error('Error fetching brand list')
+        setHasMore(false)
+      }
       console.error("Error fetching brand list:", error);
       setHasMore(false);
     } finally {
       setIsLoading(false);
+      brandRequest.current=null
     }
   };
+  useEffect(()=>{
+    return ()=>{
+      if(brandLimit.current)
+      {
+        brandLimit.current.abort()
+      }
+    }
+  },[])
 
 
 
@@ -853,14 +893,24 @@ if (startDate && endDate) {
       <Autocomplete
         multiple
         disableCloseOnSelect
+        filterOptions={(x)=>x}
+        disableListWrap
+        disablePortal
         options={[...selectedBrand, ...brandList.filter(b => !selectedBrand.some(sb => sb.id === b.id))]}
         getOptionLabel={(option) => option.name}
         isOptionEqualToValue={(option, value) => option.id === value.id}
         inputValue={inputValueBrand}
-        onInputChange={(event, newInputValue) => {
+        onInputChange={(event, newInputValue,reason) => {
           setInputValueBrand(newInputValue);
-          setBrandLimit(11);
+          setIsTyping(true)
+          if(reason==='input')
+          {
+            setBrandLimit(5)
+            debouncedFetchBrandList(newInputValue)
+          }
         }}
+        loading={isLoading||isTyping}
+        loadingText={isTyping?"Typing...":"Loading brands"}
         value={selectedBrand}
         onChange={(event, newValue) => {
           setSelectedBrand(newValue);
@@ -893,7 +943,8 @@ if (startDate && endDate) {
             placeholder="Search brands..."
             InputProps={{
               ...params.InputProps,
-              endAdornment: <>{params.InputProps.endAdornment}</>,
+              endAdornment: <>{isTyping && (<CircularProgress color="inherit" size={20}/>)}
+              {params.InputProps.endAdornment}</>,
             }}
           />
         )}
@@ -902,23 +953,23 @@ if (startDate && endDate) {
             {...props}
             sx={{
               zIndex: 1300,
-              width: "100%",
-              maxWidth:220,
+              width: 220,
               bgcolor: 'white',
               boxShadow: 3,
               borderRadius: 1,
-              overflow: 'auto',
+              overflow: 'visible',
               maxHeight: 300,
               position: 'absolute',
-              left:0,
-              right:0
             }}
-            onScroll={(event) => {
-              const { scrollTop, scrollHeight, clientHeight } = event.target;
-              // if (scrollTop + clientHeight >= scrollHeight - 5 && !isLoading && hasMore) {
-              //   setBrandLimit((prev) => prev + 10);
-              // }
-            }}
+        onScroll={(event) => {
+  const listboxNode = event.currentTarget;
+  const { scrollTop, scrollHeight, clientHeight } = listboxNode
+  const threshold=50
+  
+  if (scrollHeight - (scrollTop + clientHeight) < threshold && !isLoading && hasMore) {
+    setBrandLimit(prev => prev + 5);
+  }
+}}
           >
             {/* {selectedBrand.length > 0 && (
               <Box
@@ -1025,7 +1076,7 @@ if (startDate && endDate) {
           bgcolor: 'white',
           boxShadow: 3,
           borderRadius: 1,
-          overflow: 'auto',
+          overflow: 'visible',
           maxHeight: 300,
           position: 'absolute',
         }}
@@ -1544,7 +1595,7 @@ options={[
   </Box>
 </Grid> */}
 
-{/* 
+
 <Grid item xs={12} sm={12} sx={{width:'100%',  borderRadius: '2px',}}>
   <Box
     sx={{
@@ -1554,7 +1605,7 @@ options={[
   >
     <InsightCategory />
   </Box>
-</Grid> */}
+</Grid>
 
 
   {/* Right side - Tabs + Content */}
@@ -1638,12 +1689,12 @@ options={[
 
     <Box>
 
-      {/* {tab === 0 && (
+      {tab === 0 && (
  <CompareChart   startDate={startDateHelium}
         endDate={endDateHelium}
         widgetData={befePreset}  marketPlaceId={selectedCategory == 'all' ? selectedCategory : filterFinal} brand_id={selectedBrandFilter}   product_id={mergedProductsFilter} manufacturer_name={selectedManufacturerFilter} fulfillment_channel={selectedFulfillment}
     DateStartDate={appliedStartDate} DateEndDate={appliedEndDate}/>
-)} */}
+)}
 
       {/* {tab === 0 && (
   (befePreset === 'Today' || befePreset === 'Yesterday') ? (
@@ -1693,20 +1744,20 @@ options={[
 
 
 </Grid>
-   {/* <Grid item xs={12} sm={12} >
+   <Grid item xs={12} sm={12} >
           <PeriodComparission   marketPlaceId={selectedCategory === 'all' ? selectedCategory : filterFinal} brand_id={selectedBrandFilter}   product_id={mergedProductsFilter} manufacturer_name={selectedManufacturerFilter} fulfillment_channel={selectedFulfillment}/>
-        </Grid>  */}
-        {/* <Grid item xs={12} sm={12} >
+        </Grid> 
+        <Grid item xs={12} sm={12} >
           <MetricCard   startDate={startDateHelium}
           endDate={endDateHelium}
           widgetData={befePreset} 
           marketPlaceId={selectedCategory === 'all' ? selectedCategory : filterFinal}
           brand_id={selectedBrandFilter} product_id={mergedProductsFilter?.id} manufacturer_name={selectedManufacturerFilter} fulfillment_channel={selectedFulfillment} 
              DateStartDate={appliedStartDate} DateEndDate={appliedEndDate} />
-        </Grid> */}
+        </Grid>
 
         <Grid item xs={12} sm={12}>
-          {/* <Box sx={{paddingBottom:'10px', width:'99%'}}>
+          <Box sx={{paddingBottom:'10px', width:'99%'}}>
           <SalesIncreasing  marketPlaceId={selectedCategory === 'all' ? selectedCategory : filterFinal} brand_id={selectedBrandFilter}   product_id={mergedProductsFilter} manufacturer_name={selectedManufacturerFilter} fulfillment_channel={selectedFulfillment}  DateStartDate={appliedStartDate} DateEndDate={appliedEndDate} />
           </Box>
           <Box sx={{paddingBottom:'10px', width:'99%'}}>
@@ -1718,7 +1769,7 @@ options={[
         </Grid>
         <Grid item xs={12} sm={12} sx={{width:'99%'}}>
           <ProfitAndLoss  widgetData={befePreset} marketPlaceId={selectedCategory == 'all' ? selectedCategory : filterFinal} brand_id={selectedBrandFilter} fulfillment_channel={selectedFulfillment} manufacturer_name={selectedManufacturerFilter} product_id={mergedProductsFilter?.id}  DateStartDate={appliedStartDate} DateEndDate={appliedEndDate} />
-        </Grid> */}
+        </Grid>
 {/* <Grid item xs={12} sm={12} sx={{width:'99%'}}>
           <TestProfitLoss  widgetData={befePreset} marketPlaceId={selectedCategory == 'all' ? selectedCategory : filterFinal}/>
         </Grid> */}
