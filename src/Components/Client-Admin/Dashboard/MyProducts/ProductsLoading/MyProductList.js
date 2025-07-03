@@ -490,115 +490,126 @@ useEffect(() => {
     
     // Function to fetch product data from the backend
     const fetchMyProducts = async (currentPage) => {
-        setLoading(true);
-        try {
-            // Calculate the actual page value to send to the backend
-            // If rowsPerPage is 10, page 1 maps to 1, page 2 maps to 11, page 3 maps to 21, etc.
-            const calculatedPageForBackend = (currentPage - 1) * rowsPerPage + 1;
-  if (controllerRef.current) {
-    controllerRef.current.abort();
-  }
-  // Create new controller
-  controllerRef.current = new AbortController();
-            const response = await axios.post(
-                `${process.env.REACT_APP_IP}get_products_with_pagination/`,
-                {
-                    parent: tab === 0, // This determines if it's Parent or SKU
-                    preset: widgetData,
-                    marketplace_id: marketPlaceId.id,
-                    user_id: userId,
-                    search_query: searchQuery,
-                    page: calculatedPageForBackend, // Use the calculated page value here
-                    page_size: rowsPerPage,
-                    brand_id: brand_id,
-                    product_id: product_id,
-                    manufacturer_name: manufacturer_name,
-                    fulfillment_channel: fulfillment_channel,
-                    start_date: DateStartDate,
-                    end_date: DateEndDate,
-                    sort_by: sortValues.sortBy,
-                    sort_by_value: sortValues.sortByValue,
-                    parent_search: filterParent ? filterParent : '',
-                    sku_search: filterSku ? filterSku : '',
-                    signal: controllerRef.current.signal,
-                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    setLoading(true);
+    try {
+        const calculatedPageForBackend = (currentPage - 1) * rowsPerPage + 1;
 
-                }
-                 
-            );
+        if (controllerRef.current) {
+            controllerRef.current.abort();
+        }
 
-            const responseData = response.data;
-            if (responseData && responseData.products) {
-                const normalizedProducts = responseData.products.map(product => {
-                    console.log('oppovlaues', response.data.parent); // This console log seems to be for debugging backend response
-                    setTabType(response.data.tab_type); // Set tab type from response
-                    return {
-                        ...product,
-                        // Normalize various product data fields, providing 'N/A' if undefined
-                        grossRevenue: product.grossRevenue !== undefined ? product.grossRevenue : 'N/A',
-                        grossRevenueforPeriod: product.grossRevenueforPeriod !== undefined ? product.grossRevenueforPeriod : 'N/A',
-                        netProfit: product.netProfit !== undefined ? product.netProfit : 'N/A',
-                        netProfitforPeriod: product.netProfitforPeriod !== undefined ? product.netProfitforPeriod : 'N/A',
-                        subcategoriesBsr: product.category !== undefined ? product.category : 'N/A',
-                        reviewRating: product.reviewRating !== undefined ? product.reviewRating : 'N/A',
-                        priceDraft: product.price !== undefined ? product.price : 'N/A',
-                        refunds: product.refunds !== undefined ? product.refunds : 'N/A',
-                        refundsforPeriod: product.refundsforPeriod !== undefined ? product.refundsforPeriod : 'N/A',
-                        refundsAmount: product.refundsAmount !== undefined ? product.refundsAmount : 'N/A',
-                        refundsAmountforPeriod: product.refundsAmountforPeriod !== undefined ? product.refundsAmountforPeriod : 'N/A',
-                        pageViews: product.pageViews !== undefined ? product.pageViews : 'N/A',
-                        pageViewsPercentage: product.pageViewsPercentage !== undefined ? product.pageViewsPercentage : 'N/A',
-                        trafficSessions: product.trafficSessions !== undefined ? product.trafficSessions : 'N/A',
-                        conversionRate: product.conversionRate !== undefined ? product.conversionRate : 'N/A',
-                        margin: product.margin !== undefined ? product.margin : 'N/A',
-                        marginforPeriod: product.marginforPeriod !== undefined ? product.marginforPeriod : 'N/A',
-                        totalAmazonFees: product.totalchannelFees !== undefined ? product.totalchannelFees : 'N/A',
-                        roi: product.roi !== undefined ? product.roi : 'N/A',
-                        cogs: product.cogs !== undefined ? product.cogs : 'N/A',
-                        buyBoxWinnerId: product.buyBoxWinnerId !== undefined ? product.buyBoxWinnerId : 'N/A',
-                        salesForToday: product.salesForToday !== undefined ? product.salesForToday : 'N/A',
-                        salesForTodayPeriod: product.salesForTodayPeriod !== undefined ? product.salesForTodayPeriod : 'N/A',
-                        unitsSoldForPeriod: product.unitsSoldForPeriod !== undefined ? product.unitsSoldForPeriod : 'N/A',
-                        unitsSoldForToday: product.unitsSoldForToday !== undefined ? product.unitsSoldForToday : 'N/A',
-                        inventoryStatus: product.inventoryStatus !== undefined ? product.inventoryStatus : 'N/A',
-                        tags: product.tags !== undefined ? product.tags : [],
-                        refundRate: product.refundRate !== undefined ? product.refundRate : '0',
-                        imageUrl: product.imageUrl,
-                        title: product.title,
-                        asin: product?.product_id,
-                        sku: product?.parent_sku,
-                        stock: product.stock,
-                        price: product.price,
-                        price_start: product.price_start,
-                        price_end: product.price_end,
-                        totalStock: product.totalStock,
-                        skuInfo: product.skus ? product.skus.map(sku => ({ label: sku.sku, warning: sku.isLowStock })) : [],
-                        listings: product.listings,
-                        listingScore: product.listingScore,
-                        fulfillmentChannel: product.fulfillmentChannel,
-                        fulfillmentStatus: product.fulfillmentStatus,
-                        currentPriceRange: product.currentPriceRange,
-                    };
-                });
-                   console.log('🎉 FINAL PROCESSED DATA:');
-            console.log('  - Normalized Products:', normalizedProducts);
-            console.log('  - Normalized Products Count:', normalizedProducts.length);
-            console.log('  - Setting Total Products to:', responseData.total_products);
-                setProducts(normalizedProducts);
-                setTotalProducts(responseData.total_products);
-            } else {
-                setProducts([]);
-                setTotalProducts(0);
+        controllerRef.current = new AbortController();
+
+        const response = await axios.post(
+            `${process.env.REACT_APP_IP}get_products_with_pagination/`,
+            {
+                parent: tab === 0,
+                preset: widgetData,
+                marketplace_id: marketPlaceId.id,
+                user_id: userId,
+                search_query: searchQuery,
+                page: calculatedPageForBackend,
+                page_size: rowsPerPage,
+                brand_id: brand_id,
+                product_id: product_id,
+                manufacturer_name: manufacturer_name,
+                fulfillment_channel: fulfillment_channel,
+                start_date: DateStartDate,
+                end_date: DateEndDate,
+                sort_by: sortValues.sortBy,
+                sort_by_value: sortValues.sortByValue,
+                parent_search: filterParent || '',
+                sku_search: filterSku || '',
+                signal: controllerRef.current.signal,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            }
+        );
+
+        const responseData = response.data;
+
+        if (responseData && responseData.products) {
+            const normalizedProducts = responseData.products.map(product => {
+                setTabType(response.data.tab_type);
+                return {
+                    ...product,
+                    grossRevenue: product.grossRevenue ?? null,
+                    grossRevenueforPeriod: product.grossRevenueforPeriod ?? null,
+                    netProfit: product.netProfit ?? null,
+                    netProfitforPeriod: product.netProfitforPeriod ?? null,
+                    subcategoriesBsr: product.category ?? 'N/A',
+                    reviewRating: product.reviewRating ?? 'N/A',
+                    priceDraft: product.price ?? 'N/A',
+                    refunds: product.refunds ?? 0,
+                    refundsforPeriod: product.refundsforPeriod ?? 0,
+                    refundsAmount: product.refundsAmount ?? 0,
+                    refundsAmountforPeriod: product.refundsAmountforPeriod ?? 0,
+                    pageViews: product.pageViews ?? 0,
+                    pageViewsPercentage: product.pageViewsPercentage ?? 0,
+                    trafficSessions: product.trafficSessions ?? 0,
+                    conversionRate: product.conversionRate ?? 0,
+                    margin: product.margin ?? 0,
+                    marginforPeriod: product.marginforPeriod ?? 0,
+                    totalAmazonFees: product.totalchannelFees ?? 0,
+                    roi: product.roi ?? 0,
+                    cogs: product.cogs ?? null,
+                    buyBoxWinnerId: product.buyBoxWinnerId ?? 'N/A',
+                    salesForToday: product.salesForToday ?? 0,
+                    salesForTodayPeriod: product.salesForTodayPeriod ?? 0,
+                    unitsSoldForPeriod: product.unitsSoldForPeriod ?? 0,
+                    unitsSoldForToday: product.unitsSoldForToday ?? 0,
+                    inventoryStatus: product.inventoryStatus ?? 'N/A',
+                    tags: product.tags ?? [],
+                    refundRate: product.refundRate ?? '0',
+                    imageUrl: product.imageUrl,
+                    title: product.title,
+                    asin: product?.product_id,
+                    sku: product?.parent_sku,
+                    stock: product.stock,
+                    price: product.price,
+                    price_start: product.price_start,
+                    price_end: product.price_end,
+                    totalStock: product.totalStock,
+                    skuInfo: product.skus
+                        ? product.skus.map(sku => ({
+                            label: sku.sku,
+                            warning: sku.isLowStock,
+                        }))
+                        : [],
+                    listings: product.listings,
+                    listingScore: product.listingScore,
+                    fulfillmentChannel: product.fulfillmentChannel,
+                    fulfillmentStatus: product.fulfillmentStatus,
+                    currentPriceRange: product.currentPriceRange,
+                };
+            });
+
+            // ✅ Client-side fallback sort (optional but safe)
+            if (
+                sortValues.sortBy &&
+                typeof normalizedProducts[0]?.[sortValues.sortBy] === 'number'
+            ) {
+                normalizedProducts.sort((a, b) =>
+                    sortValues.sortByValue === -1
+                        ? b[sortValues.sortBy] - a[sortValues.sortBy]
+                        : a[sortValues.sortBy] - b[sortValues.sortBy]
+                );
             }
 
-        } catch (error) {
-            console.error('Error fetching products:', error);
+            setProducts(normalizedProducts);
+            setTotalProducts(responseData.total_products);
+        } else {
             setProducts([]);
             setTotalProducts(0);
-        } finally {
-            setLoading(false);
         }
-    };
+
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        setProducts([]);
+        setTotalProducts(0);
+    } finally {
+        setLoading(false);
+    }
+};
 
     return (
             
