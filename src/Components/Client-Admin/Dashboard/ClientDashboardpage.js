@@ -1163,7 +1163,7 @@ options={[
           bgcolor: 'white',
           boxShadow: 3,
           borderRadius: 1,
-          overflow: 'auto',
+          overflow: 'visible',
           maxHeight: 300,
           position: 'absolute',
         }}
@@ -1438,7 +1438,7 @@ options={[
               bgcolor: 'white',
               boxShadow: 3,
               borderRadius: 1,
-              overflow: 'auto',
+              overflow: 'visible',
               maxHeight: 300,
               position: 'absolute',
             }}
