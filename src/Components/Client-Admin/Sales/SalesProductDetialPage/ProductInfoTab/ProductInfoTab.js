@@ -3,7 +3,6 @@ import {
   Box,
   Typography,
   Grid,
-  Switch, // This component isn't used in the provided snippet, but I'm keeping it as it was in your original code.
   Chip,
   IconButton,
   Snackbar,
@@ -19,7 +18,6 @@ import COGSGraph from './COGSGraph';
 
 const ProductInfoTab = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [copiedText, setCopiedText] = useState('');
@@ -117,8 +115,8 @@ const ProductInfoTab = () => {
       setSkuTooltipText('Copy SKU');
     }, 1500);
   };
-
-  const fetchProductInfo = async () => {
+  useEffect(()=>{
+ const fetchProductInfo = async () => {
     setLoading(true);
     setError(null);
 
@@ -142,10 +140,10 @@ const ProductInfoTab = () => {
       setLoading(false);
     }
   };
+  if(id)fetchProductInfo()
+  },[id])
+ 
 
-  useEffect(() => {
-    fetchProductInfo();
-  }, [id]);
 
   if (loading) {
     return (

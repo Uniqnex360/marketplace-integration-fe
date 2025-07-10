@@ -154,6 +154,7 @@ const fetchOrderData = async (marketId = "all", page, rowsPerPage) => {
         timezone: systemTimeZone, // Pass the system time zone
       }
     );
+    console.log('FETCH ALL ORDERS',response)
 
     // Process response
     if (response.data.data.manual_orders) {

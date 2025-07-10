@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -20,13 +20,10 @@ import {
   DialogTitle,
   Button,
   IconButton,
-  Chip,
-  Menu
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import axios from "axios";
 import CloseIcon from "@mui/icons-material/Close";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import UserAdd from "../UserFeild/UserAdd";
 import { Link } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/Edit';
@@ -41,8 +38,6 @@ function UserList() {
   const [page, setPage] = useState(0);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [currentColumn, setCurrentColumn] = useState(null);
 
   const handleDialogOpen = () => {
     setOpenDialog(true);
@@ -121,26 +116,8 @@ const filteredClientData = (clientData || []).filter(
     setPage(0); // Reset to first page when rows per page changes
   };
 
-  // Sorting
-  const handleSelectSort = (key, direction) => {
-    fetchClientData(key, direction);
-    setAnchorEl(null); // Close the menu after selection
-  };
 
-  const handleCloseMenu = () => {
-    setAnchorEl(null);
-  };
-
-  // Handle opening of menu
-  const handleOpenMenu = (event, column) => {
-    setAnchorEl(event.currentTarget);
-    setCurrentColumn(column);
-  };
-
-  const handleEditClient = (client) => {
-    setSelectedClient(client); // Set the selected client for editing
-    handleDialogOpen(); // Open the dialog
-  };
+  
 
   return (
     <Box sx={{ p: 3, marginTop: '3%' }}>

@@ -4,8 +4,6 @@ import { Card, Grid, CardContent, Typography, FormControl, InputLabel, Select, M
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import CustomBarChart from "./CustomBarChart";
 import DottedCircleLoading from "../../Loading/DotLoading";
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { format } from 'date-fns';
 import DonutChart from "./DonutChart";
 

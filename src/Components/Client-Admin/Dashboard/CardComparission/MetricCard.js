@@ -14,7 +14,6 @@ import {
   Tooltip
 } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
@@ -705,221 +704,71 @@ useEffect(() => {
       }
     };
     
-  const transformData = (data) => {
-    if (!data) return [];
-    return [
-      {
-        title: 'Today',
-        date: new Date(data.today.dateRanges.current.from).toLocaleDateString(),
-        dateRangePrev: `${new Date(data.today.dateRanges.previous.from).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        })} - ${new Date(data.today.dateRanges.previous.to).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        })}`, 
+ const transformData = (data) => {
+  if (!data) return [];
 
-        dateRange: `${new Date(data.today.dateRanges.current.from).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        })} - ${new Date(data.today.dateRanges.current.to).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        })}`, 
-
-
-
-        // Format change like 21/4/2025
-
-
-        dateRangePrevFormat: `${new Date(data.today.dateRanges.previous.from).toLocaleDateString('en-US', {
-          year: '2-digit',
-          month: '2-digit',
-          day: '2-digit'
-        })} - ${new Date(data.today.dateRanges.previous.to).toLocaleDateString('en-US', {
-          year: '2-digit',
-          month: '2-digit',
-          day: '2-digit'
-        })}`,
-        
-        dateRangeFormat: `${new Date(data.today.dateRanges.current.from).toLocaleDateString('en-US', {
-          year: '2-digit',
-          month: '2-digit',
-          day: '2-digit'
-        })} - ${new Date(data.today.dateRanges.current.to).toLocaleDateString('en-US', {
-          year: '2-digit',
-          month: '2-digit',
-          day: '2-digit'
-        })}`,
-        
-
-        
-        grossRevenue: `$${data.today.summary.grossRevenue.current.toFixed(2)}`,
-        expenses: `-$${data.today.summary.expenses.current.toFixed(2)}`,
-        netProfit: `$${data.today.summary.netProfit.current.toFixed(2)}`,
-        netPrevious:`$${data.today.summary.netProfit.previous.toFixed(2)}`,
-       
-        margin: `${data.today.summary.margin.current.toFixed(2)}%`,
-        orders: data.today.summary.orders.current, // Order data not directly in this summary
-        // Order data not directly in this summary
-        unitsSold: data.today.summary.unitsSold.current,
-        refunds: data.today.summary.refunds.current,
-        
-        previous: data.today.summary.grossRevenue.previous,
-        // previous: data.today.summary.expenses.previous,
-        revenueChange: `${data.today.summary.grossRevenue.delta >= 0 ? '+' : ''}$${data.today.summary.grossRevenue.delta.toFixed(2)}`,
-        netProfitCalculation: data.today.netProfitCalculation,
-      },
-      {
-        title: 'Yesterday',
-        date: new Date(data.yesterday.dateRanges.current.from).toLocaleDateString(),
-        dateRangePrev: `${new Date(data.yesterday.dateRanges.previous.from).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        })} - ${new Date(data.yesterday.dateRanges.previous.to).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        })}`, 
-
-        dateRange: `${new Date(data.yesterday.dateRanges.current.from).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        })} - ${new Date(data.yesterday.dateRanges.current.to).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        })}`, 
-
-
-
-        // Chagne date format
-
-        dateRangePrevFormat: `${new Date(data.yesterday.dateRanges.previous.from).toLocaleDateString('en-US', {
-          year: '2-digit',
-          month: '2-digit',
-          day: '2-digit'
-        })} - ${new Date(data.yesterday.dateRanges.previous.to).toLocaleDateString('en-US', {
-          year: '2-digit',
-          month: '2-digit',
-          day: '2-digit'
-        })}`,
-        
-        dateRangeFormat: `${new Date(data.yesterday.dateRanges.current.from).toLocaleDateString('en-US', {
-          year: '2-digit',
-          month: '2-digit',
-          day: '2-digit'
-        })} - ${new Date(data.yesterday.dateRanges.current.to).toLocaleDateString('en-US', {
-          year: '2-digit',
-          month: '2-digit',
-          day: '2-digit'
-        })}`,
-        
-        
-        grossRevenue: `$${data.yesterday.summary.grossRevenue.current.toFixed(2)}`,
-        expenses: `-$${data.yesterday.summary.expenses.current.toFixed(2)}`,
-        netProfit: `$${data.yesterday.summary.netProfit.current.toFixed(2)}`,
-        netPrevious:`$${data.yesterday.summary.netProfit.previous.toFixed(2)}`,
-      
-        margin: `${data.yesterday.summary.margin.current.toFixed(2)}%`,
-        orders: data.yesterday.summary.orders.current, // Order data not directly in this summary
-        unitsSold: data.yesterday.summary.unitsSold.current,
-        refunds: data.yesterday.summary.refunds.current,
-      
-        previous: data.yesterday.summary.grossRevenue.previous,
-        revenueChange: `${data.yesterday.summary.grossRevenue.delta >= 0 ? '+' : ''}$${data.yesterday.summary.grossRevenue.delta.toFixed(2)}`,
-        netProfitCalculation: data.yesterday.netProfitCalculation,
-      },
-    {
-        title: 'Last 7 Days',
-     
-  dateRangePrev: `${formatterLong.format(new Date(data.last7Days.dateRanges.previous.from))} - ${formatterLong.format(new Date(data.last7Days.dateRanges.previous.to))}`,
-
-  dateRange: `${formatterLong.format(new Date(data.last7Days.dateRanges.current.from))} - ${formatterLong.format(new Date(data.last7Days.dateRanges.current.to))}`,
-
-  dateRangePrevFormat: `${formatterShort.format(new Date(data.last7Days.dateRanges.previous.from))} - ${formatterShort.format(new Date(data.last7Days.dateRanges.previous.to))}`,
-
-  dateRangeFormat: `${formatterShort.format(new Date(data.last7Days.dateRanges.current.from))} - ${formatterShort.format(new Date(data.last7Days.dateRanges.current.to))}`,
-
-        
-
-
-        
-        // Chagne date format
-
-        dateRangePrevFormat: `${new Date(data.last7Days.dateRanges.previous.from).toLocaleDateString('en-US', {
-          year: '2-digit',
-          month: '2-digit',
-          day: '2-digit'
-        })} - ${new Date(data.last7Days.dateRanges.previous.to).toLocaleDateString('en-US', {
-          year: '2-digit',
-          month: '2-digit',
-          day: '2-digit'
-        })}`,
-        
-        dateRangeFormat: `${new Date(data.last7Days.dateRanges.current.from).toLocaleDateString('en-US', {
-          year: '2-digit',
-          month: '2-digit',
-          day: '2-digit'
-        })} - ${new Date(data.last7Days.dateRanges.current.to).toLocaleDateString('en-US', {
-          year: '2-digit',
-          month: '2-digit',
-          day: '2-digit'
-        })}`,
-        
-        
-        grossRevenue: `$${data.last7Days.summary.grossRevenue.current.toFixed(2)}`,
-        expenses: `-$${data.last7Days.summary.expenses.current.toFixed(2)}`,
-        netProfit: `$${data.last7Days.summary.netProfit.current.toFixed(2)}`,
-        netPrevious:`$${data.last7Days.summary.netProfit.previous.toFixed(2)}`,
-        
-        margin: `${data.last7Days.summary.margin.current.toFixed(2)}%`,
-        orders: data.last7Days.summary.orders.current, // Order data not directly in this summary
- // Order data not directly in this summary
-        unitsSold: data.last7Days.summary.unitsSold.current,
-        refunds: data.last7Days.summary.refunds.current,
-     
-        previous: data.last7Days.summary.grossRevenue.previous,
-        revenueChange: `${data.last7Days.summary.grossRevenue.delta >= 0 ? '+' : ''}$${data.last7Days.summary.grossRevenue.delta.toFixed(2)}`,
-        netProfitCalculation: data.last7Days.netProfitCalculation,
-      },
-    {
-    title: 'Custom',
-
-    // ✅ Long format with Today / Yesterday condition
-    dateRange:
-      widgetData === 'Today' || widgetData === 'Yesterday'
-        ? formatterLong.format(new Date(data.custom.dateRanges.current.from))
-        : `${formatterLong.format(new Date(data.custom.dateRanges.current.from))} - ${formatterLong.format(new Date(data.custom.dateRanges.current.to))}`,
-
-    dateRangePrev: `${formatterLong.format(new Date(data.custom.dateRanges.previous.from))} - ${formatterLong.format(new Date(data.custom.dateRanges.previous.to))}`,
-
-    // ✅ Short format
-    dateRangeFormat: `${formatterShort.format(new Date(data.custom.dateRanges.current.from))} - ${formatterShort.format(new Date(data.custom.dateRanges.current.to))}`,
-    dateRangePrevFormat: `${formatterShort.format(new Date(data.custom.dateRanges.previous.from))} - ${formatterShort.format(new Date(data.custom.dateRanges.previous.to))}`,
-
-    // ✅ Metrics
-    grossRevenue: `$${data.custom.summary.grossRevenue.current.toFixed(2)}`,
-    expenses: `-$${data.custom.summary.expenses.current.toFixed(2)}`,
-    netProfit: `$${data.custom.summary.netProfit.current.toFixed(2)}`,
-    netPrevious: `$${data.custom.summary.netProfit.previous.toFixed(2)}`,
-    margin: `${data.custom.summary.margin.current.toFixed(2)}%`,
-    orders: data.custom.summary.orders.current,
-    unitsSold: data.custom.summary.unitsSold.current,
-    refunds: data.custom.summary.refunds.current,
-    previous: data.custom.summary.grossRevenue.previous,
-    revenueChange: `${data.custom.summary.grossRevenue.delta >= 0 ? '+' : ''}$${data.custom.summary.grossRevenue.delta.toFixed(2)}`,
-    netProfitCalculation: data.custom.netProfitCalculation,
-  }
-    ];
+  // Helper function to safely format dates
+  const safeFormatDate = (dateString, formatter) => {
+    try {
+      return dateString ? formatter.format(new Date(dateString)) : '';
+    } catch (e) {
+      console.warn('Date formatting error:', e);
+      return '';
+    }
   };
 
+  // Helper function to safely access nested properties
+  const safeGet = (obj, path, defaultValue = 0) => {
+    try {
+      return path.split('.').reduce((acc, part) => acc && acc[part], obj) ?? defaultValue;
+    } catch (e) {
+      return defaultValue;
+    }
+  };
+
+  const periods = ['today', 'yesterday', 'last7Days', 'custom'];
+  return periods.reduce((acc, period) => {
+    if (!data[period]) return acc;
+
+    const periodData = data[period];
+    
+    try {
+      const cardData = {
+        title: period === 'last7Days' ? 'Last 7 Days' : period.charAt(0).toUpperCase() + period.slice(1),
+        
+        dateRange: periodData.dateRanges?.current ? 
+          `${safeFormatDate(periodData.dateRanges.current.from, formatterLong)} - ${safeFormatDate(periodData.dateRanges.current.to, formatterLong)}` : '',
+        
+        dateRangePrev: periodData.dateRanges?.previous ? 
+          `${safeFormatDate(periodData.dateRanges.previous.from, formatterLong)} - ${safeFormatDate(periodData.dateRanges.previous.to, formatterLong)}` : '',
+        
+        dateRangeFormat: periodData.dateRanges?.current ? 
+          `${safeFormatDate(periodData.dateRanges.current.from, formatterShort)} - ${safeFormatDate(periodData.dateRanges.current.to, formatterShort)}` : '',
+        
+        dateRangePrevFormat: periodData.dateRanges?.previous ? 
+          `${safeFormatDate(periodData.dateRanges.previous.from, formatterShort)} - ${safeFormatDate(periodData.dateRanges.previous.to, formatterShort)}` : '',
+        
+        grossRevenue: `$${safeGet(periodData, 'summary.grossRevenue.current', 0).toFixed(2)}`,
+        expenses: `-$${safeGet(periodData, 'summary.expenses.current', 0).toFixed(2)}`,
+        netProfit: `$${safeGet(periodData, 'summary.netProfit.current', 0).toFixed(2)}`,
+        netPrevious: `$${safeGet(periodData, 'summary.netProfit.previous', 0).toFixed(2)}`,
+        margin: `${safeGet(periodData, 'summary.margin.current', 0).toFixed(2)}%`,
+        orders: safeGet(periodData, 'summary.orders.current', 0),
+        unitsSold: safeGet(periodData, 'summary.unitsSold.current', 0),
+        refunds: safeGet(periodData, 'summary.refunds.current', 0),
+        previous: safeGet(periodData, 'summary.grossRevenue.previous', 0),
+        revenueChange: `${safeGet(periodData, 'summary.grossRevenue.delta', 0) >= 0 ? '+' : ''}$${safeGet(periodData, 'summary.grossRevenue.delta', 0).toFixed(2)}`,
+        netProfitCalculation: periodData.netProfitCalculation || {},
+      };
+
+      acc.push(cardData);
+    } catch (error) {
+      console.error(`Error processing ${period} data:`, error);
+    }
+
+    return acc;
+  }, []);
+};
   const processedData = metricsData ? transformData(metricsData) : [];
 
   return (

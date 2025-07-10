@@ -207,30 +207,38 @@ dayjs.extend(utc);
   }, [marketPlaceId, widgetData, brand_id, product_id, manufacturer_name, fulfillment_channel, DateStartDate, DateEndDate]);
 
   const fetchProfitAndLossDetails = async () => {
-    setLoadingBody(true)
-    try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_IP}getProfitAndLossDetails/`, {
-        preset: widgetData,
-        start_date: DateStartDate,
-        end_date: DateEndDate,
-        marketplace_id: marketPlaceId.id,
-        brand_id: brand_id,
-        product_id: product_id,
-        manufacturer_name: manufacturer_name,
-        fulfillment_channel: fulfillment_channel,
-        timezone: systemTimeZone, // Pass the system timezone
-      }
-      );
-      setSummaryDate(response.data.custom.dateRanges);
-      setSummaryOther(response.data.custom.netProfitCalculation);
-      setSummary(response.data.custom.summary);
-    } catch (error) {
-      console.error('Error fetching profit and loss details:', error);
-    }finally {
-      setLoadingBody(false)
-    }
-  };
+  setLoadingBody(true);
+  try {
+    const response = await axios.post(
+      `${process.env.REACT_APP_IP}getProfitAndLossDetails/`, {
+      preset: widgetData,
+      start_date: DateStartDate,
+      end_date: DateEndDate,
+      marketplace_id: marketPlaceId.id,
+      brand_id: brand_id,
+      product_id: product_id,
+      manufacturer_name: manufacturer_name,
+      fulfillment_channel: fulfillment_channel,
+      timezone: systemTimeZone,
+    });
+
+    // Add null checks for the response data
+    const responseData = response?.data || {};
+    const customData = responseData?.custom || {};
+    
+    setSummaryDate(customData?.dateRanges || null);
+    setSummaryOther(customData?.netProfitCalculation || null);
+    setSummary(customData?.summary || null);
+  } catch (error) {
+    console.error('Error fetching profit and loss details:', error);
+    // Set default values when error occurs
+    setSummaryDate(null);
+    setSummaryOther(null);
+    setSummary(null);
+  } finally {
+    setLoadingBody(false);
+  }
+};
 
   const fetchProfitAndLossGraph = async () => {
     setLoading(true)

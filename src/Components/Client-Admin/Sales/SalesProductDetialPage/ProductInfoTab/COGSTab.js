@@ -3,14 +3,10 @@ import {
     Box, Typography, Grid, IconButton, TableCell, TableRow, TableHead,
     TableBody, Paper, Table, TableContainer, TextField, Button, Snackbar, Menu, MenuItem, ListItemIcon, ListItemText
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { Add as AddIcon, Download as DownloadIcon, PictureAsPdf as PdfIcon, Image as ImageIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import {  Download as DownloadIcon, Delete as DeleteIcon } from '@mui/icons-material';
 
-import { jsPDF } from 'jspdf';
-import html2canvas from 'html2canvas';
 import { saveAs } from 'file-saver';
 import * as XLSX from 'xlsx';
 
@@ -205,22 +201,6 @@ const CostOfGoodsSold = ({ marketplaces, dateRange, productData }) => {
         });
     };
 
-    const handleAddNewRow = () => {
-        setEditMode(true);
-        const { startDate, endDate } = parseDateRange(dateRange);
-        setNewEntry({
-            name: '',
-            product_cost: '',
-            shipping_cost: '',
-            total_cogs: '0.00',
-            isNew: true,
-            tempId: Date.now(),
-            // For new entry, initialize 'Current' as empty for date input, but keep 'Current' for endDate display/logic
-            // Use the parsed dates directly from parseDateRange
-            startDate: startDate === 'Current' ? '' : startDate,
-            endDate: endDate === 'Current' ? 'Current' : endDate,
-        });
-    };
 
     const handleAddEntryConfirm = () => {
         // Validation for new entry

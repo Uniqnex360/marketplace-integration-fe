@@ -24,8 +24,8 @@ function ProfitabilityTab({ productId, widgetData, startDate, endDate }) {
   useEffect(()=>{
     console.log('oppo',widgetData)
   },[widgetData])
-
-  const fetchProfitabilityData = async () => {
+  useEffect(()=>{
+const fetchProfitabilityData = async () => {
     setLoading(true);
     setError(null);
 
@@ -75,19 +75,13 @@ function ProfitabilityTab({ productId, widgetData, startDate, endDate }) {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    // Only fetch if 'id' (from useParams) is available
-    if (id) {
-      fetchProfitabilityData();
-    } else {
-      setLoading(false);
-      setError('No product ID found in the URL to display profitability.');
-    }
-  }, [id, widgetData, startDate, endDate]); // Depend on 'id' to re-fetch when it changes
+  if(id) fetchProfitabilityData()
+  },[id,widgetData,startDate,endDate])
+  
 
 
-  const fetchNetProfitabilityData = async () => {
+  useEffect(()=>{
+ const fetchNetProfitabilityData = async () => {
   setLoading(true);
   setError(null);
 
@@ -145,17 +139,10 @@ function ProfitabilityTab({ productId, widgetData, startDate, endDate }) {
   } finally {
     setLoading(false);
   }
+  if(id) fetchNetProfitabilityData()
 };
-
-useEffect(() => {
-  // Only fetch if 'id' (from useParams) is available
-  if (id) {
-    fetchNetProfitabilityData();
-  } else {
-    setLoading(false);
-    setError('No product ID found in the URL to display profitability.');
-  }
-}, [id,widgetData, startDate, endDate]); // Depend on 'id' to re-fetch when it changes
+  },[id,widgetData, startDate, endDate])
+ 
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>

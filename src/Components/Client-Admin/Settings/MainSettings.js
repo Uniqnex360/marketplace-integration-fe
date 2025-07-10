@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 
 const MainSettings = () => {
-  const [ setCategories] = useState([]);
+  const [categories,setCategories] = useState([]);
   const userData = localStorage.getItem("user");
   let userIds = "";
 

@@ -6,8 +6,6 @@ import {
   IconButton,
   Typography,
   Box,
-  Card,
-  CardContent,
   Grid,
   Tooltip,
   Tabs,
@@ -17,16 +15,14 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { styled } from '@mui/material/styles';
 import axios from 'axios';
-import { ArrowDownward, ArrowUpward } from '@mui/icons-material';
 import OverviewTab from './OverviewTab/OverviewTab';
-import ProfitAndLoss from '../../Dashboard/ProfitAndLoss/ProfitAndLoss';
 import InventoryGraph from './OverviewTab/InventoryGraph';
 import SalesProfitAndLoss from './OverviewTab/SalesProfitAndLoss';
 import DateRangeForSales from './DateRangeForSales';
 
 import { subDays } from 'date-fns';
 
-import { format, parseISO, isSameDay } from 'date-fns';
+import { format } from 'date-fns';
 import { enIN } from 'date-fns/locale';
 import dayjs from 'dayjs';
 import ProductInfoTab from './ProductInfoTab/ProductInfoTab';

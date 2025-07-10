@@ -49,10 +49,9 @@ function UserAdd({ clientData, onClose, reloadUser }) {
   const [profileImage, setProfileImage] = useState(clientData ? clientData.profile_image : ""); // Store the image URL or base64 string
   const [imagePreview, setImagePreview] = useState(clientData ? clientData.profile_image : ""); // Preview image before upload
 
-  const debouncedEmail = useDebounce(email, 500); // Use debounce for email
 
-  // Fetch industries (roles) for the user
-  const fetchIndustry = async () => {
+  useEffect(()=>{
+ const fetchIndustry = async () => {
     try {
       setLoading(true);
       const response = await axios.get(`${process.env.REACT_APP_IP}fetchRoles/`, {
@@ -65,10 +64,10 @@ function UserAdd({ clientData, onClose, reloadUser }) {
       setLoading(false);
     }
   };
+  if(userId) fetchIndustry()
+  },[userId])
+ 
 
-  useEffect(() => {
-    fetchIndustry(); // Fetch industry list when the component is mounted
-  }, []);
 
   useEffect(() => {
     if (clientData) {

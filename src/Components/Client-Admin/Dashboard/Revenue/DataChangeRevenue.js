@@ -150,6 +150,7 @@ const [comparisonText, setComparisonText] = useState('');
         );
 
   const data = response.data.data;
+  console.log('updatedRevenueWidgetAPIView',data)
         setCompareDropDown(data.comapre_past);
         setCompareTotal(data.compare_total);
         setChartData(data?.graph);

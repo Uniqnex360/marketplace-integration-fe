@@ -2,11 +2,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import axios from "axios";
 import dayjs from 'dayjs';
 
-import { useParams, useNavigate } from 'react-router-dom';
-import { format, parseISO } from 'date-fns';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import {
-    Box, Switch, Button, Typography, ListItemText, MenuItem, IconButton, ListItemIcon, Menu,
+    Box, Typography, ListItemText, MenuItem, IconButton, ListItemIcon, Menu,
 } from '@mui/material';
 import {
     Download as DownloadIcon, Download, Delete,

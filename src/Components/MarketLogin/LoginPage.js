@@ -1,22 +1,20 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import {
   TextField,
   Button,
   Box,
   Typography,
   Paper,
-  CircularProgress,
   IconButton,
   InputAdornment,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import backgroundLoginImage from "../assets/download (26).jpg"; // Your image import
 import ForgotPassword from "./ForgotPassword";
-import Register from "./Register"; // Import the Register page
-import { ToastContainer, toast } from "react-toastify"; // Import ToastContainer and toast
-import "react-toastify/dist/ReactToastify.css"; // Import the CSS for toast notifications
+import Register from "./Register"; 
+import { ToastContainer, toast } from "react-toastify"; 
+import "react-toastify/dist/ReactToastify.css"; 
 import DottedCircleLoading from "../Loading/DotLoading";
 
 const LoginPage = () => {
@@ -27,7 +25,7 @@ const LoginPage = () => {
   const [passwordError, setPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [showRegisterPage, setShowRegisterPage] = useState(false); // State for Register Page
+  const [showRegisterPage, setShowRegisterPage] = useState(false);
   const navigate = useNavigate();
 
   const validateForm = () => {

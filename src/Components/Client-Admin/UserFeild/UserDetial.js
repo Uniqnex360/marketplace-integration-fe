@@ -9,15 +9,10 @@ import {
   Paper,
   Grid,
   Divider,
-  IconButton,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import SaveIcon from "@mui/icons-material/Save";
-import CancelIcon from "@mui/icons-material/Cancel";
-import DeleteIcon from "@mui/icons-material/Delete";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 
-import { useParams, useNavigate ,useLocation} from "react-router-dom";
+import { useParams} from "react-router-dom";
 
 const UserDetail = () => {
   const { id } = useParams();
@@ -61,36 +56,6 @@ const UserDetail = () => {
     fetchUserDetails();
   }, [id]); // Only re-run if `id` changes
 
-  const handleSaveClick = async () => {
-    try {
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (!user || !user.id) {
-        setError("User not found");
-        return;
-      }
-
-      const userData = {
-        first_name: userDetails.first_name,
-        last_name: userDetails.last_name,
-        mobile_number: userDetails.mobile_number,
-        profile_image: userImage || "",
-      };
-
-      const response = await axios.post(
-        `${process.env.REACT_APP_IP}updateUserProfile/?user_id=${user.id}`,
-        {
-          user_obj: userData,
-        }
-      );
-
-      if (response.data.status === true) {
-        window.location.reload();
-      }
-    } catch (err) {
-      setError("Error saving user details");
-      console.error(err);
-    }
-  };
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
