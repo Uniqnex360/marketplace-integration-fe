@@ -9,8 +9,12 @@ import {
     LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, CartesianGrid
 } from "recharts";
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { fontSize, styled } from '@mui/system';
 import dayjs from 'dayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import ArrowUpward from '@mui/icons-material/ArrowUpward';
 import ArrowDownward from '@mui/icons-material/ArrowDownward';
 import DateRangeSelector from "../../DateRange/DateRange";
@@ -278,12 +282,6 @@ const SalesOverview = () => {
                     isPositive: salesData?.data?.sales?.yesterday?.difference >= 0,
                 },
                 {
-                    label: "Today",
-                    value: `$${parseFloat(salesData?.data?.sales?.today?.value || 0.00).toFixed(2)}`,
-                    change: `${parseFloat(salesData?.data?.sales?.today?.difference || 0.00).toFixed(2)}`,
-                    isPositive: salesData?.data?.sales?.today?.difference >= 0,
-                },
-                {
                     label: "Previous day",
                     value: `$${parseFloat(salesData?.data?.sales?.previous_day?.value || 0.00).toFixed(2)}`,
                     change: `${parseFloat(salesData?.data?.sales?.previous_day?.difference || 0.00).toFixed(2)}`,
@@ -303,12 +301,6 @@ const SalesOverview = () => {
                     value: `${salesData?.data?.units?.yesterday?.value || 0}`,
                     change: `${salesData?.data?.units?.yesterday?.difference || 0}`,
                     isPositive: salesData?.data?.units?.yesterday?.difference >= 0,
-                },
-                {
-                    label: "Today",
-                    value: `${salesData?.data?.units?.today?.value || 0}`,
-                    change: `${salesData?.data?.units?.today?.difference || 0}`,
-                    isPositive: salesData?.data?.units?.today?.difference >= 0,
                 },
                 {
                     label: "Previous day",
