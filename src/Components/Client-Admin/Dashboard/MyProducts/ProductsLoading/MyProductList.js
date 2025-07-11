@@ -1,6 +1,4 @@
-import React, { useState, useEffect, useRef,useMemo} from "react";
-import { useDebounce } from 'use-debounce';
-
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   Typography,
@@ -167,19 +165,9 @@ const MyProductList = ({
   const initialPage = parseInt(queryParams.get("page"), 10) || 1;
   const [loadingTime, setLoadingTime] = useState(0);
   const loadingIntervalRef = useRef(null);
-  const MAX_LOADING_TIME = 60;
-
   const startLoadingTimer = () => {
-    stopLoadingTimer();
-    setLoadingTime(0);
     loadingIntervalRef.current = setInterval(() => {
-      setLoadingTime((prev) => {
-        if (prev >= MAX_LOADING_TIME) {
-          stopLoadingTimer();
-          return MAX_LOADING_TIME;
-        }
-        return prev + 1;
-      });
+      setLoadingTime((prev) => prev + 1);
     }, 1000);
   };
   const stopLoadingTimer = () => {
@@ -506,96 +494,51 @@ const MyProductList = ({
     setVisibleColumns(selectedColumns);
   }, [selectedColumns]);
   // This useEffect triggers data fetching when relevant parameters change
-  const currentParams = useMemo(() => ({
-  marketPlaceId,
-  widgetData,
-  rowsPerPage,
-  searchQuery,
-  brand_id,
-  product_id,
-  manufacturer_name,
-  fulfillment_channel,
-  DateStartDate,
-  DateEndDate,
-  tab,
-  activeColumnCategoryTab,
-  sortValues,
-  filterParent,
-  filterSku,
-}), [
-  marketPlaceId,
-  widgetData,
-  rowsPerPage,
-  searchQuery,
-  brand_id,
-  product_id,
-  manufacturer_name,
-  fulfillment_channel,
-  DateStartDate,
-  DateEndDate,
-  tab,
-  activeColumnCategoryTab,
-  sortValues,
-  filterParent,
-  filterSku,
-]);
-useEffect(() => {
-  const paramsString = JSON.stringify(currentParams);
-  
-  if (lastParamsRef.current !== paramsString) {
-    lastParamsRef.current = paramsString;
-    
-    let isSubscribed = true;
-    
-    const fetchData = async () => {
-      if (controllerRef.current) {
-        controllerRef.current.abort();
-      }
-      controllerRef.current = new AbortController();
-      
-      try {
-        // Your existing fetch logic
-        if (isSubscribed) {
-          fetchMyProducts(1);
-        }
-      } catch (error) {
-        if (error.name === 'AbortError') {
-          console.log('Request was aborted');
-        } else {
-          console.error('Error fetching data:', error);
-        }
-      }
-    };
+  useEffect(() => {
+    console.log("oppo", filterParent, filterSku);
+    const currentParams = JSON.stringify({
+      marketPlaceId,
+      widgetData,
+      rowsPerPage,
+      searchQuery,
+      brand_id,
+      product_id,
+      manufacturer_name,
+      fulfillment_channel,
+      DateStartDate,
+      DateEndDate,
+      tab,
+      activeColumnCategoryTab,
+      sortValues,
+      filterParent,
+      filterSku,
+    });
 
-    fetchData();
-
-    return () => {
-      isSubscribed = false;
-      if (controllerRef.current) {
-        controllerRef.current.abort();
-      }
-    };
-  }
-}, [currentParams]);
-useEffect(() => {
-  navigate(`/Home?page=${page}&&rowsPerPage=${rowsPerPage}`);
-}, [page, rowsPerPage]);
-
-const handlePageChange = (event, newPage) => {
-  setPage(newPage);
-  fetchMyProducts(newPage);
-};
-const debouncedSearchQuery = useDebounce(searchQuery, 300);
-
-useEffect(() => {
-  setPage(1);
-  setRowsPerPage(10);
-}, [debouncedSearchQuery]);
+    // Only fetch if parameters have actually changed
+    if (lastParamsRef.current !== currentParams) {
+      lastParamsRef.current = currentParams;
+      fetchMyProducts(1); // Always start from page 1 when filters/sort/tabs change
+    }
+  }, [
+    marketPlaceId,
+    widgetData,
+    rowsPerPage,
+    searchQuery,
+    brand_id,
+    product_id,
+    manufacturer_name,
+    fulfillment_channel,
+    DateStartDate,
+    DateEndDate,
+    tab,
+    activeColumnCategoryTab,
+    sortValues,
+    filterParent,
+    filterSku,
+  ]);
 
   const fetchMyProducts = async (currentPage) => {
-    if(loading)return
     setLoading(true);
-    setLoadingTime(0);
     startLoadingTimer();
     try {
       // Calculate the actual page value to send to the backend
@@ -1328,11 +1271,9 @@ useEffect(() => {
                 fontStyle: "italic",
               }}
             >
-              {loadingTime >= MAX_LOADING_TIME && (
-                <Typography color="error">
-                  Taking longer than expected. Please check your connection.
-                </Typography>
-              )}
+              {loadingTime > 0
+                ? `Time elapsed: ${loadingTime} seconds`
+                : "Starting..."}
             </Typography>
           </Box>
         ) : (
@@ -1358,7 +1299,11 @@ useEffect(() => {
           <Pagination
             count={Math.ceil(totalProducts / rowsPerPage)}
             page={page}
-            onChange={handlePageChange}
+            onChange={(event, newPage) => {
+              setPage(newPage);
+              navigate(`/Home?page=${newPage}&&rowsPerPage=${rowsPerPage}`);
+              fetchMyProducts(newPage); // Pass the MUI pagination's newPage value
+            }}
             size="small"
             color="primary"
           />
