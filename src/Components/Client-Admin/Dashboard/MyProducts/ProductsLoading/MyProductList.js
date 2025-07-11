@@ -165,9 +165,19 @@ const MyProductList = ({
   const initialPage = parseInt(queryParams.get("page"), 10) || 1;
   const [loadingTime, setLoadingTime] = useState(0);
   const loadingIntervalRef = useRef(null);
+  const MAX_LOADING_TIME = 60;
+
   const startLoadingTimer = () => {
+    stopLoadingTimer();
+    setLoadingTime(0);
     loadingIntervalRef.current = setInterval(() => {
-      setLoadingTime((prev) => prev + 1);
+      setLoadingTime((prev) => {
+        if (prev >= MAX_LOADING_TIME) {
+          stopLoadingTimer();
+          return MAX_LOADING_TIME;
+        }
+        return prev + 1;
+      });
     }, 1000);
   };
   const stopLoadingTimer = () => {
@@ -539,6 +549,7 @@ const MyProductList = ({
 
   const fetchMyProducts = async (currentPage) => {
     setLoading(true);
+    setLoadingTime(0);
     startLoadingTimer();
     try {
       // Calculate the actual page value to send to the backend
@@ -1271,9 +1282,11 @@ const MyProductList = ({
                 fontStyle: "italic",
               }}
             >
-              {loadingTime > 0
-                ? `Time elapsed: ${loadingTime} seconds`
-                : "Starting..."}
+              {loadingTime >= MAX_LOADING_TIME && (
+                <Typography color="error">
+                  Taking longer than expected. Please check your connection.
+                </Typography>
+              )}
             </Typography>
           </Box>
         ) : (
