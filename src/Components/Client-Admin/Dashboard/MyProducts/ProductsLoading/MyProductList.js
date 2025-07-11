@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef,useMemo,useDebounce} from "react";
+import React, { useState, useEffect, useRef,useMemo} from "react";
+import { useDebounce } from 'use-debounce';
+
 import {
   Box,
   Typography,
