@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef,useMemo,useDebounce} from "react";
 import {
   Box,
   Typography,
@@ -504,50 +504,94 @@ const MyProductList = ({
     setVisibleColumns(selectedColumns);
   }, [selectedColumns]);
   // This useEffect triggers data fetching when relevant parameters change
-  useEffect(() => {
-    console.log("oppo", filterParent, filterSku);
-    const currentParams = JSON.stringify({
-      marketPlaceId,
-      widgetData,
-      rowsPerPage,
-      searchQuery,
-      brand_id,
-      product_id,
-      manufacturer_name,
-      fulfillment_channel,
-      DateStartDate,
-      DateEndDate,
-      tab,
-      activeColumnCategoryTab,
-      sortValues,
-      filterParent,
-      filterSku,
-    });
+  const currentParams = useMemo(() => ({
+  marketPlaceId,
+  widgetData,
+  rowsPerPage,
+  searchQuery,
+  brand_id,
+  product_id,
+  manufacturer_name,
+  fulfillment_channel,
+  DateStartDate,
+  DateEndDate,
+  tab,
+  activeColumnCategoryTab,
+  sortValues,
+  filterParent,
+  filterSku,
+}), [
+  marketPlaceId,
+  widgetData,
+  rowsPerPage,
+  searchQuery,
+  brand_id,
+  product_id,
+  manufacturer_name,
+  fulfillment_channel,
+  DateStartDate,
+  DateEndDate,
+  tab,
+  activeColumnCategoryTab,
+  sortValues,
+  filterParent,
+  filterSku,
+]);
+useEffect(() => {
+  const paramsString = JSON.stringify(currentParams);
+  
+  if (lastParamsRef.current !== paramsString) {
+    lastParamsRef.current = paramsString;
+    
+    let isSubscribed = true;
+    
+    const fetchData = async () => {
+      if (controllerRef.current) {
+        controllerRef.current.abort();
+      }
+      controllerRef.current = new AbortController();
+      
+      try {
+        // Your existing fetch logic
+        if (isSubscribed) {
+          fetchMyProducts(1);
+        }
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          console.log('Request was aborted');
+        } else {
+          console.error('Error fetching data:', error);
+        }
+      }
+    };
 
-    // Only fetch if parameters have actually changed
-    if (lastParamsRef.current !== currentParams) {
-      lastParamsRef.current = currentParams;
-      fetchMyProducts(1); // Always start from page 1 when filters/sort/tabs change
-    }
-  }, [
-    marketPlaceId,
-    widgetData,
-    rowsPerPage,
-    searchQuery,
-    brand_id,
-    product_id,
-    manufacturer_name,
-    fulfillment_channel,
-    DateStartDate,
-    DateEndDate,
-    tab,
-    activeColumnCategoryTab,
-    sortValues,
-    filterParent,
-    filterSku,
-  ]);
+    fetchData();
+
+    return () => {
+      isSubscribed = false;
+      if (controllerRef.current) {
+        controllerRef.current.abort();
+      }
+    };
+  }
+}, [currentParams]);
+useEffect(() => {
+  navigate(`/Home?page=${page}&&rowsPerPage=${rowsPerPage}`);
+}, [page, rowsPerPage]);
+
+const handlePageChange = (event, newPage) => {
+  setPage(newPage);
+  fetchMyProducts(newPage);
+};
+const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
+useEffect(() => {
+  setPage(1);
+  setRowsPerPage(10);
+}, [debouncedSearchQuery]);
 
   const fetchMyProducts = async (currentPage) => {
+    if(loading)return
     setLoading(true);
     setLoadingTime(0);
     startLoadingTimer();
@@ -1312,11 +1356,7 @@ const MyProductList = ({
           <Pagination
             count={Math.ceil(totalProducts / rowsPerPage)}
             page={page}
-            onChange={(event, newPage) => {
-              setPage(newPage);
-              navigate(`/Home?page=${newPage}&&rowsPerPage=${rowsPerPage}`);
-              fetchMyProducts(newPage); // Pass the MUI pagination's newPage value
-            }}
+            onChange={handlePageChange}
             size="small"
             color="primary"
           />
