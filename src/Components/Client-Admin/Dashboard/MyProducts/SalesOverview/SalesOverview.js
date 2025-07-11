@@ -275,6 +275,12 @@ const SalesOverview = () => {
     const getCardData = () => {
         if (tab === "sales") {
             return [
+                 {
+                    label: "Today",
+                    value: `$${parseFloat(salesData?.data?.sales?.today?.value || 0.00).toFixed(2)}`,
+                    change: `${parseFloat(salesData?.data?.sales?.today?.difference || 0.00).toFixed(2)}`,
+                    isPositive: salesData?.data?.sales?.today?.difference >= 0,
+                },
                 {
                     label: "Yesterday",
                     value: `$${parseFloat(salesData?.data?.sales?.yesterday?.value || 0.00).toFixed(2)}`,
@@ -296,6 +302,12 @@ const SalesOverview = () => {
             ];
         } else if (tab === "units") {
             return [
+                {
+                    label: "Today",
+                    value: `${salesData?.data?.units?.today?.value || 0}`,
+                    change: `${salesData?.data?.units?.today?.difference || 0}`,
+                    isPositive: salesData?.data?.units?.today?.difference >= 0,
+                },
                 {
                     label: "Yesterday",
                     value: `${salesData?.data?.units?.yesterday?.value || 0}`,
