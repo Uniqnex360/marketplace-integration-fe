@@ -49,16 +49,14 @@ const CustomBarChart = ({ marketPlaceId }) => {
 
                 // Check if response contains the trend_percentage data
                 if (response.data && response.data.data && response.data.data.trend_percentage) {
-                    const trendData = response.data.data.trend_percentage[0]; // Assuming data contains a single item
+                    const trendData = response.data.data.trend_percentage; // Assuming data contains a single item
 
                     // Map the trend_percentage data to the format required for the chart
-                    const chartData = [{
-                        name: trendData.id, // Set name as id (like "all")
-                        current_range_sales: trendData.current_range_sales, // The current sales value
-                        previous_range_sales: trendData.previous_range_sales, // The previous sales value
-                        trend_percentage: trendData.trend_percentage, // The percentage change
-                        current_percentage: trendData.current_percentage
-                    }];
+                    const chartData = trendData.map(item=>({
+                        name:item.year.toString(),
+                        sales:item.sales,
+                        label:item.label
+                    }))
 
                     setData(chartData); // Set the mapped data for the chart
                     setTrendPercentage(trendData.trend_percentage); // Set trend percentage to display at the top
@@ -149,58 +147,21 @@ const CustomBarChart = ({ marketPlaceId }) => {
                 {/* Bar Chart Container */}
                 <Box sx={{ width: "100%", height: 'calc(100% - 70px)', marginTop: '40px', position: "relative" }}> {/* Adjust height and marginTop */}
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={data} layout='vertical' margin={{ top: 15, right: 30, left: 20, bottom: 5 }}> {/* Add top margin */}
+                        <BarChart data={data} margin={{ top: 15, right: 30, left: 20, bottom: 5 }}> {/* Add top margin */}
                             {/* <CartesianGrid strokeDasharray="3 3" /> */}
                             <XAxis dataKey="name" axisLine={true} tick={{ fill: "#333", fontWeight: "bold" }} />
                             <YAxis axisLine={true} tick={{ fill: "#666" }} />
 
-                            <Tooltip
-                                cursor={{ fill: "rgba(0,0,0,0.1)" }}
-                                formatter={(value, name) => {
-                                    if (name === "trend_percentage") {
-                                        return `${value}%`; // Format trend percentage in Tooltip
-                                    }
-                                    return `$${value.toFixed(2)}`;
-                                }}
-                                contentStyle={{
-                                    fontSize: "12px", // Set tooltip font size to 12px
-                                    backgroundColor: "rgba(255, 255, 255, 0.9)", // Optional: Adjust background color
-                                    borderRadius: "4px", // Optional: Optional border radius for the tooltip
-                                    border: "1px solid #ccc", // Optional: Optional border color for the tooltip
-                                }}
-                            />
+                            <Tooltip formatter={(value, name) => `$${value?.toFixed?.(2)}`} />
+
                             <Legend />
 
                             {/* Grouped Bar Chart */}
                             {/* Previous Sales - Positioned to the left */}
-                            <Bar dataKey="previous_range_sales" fill={colors[1]} name="Previous Year Sales" barSize={30}>
-                                {data.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={colors[1]} />
-                                ))}
-                            </Bar>
+                            <Bar dataKey="sales" fill="#0F67B1" name="Sales">
+  <LabelList dataKey="label" position="top" />
+</Bar>
 
-                            {/* Current Sales - Positioned to the right */}
-                            <Bar dataKey="current_range_sales" fill={colors[0]} name="Current Year Sales" barSize={30}>
-                                {data.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={colors[0]} />
-                                ))}
-                                {/* Add trend_percentage as label for current sales */}
-                                <LabelList
-                                    dataKey="current_percentage"
-                                    position="top"
-                                    content={({ x, y, value }) => (
-                                        <text
-                                            x={x + 10}  // Adjust position
-                                            y={y - 5}   // Move slightly above the bar
-                                            textAnchor="middle"
-                                            fill="#333"
-                                            fontSize="10px" // Reduce font size
-                                        >
-                                            {value !== undefined ? `${value.toFixed(1)}%` : ''}
-                                        </text>
-                                    )}
-                                />
-                            </Bar>
                         </BarChart>
                     </ResponsiveContainer>
                 </Box>
