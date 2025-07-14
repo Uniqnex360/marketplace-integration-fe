@@ -149,7 +149,7 @@ const CustomBarChart = ({ marketPlaceId }) => {
                 {/* Bar Chart Container */}
                 <Box sx={{ width: "100%", height: 'calc(100% - 70px)', marginTop: '40px', position: "relative" }}> {/* Adjust height and marginTop */}
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={data} margin={{ top: 15, right: 30, left: 20, bottom: 5 }}> {/* Add top margin */}
+                        <BarChart data={data} layout='vertical' margin={{ top: 15, right: 30, left: 20, bottom: 5 }}> {/* Add top margin */}
                             {/* <CartesianGrid strokeDasharray="3 3" /> */}
                             <XAxis dataKey="name" axisLine={true} tick={{ fill: "#333", fontWeight: "bold" }} />
                             <YAxis axisLine={true} tick={{ fill: "#666" }} />
@@ -173,14 +173,14 @@ const CustomBarChart = ({ marketPlaceId }) => {
 
                             {/* Grouped Bar Chart */}
                             {/* Previous Sales - Positioned to the left */}
-                            <Bar dataKey="previous_range_sales" fill={colors[1]} name="Previous Year Sales" barSize={30} layout="vertical">
+                            <Bar dataKey="previous_range_sales" fill={colors[1]} name="Previous Year Sales" barSize={30}>
                                 {data.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={colors[1]} />
                                 ))}
                             </Bar>
 
                             {/* Current Sales - Positioned to the right */}
-                            <Bar dataKey="current_range_sales" fill={colors[0]} name="Current Year Sales" barSize={30} layout="vertical">
+                            <Bar dataKey="current_range_sales" fill={colors[0]} name="Current Year Sales" barSize={30}>
                                 {data.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={colors[0]} />
                                 ))}

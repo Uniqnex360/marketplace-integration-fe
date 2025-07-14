@@ -165,7 +165,18 @@ const MyProductList = ({
   const initialPage = parseInt(queryParams.get("page"), 10) || 1;
   const [loadingTime, setLoadingTime] = useState(0);
   const loadingIntervalRef = useRef(null);
+  useEffect(() => {
+    return () => {
+      if (loadingIntervalRef.current) {
+        clearInterval(loadingIntervalRef.current);
+      }
+    };
+  }, []);
   const startLoadingTimer = () => {
+    setLoadingTime(0);
+    if (loadingIntervalRef.current) {
+      clearInterval(loadingIntervalRef.current);
+    }
     loadingIntervalRef.current = setInterval(() => {
       setLoadingTime((prev) => prev + 1);
     }, 1000);
@@ -173,8 +184,8 @@ const MyProductList = ({
   const stopLoadingTimer = () => {
     if (loadingIntervalRef.current) {
       clearInterval(loadingIntervalRef.current);
+      loadingIntervalRef.current = null;
     }
-    loadingIntervalRef.current = null;
   };
   const [page, setPage] = useState(initialPage); // Current page for pagination
   const [showSearch, setShowSearch] = useState(false); // State to toggle search input visibility
@@ -541,8 +552,6 @@ const MyProductList = ({
     setLoading(true);
     startLoadingTimer();
     try {
-      // Calculate the actual page value to send to the backend
-      // If rowsPerPage is 10, page 1 maps to 1, page 2 maps to 11, page 3 maps to 21, etc.
       const calculatedPageForBackend = (currentPage - 1) * rowsPerPage + 1;
       if (controllerRef.current) {
         controllerRef.current.abort();
@@ -701,14 +710,7 @@ const MyProductList = ({
       stopLoadingTimer();
     }
   };
-  useEffect(() => {
-    return () => {
-      stopLoadingTimer();
-      if (loadingIntervalRef.current) {
-        loadingIntervalRef.current.abort();
-      }
-    };
-  }, []);
+
   return (
     <Box
       sx={{
@@ -944,12 +946,12 @@ const MyProductList = ({
               </Box>
             </Popover>
             {/* <FilterParentSku
-        open={isFilterOpen}
-        anchorEl={anchorEl}
-        onClose={handleFilterClose}
-        onApply={handleApplyFilter}
-        isParentType={TabType}
-      /> */}
+          open={isFilterOpen}
+          anchorEl={anchorEl}
+          onClose={handleFilterClose}
+          onApply={handleApplyFilter}
+          isParentType={TabType}
+        /> */}
           </Box>
           <Box sx={{ marginLeft: "5px" }}>
             {!showSearch ? (
@@ -1142,11 +1144,11 @@ const MyProductList = ({
             Customize
           </Button>
           {/* {isCustomizedPage && (
-                        <CustomizedProd
-                            open={isCustomizedPage}
-                            onClose={() => setIsCustomizedPage(false)}
-                        />
-                    )} */}
+                          <CustomizedProd
+                              open={isCustomizedPage}
+                              onClose={() => setIsCustomizedPage(false)}
+                          />
+                      )} */}
           {!showSearch && (
             <Box>
               <ProductExport products={products} />
@@ -1271,9 +1273,7 @@ const MyProductList = ({
                 fontStyle: "italic",
               }}
             >
-              {loadingTime > 0
-                ? `Time elapsed: ${loadingTime} seconds`
-                : "Starting..."}
+              {loadingTime > 0 ? `Loading (${loadingTime}s)` : "Starting..."}
             </Typography>
           </Box>
         ) : (
