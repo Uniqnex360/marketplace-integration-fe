@@ -48,20 +48,27 @@ const CustomBarChart = ({ marketPlaceId }) => {
                 );
 
                 // Check if response contains the trend_percentage data
-                if (response.data && response.data.data && response.data.data.trend_percentage) {
-                    const trendData = response.data.data.trend_percentage; // Assuming data contains a single item
+               if (response.data && response.data.data && response.data.data.trend_percentage) {
+    const trendData = response.data.data.trend_percentage[0];
 
-                    // Map the trend_percentage data to the format required for the chart
-                    const chartData = trendData.map(item=>({
-                        name:item.year.toString(),
-                        sales:item.sales,
-                        label:item.label
-                    }))
+    // Transform to two data points
+    const chartData = [
+        {
+            name: "Previous",
+            sales: trendData.previous_range_sales,
+            percentage: trendData.current_percentage, // optional
+        },
+        {
+            name: "Current",
+            sales: trendData.current_range_sales,
+            percentage: trendData.trend_percentage, // optional
+        }
+    ];
 
-                    setData(chartData); // Set the mapped data for the chart
-                    setTrendPercentage(trendData.trend_percentage); // Set trend percentage to display at the top
-                    setCurrentPercentage(trendData.current_percentage);
-                } else {
+    setData(chartData);
+    setTrendPercentage(trendData.trend_percentage);
+    setCurrentPercentage(trendData.current_percentage);
+} else {
                     console.error("Invalid response from API or missing trend_percentage data");
                 }
             } catch (error) {
@@ -147,22 +154,41 @@ const CustomBarChart = ({ marketPlaceId }) => {
                 {/* Bar Chart Container */}
                 <Box sx={{ width: "100%", height: 'calc(100% - 70px)', marginTop: '40px', position: "relative" }}> {/* Adjust height and marginTop */}
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={data} margin={{ top: 15, right: 30, left: 20, bottom: 5 }}> {/* Add top margin */}
-                            {/* <CartesianGrid strokeDasharray="3 3" /> */}
-                            <XAxis dataKey="name" axisLine={true} tick={{ fill: "#333", fontWeight: "bold" }} />
-                            <YAxis axisLine={true} tick={{ fill: "#666" }} />
+                       <BarChart data={data} margin={{ top: 15, right: 30, left: 20, bottom: 5 }}>
+    <XAxis dataKey="name" axisLine={true} tick={{ fill: "#333", fontWeight: "bold" }} />
+    <YAxis axisLine={true} tick={{ fill: "#666" }} />
 
-                            <Tooltip formatter={(value, name) => `$${value?.toFixed?.(2)}`} />
+    <Tooltip
+        cursor={{ fill: "rgba(0,0,0,0.1)" }}
+        formatter={(value, name) => `$${value.toFixed(2)}`}
+        contentStyle={{
+            fontSize: "12px",
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            borderRadius: "4px",
+            border: "1px solid #ccc",
+        }}
+    />
+    <Legend />
 
-                            <Legend />
-
-                            {/* Grouped Bar Chart */}
-                            {/* Previous Sales - Positioned to the left */}
-                            <Bar dataKey="sales" fill="#0F67B1" name="Sales">
-  <LabelList dataKey="label" position="top" />
-</Bar>
-
-                        </BarChart>
+    {/* Only one Bar, since each data point is either "Previous" or "Current" */}
+    <Bar dataKey="sales" fill={colors[0]} name="Sales" barSize={30}>
+        <LabelList
+            dataKey="percentage"
+            position="top"
+            content={({ x, y, value }) => (
+                <text
+                    x={x}
+                    y={y - 5}
+                    textAnchor="middle"
+                    fill="#333"
+                    fontSize="10px"
+                >
+                    {value !== undefined ? `${value.toFixed(1)}%` : ''}
+                </text>
+            )}
+        />
+    </Bar>
+</BarChart>
                     </ResponsiveContainer>
                 </Box>
             </CardContent>
