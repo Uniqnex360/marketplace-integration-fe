@@ -1006,7 +1006,7 @@ const OrderList = ({ fetchOrdersFromParent }) => {
         hour: "2-digit",
         minute: "2-digit",
         hour12: true,
-        timeZone: "America/Denver" 
+        timeZone: "US/Pacific" 
       })
     : "N/A"}
 </TableCell>
