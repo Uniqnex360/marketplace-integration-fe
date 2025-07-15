@@ -997,24 +997,19 @@ const OrderList = ({ fetchOrdersFromParent }) => {
                           {order.marketplace_name}
                         </TableCell>
 
-                        <TableCell
-                          sx={{ textAlign: "center", paddingLeft: "3px" }}
-                        >
-                          {order.order_date
-                            ? new Date(order.order_date).toLocaleString(
-                                undefined,
-                                {
-                                  day: "2-digit",
-                                  month: "2-digit",
-                                  year: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                  hour12: true,
-                                  timeZone: "US/Pacific",
-                                }
-                              )
-                            : "N/A"}
-                        </TableCell>
+                       <TableCell sx={{ textAlign: "center", paddingLeft: "3px" }}>
+  {order.order_date
+    ? new Date(order.order_date).toLocaleString(undefined, {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+        timeZone: "America/Denver" 
+      })
+    : "N/A"}
+</TableCell>
 
                         <TableCell sx={{ textAlign: "center" }}>
                           {order.currency}
