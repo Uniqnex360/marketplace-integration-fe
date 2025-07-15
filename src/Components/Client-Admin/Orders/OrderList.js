@@ -731,8 +731,7 @@ const OrderList = ({ fetchOrdersFromParent }) => {
                       >
                         {order.purchase_order_date
                           ? new Date(
-                              order.purchase_order_date + "Z"
-                            ).toLocaleString(undefined, {
+                              order.purchase_order_date).toLocaleString(undefined, {
                               day: "2-digit",
                               month: "2-digit",
                               year: "numeric",
