@@ -1010,7 +1010,7 @@ const OrderList = ({ fetchOrdersFromParent }) => {
                                   hour: "2-digit",
                                   minute: "2-digit",
                                   hour12: true,
-                                  timeZone: systemTimeZone,
+                                  timeZone: "US/Pacific",
                                 }
                               )
                             : "N/A"}
