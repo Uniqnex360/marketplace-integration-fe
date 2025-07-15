@@ -1001,7 +1001,7 @@ const OrderList = ({ fetchOrdersFromParent }) => {
                           sx={{ textAlign: "center", paddingLeft: "3px" }}
                         >
                           {order.order_date
-                            ? new Date(order.order_date + "Z").toLocaleString(
+                            ? new Date(order.order_date).toLocaleString(
                                 undefined,
                                 {
                                   day: "2-digit",
