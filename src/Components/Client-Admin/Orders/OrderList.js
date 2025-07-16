@@ -123,77 +123,68 @@ const OrderList = ({ fetchOrdersFromParent }) => {
 
   // First, define the function to fetch data
   const fetchOrderData = async (marketId = "all", page, rowsPerPage) => {
-    setLoading(true);
+  setLoading(true);
 
-    const validRowsPerPage = rowsPerPage && rowsPerPage > 0 ? rowsPerPage : 50;
-    const skip = (page - 1) * validRowsPerPage;
+  const validRowsPerPage = rowsPerPage && rowsPerPage > 0 ? rowsPerPage : 25;
+  const skip = (page - 1) * validRowsPerPage;
 
-    try {
-      const userData = localStorage.getItem("user");
-      let userIds = "";
-      if (userData) {
-        const data = JSON.parse(userData);
-        userIds = data.id;
+  try {
+    const userData = localStorage.getItem("user");
+    let userIds = "";
+    if (userData) {
+      const data = JSON.parse(userData);
+      userIds = data.id;
+    }
+
+    const marketplaceId = localStorage.getItem("selectedCategory")
+      ? JSON.parse(localStorage.getItem("selectedCategory")).id
+      : "all";
+
+    const response = await axios.post(
+      `${process.env.REACT_APP_IP}fetchAllorders/`,
+      {
+        user_id: userIds,
+        skip: skip >= 0 ? skip : 0,
+        limit: validRowsPerPage,
+        marketplace_id: marketplaceId,
+        search_query: searchQuery,
+        sort_by: sortConfig.key,
+        sort_by_value: sortConfig.direction === "asc" ? 1 : -1,
+        timezone: "US/Pacific",
       }
+    );
 
-      const marketplaceId = localStorage.getItem("selectedCategory")
-        ? JSON.parse(localStorage.getItem("selectedCategory")).id
-        : "all"; // Default to "all" if no selectedCategory is found
-
-      const response = await axios.post(
-        `${process.env.REACT_APP_IP}fetchAllorders/`,
-        {
-          user_id: userIds,
-          skip: skip >= 0 ? skip : 0,
-          limit: validRowsPerPage,
-          marketplace_id: marketplaceId,
-          search_query: searchQuery,
-          sort_by: sortConfig.key,
-          sort_by_value: sortConfig.direction === "asc" ? 1 : -1,
-          timezone: "US/Pacific", // Pass the system time zone
-        }
-      );
-      console.log("FETCH ALL ORDERS", response);
-
-      if (!response?.data?.data) {
-      throw new Error("Invalid response structure from server");
-    }
-
-    // Initialize with empty arrays as fallback
-    const responseData = response.data.data;
+    // Safely extract data from response
+    const responseData = response?.data?.data || {};
     
-    // Handle manual orders
-    if (Array.isArray(responseData.manual_orders)) {
-      setManualOrders(responseData.manual_orders);
-    } else {
-      setManualOrders([]); // Fallback to empty array
-    }
-
-    // Handle regular orders
-    if (Array.isArray(responseData.orders)) {
-      setOrders(responseData.orders);
-    } else {
-      setOrders([]); // Fallback to empty array
-    }
-
+    // Set orders with empty array fallback
+    setOrders(Array.isArray(responseData.orders) ? responseData.orders : []);
+    
+    // Set manual_orders with empty array fallback
+    setManualOrders(Array.isArray(responseData.manual_orders) ? responseData.manual_orders : []);
+    
     // Set other data with proper fallbacks
     setCustomStatus(responseData.status || "");
     setOrderCount(responseData.total_count || 0);
-    setTotalPages(
-      Math.ceil((responseData.total_count || 0) / validRowsPerPage)
-    );
-    setLogoMarket(
-      Array.isArray(responseData.marketplace_list) 
-        ? responseData.marketplace_list 
-        : []
-    );
+    setTotalPages(Math.ceil((responseData.total_count || 0) / validRowsPerPage));
+    setLogoMarket(Array.isArray(responseData.marketplace_list) ? responseData.marketplace_list : []);
 
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    
+    // Reset all data states on error
+    setOrders([]);
+    setManualOrders([]);
+    setOrderCount(0);
+    setTotalPages(1);
+    setLogoMarket([]);
+    
+    toast.error("Failed to load orders. Please try again.");
+    
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Ref to track previous params for comparison
   const prevParams = useRef({
