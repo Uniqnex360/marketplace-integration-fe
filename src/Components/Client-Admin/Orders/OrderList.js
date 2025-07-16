@@ -157,7 +157,7 @@ const OrderList = ({ fetchOrdersFromParent }) => {
 
       // Process response
       if (response.data.data.manual_orders) {
-        setManualOrders(response.data.data.manual_orders);
+        setManualOrders(response.data.data.manual_orders||[]);
         setCustomStatus(response.data.data.status);
         setOrderCount(response.data.data.total_count);
         setTotalPages(
