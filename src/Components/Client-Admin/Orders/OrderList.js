@@ -155,29 +155,39 @@ const OrderList = ({ fetchOrdersFromParent }) => {
       );
       console.log("FETCH ALL ORDERS", response);
 
-      // Process response
-      if (response.data.data.manual_orders) {
-        setManualOrders(response.data.data.manual_orders||[]);
-        setCustomStatus(response.data.data.status);
-        setOrderCount(response.data.data.total_count);
-        setTotalPages(
-          Math.ceil(response.data.data.total_count / validRowsPerPage)
-        );
-      }
+      if (!response?.data?.data) {
+      throw new Error("Invalid response structure from server");
+    }
 
-      if (response.data.data.orders) {
-        setOrders(response.data.data.orders);
-        setCustomStatus(response.data.data.status);
-        setOrderCount(response.data.data.total_count);
-        setTotalPages(
-          Math.ceil(response.data.data.total_count / validRowsPerPage)
-        );
-        setLogoMarket(
-          Array.isArray(response.data.data.marketplace_list)
-            ? response.data.data.marketplace_list
-            : []
-        );
-      }
+    // Initialize with empty arrays as fallback
+    const responseData = response.data.data;
+    
+    // Handle manual orders
+    if (Array.isArray(responseData.manual_orders)) {
+      setManualOrders(responseData.manual_orders);
+    } else {
+      setManualOrders([]); // Fallback to empty array
+    }
+
+    // Handle regular orders
+    if (Array.isArray(responseData.orders)) {
+      setOrders(responseData.orders);
+    } else {
+      setOrders([]); // Fallback to empty array
+    }
+
+    // Set other data with proper fallbacks
+    setCustomStatus(responseData.status || "");
+    setOrderCount(responseData.total_count || 0);
+    setTotalPages(
+      Math.ceil((responseData.total_count || 0) / validRowsPerPage)
+    );
+    setLogoMarket(
+      Array.isArray(responseData.marketplace_list) 
+        ? responseData.marketplace_list 
+        : []
+    );
+
     } catch (error) {
       console.error("Error fetching orders:", error);
     } finally {
