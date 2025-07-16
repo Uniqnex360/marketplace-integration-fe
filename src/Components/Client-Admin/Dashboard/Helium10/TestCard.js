@@ -28,6 +28,8 @@ import {
 } from 'recharts';
 import dayjs from 'dayjs';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 import 'dayjs/locale/en';
 import axios from 'axios';
 import ChooseMetrics from './ChooseMetrics';
@@ -35,7 +37,12 @@ import DottedCircleLoading from '../../../Loading/DotLoading';
 import SkeletonLoadingUI from './SummaryCardLoading';
 
 dayjs.extend(weekOfYear);
+dayjs.extend(utc);
+dayjs.extend(timezone);
 dayjs.locale('en');
+
+// Set the default timezone to US/Pacific
+const TIMEZONE = 'US/Pacific'; // US/Pacific timezone
 
 const MetricItem = ({
   title,
@@ -95,10 +102,12 @@ const MetricItem = ({
   </Card>
   );
 };
+
 const TestCard = ({marketPlaceId, brand_id, product_id, manufacturer_name, fulfillment_channel}) => {
   
   const theme = useTheme();
-  const [selectedDate, setSelectedDate] = useState(dayjs());
+  // Initialize with current Pacific time
+  const [selectedDate, setSelectedDate] = useState(dayjs().tz(TIMEZONE));
   const [metrics, setMetrics] = useState({});
   const [previous, setPrevious] = useState({});
   const [difference, setDifference] = useState({});
@@ -177,7 +186,7 @@ const TestCard = ({marketPlaceId, brand_id, product_id, manufacturer_name, fulfi
             product_id: product_id,
             manufacturer_name: manufacturer_name,
             fulfillment_channel: fulfillment_channel,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            timezone: TIMEZONE, // Always use Pacific timezone
          
         }
       );
@@ -198,15 +207,12 @@ const TestCard = ({marketPlaceId, brand_id, product_id, manufacturer_name, fulfi
         ([rawDate, values]) => {
           const capitalizedDate =
             rawDate.charAt(0).toUpperCase() + rawDate.slice(1); // "april 25, 2025" -> "April 25, 2025"
-          const parsedDate = new Date(capitalizedDate);
-          const formattedDate = parsedDate.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-          });
+          const parsedDate = dayjs(capitalizedDate).tz(TIMEZONE); // Parse in Pacific time
+          const formattedDate = parsedDate.format('MMM DD');
           return {
             date: formattedDate,
             revenue: values.gross_revenue,
-            fullDate: parsedDate,
+            fullDate: parsedDate.toDate(),
           };
         }
       );
@@ -285,13 +291,9 @@ const TestCard = ({marketPlaceId, brand_id, product_id, manufacturer_name, fulfi
        
   }, [selectedDate, marketPlaceId, brand_id, product_id, manufacturer_name, fulfillment_channel, ]);
 
-
-
-
-
-  const today = dayjs();
+  // Get current Pacific time
+  const today = dayjs().tz(TIMEZONE);
   const yesterday = today.subtract(1, 'day');
-
 
 // Go to previous day
 const handlePrevious = () => {
@@ -305,7 +307,7 @@ const handleNext = () => {
   }
 };
 
-// Back to today
+// Back to today (Pacific time)
 const handleBackToToday = () => {
   setSelectedDate(today);
 };
@@ -326,7 +328,7 @@ const handleBackToToday = () => {
 
   
     const getTooltipText = (date) => {
-      const formattedDate = dayjs(date).format('MMM DD');
+      const formattedDate = dayjs(date).tz(TIMEZONE).format('MMM DD');
       return date.isSame(yesterday, 'day')
         ? `Yesterday: ${formatCurrency(previous.gross_revenue)}`
         : `${formattedDate}: ${formatCurrency(previous.gross_revenue)}`;
@@ -564,7 +566,7 @@ const handleBackToToday = () => {
             }}
           >
             <Typography fontWeight="bold" fontSize={14} color="#485E75">
-              {dayjs(tooltipData.fullDate).format('MMM DD, YYYY')}
+              {dayjs(tooltipData.fullDate).tz(TIMEZONE).format('MMM DD, YYYY')}
             </Typography>
             <Typography fontSize={14} color="#000" fontWeight="bold">
               {formatCurrency(tooltipData.revenue)}
