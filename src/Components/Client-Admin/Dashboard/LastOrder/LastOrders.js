@@ -80,7 +80,7 @@ const CustomTooltip = React.memo(({ active, payload }) => {
 const OrderCard = React.memo(({ order }) => {
     const [tooltipText, setTooltipText] = useState('');
     const [loading, setLoading] = useState(false);
-const systemTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const systemTimeZone = 'US/Pacific'
 
     const handleTooltipOpen = useCallback((value) => {
         const isNumberOnly = /^\d+$/.test(value);
