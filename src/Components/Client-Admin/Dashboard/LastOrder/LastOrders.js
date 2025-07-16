@@ -152,16 +152,7 @@ const OrderCard = React.memo(({ order }) => {
           >
             {/* {dayjs(order.purchaseDate+ 'Z').utc().tz(dayjs.tz.guess()).format("h:mm A")} */}
 
-            {order.purchaseDate
-              ? new Date(
-                  `${order.purchaseDate.replace(" ", "T")}Z`
-                ).toLocaleString("en-US", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: true,
-                  timeZone: "US/Pacific",
-                })
-              : "N/A"}
+            {formatPacificTime(order.purchaseDate)}
             {/* {order.purchaseDate ? new Date(order.purchaseDate).toLocaleDateString('en-GB') : 'N/A'} */}
           </Typography>
           <Typography
@@ -280,7 +271,10 @@ const OrderCard = React.memo(({ order }) => {
     </Card>
   );
 });
-
+const formatPacificTime=(dateString)=>{
+    if(!dateString) return "N/A"
+    return dayjs(`${dateString.replace(" ","T")}Z`).tz('US/Pacific').format('h:mm A')
+}
 const LastOrders = React.memo(
   ({
     marketPlaceId,
