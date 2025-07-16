@@ -122,7 +122,7 @@ const OrderList = ({ fetchOrdersFromParent }) => {
   }, [selectedCategory]);
 
   // First, define the function to fetch data
-  const fetchOrderData = async (marketId = "all", page, rowsPerPage) => {
+const fetchOrderData = async (marketId = "all", page, rowsPerPage) => {
   setLoading(true);
 
   const validRowsPerPage = rowsPerPage && rowsPerPage > 0 ? rowsPerPage : 25;
@@ -154,20 +154,22 @@ const OrderList = ({ fetchOrdersFromParent }) => {
       }
     );
 
-    // Safely extract data from response
-    const responseData = response?.data?.data || {};
+    // Handle response data with proper fallbacks
+    const responseData = response.data || {};
     
     // Set orders with empty array fallback
     setOrders(Array.isArray(responseData.orders) ? responseData.orders : []);
     
-    // Set manual_orders with empty array fallback
-    setManualOrders(Array.isArray(responseData.manual_orders) ? responseData.manual_orders : []);
+    // Set marketplace_list with empty array fallback
+    setLogoMarket(Array.isArray(responseData.marketplace_list) ? responseData.marketplace_list : []);
     
     // Set other data with proper fallbacks
-    setCustomStatus(responseData.status || "");
     setOrderCount(responseData.total_count || 0);
     setTotalPages(Math.ceil((responseData.total_count || 0) / validRowsPerPage));
-    setLogoMarket(Array.isArray(responseData.marketplace_list) ? responseData.marketplace_list : []);
+    setCustomStatus(responseData.status || "");
+
+    // Manual orders are not in this response, so ensure it's reset
+    setManualOrders([]);
 
   } catch (error) {
     console.error("Error fetching orders:", error);
@@ -175,9 +177,9 @@ const OrderList = ({ fetchOrdersFromParent }) => {
     // Reset all data states on error
     setOrders([]);
     setManualOrders([]);
+    setLogoMarket([]);
     setOrderCount(0);
     setTotalPages(1);
-    setLogoMarket([]);
     
     toast.error("Failed to load orders. Please try again.");
     
@@ -185,7 +187,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
     setLoading(false);
   }
 };
-
   // Ref to track previous params for comparison
   const prevParams = useRef({
     selectedCategoryId: selectedCategory.id,
