@@ -70,15 +70,20 @@ const InsightsSection = () => {
 
         const sortedAlerts = [...data.alerts_feed].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        setNotifications(sortedAlerts.map(alert => ({
+        setNotifications(sortedAlerts.map(alert => {
+          const parsedDate=parseISO(alert.date)
+          const pacificDate=utcToZonedTime(parsedDate,"US/Pacific")
+          return {
           id: Math.random(),
           title: alert.title,
           desc: alert.message,
           tag: alert.type,
           color: getColorByType(alert.type),
-          date: parseISO(alert.date), // Parse the date string
+          date: format(pacificDate('MMM d, yyyy h:mm aaaa zzz',{timeZone:"US/Pacific"})),
           textColor: getTextColorForBackground(getColorByType(alert.type)),
-        })));
+          }
+         
+        }));
         setIsLoading(false);
       } catch (err) {
         setError(err.message);
