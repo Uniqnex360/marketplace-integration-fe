@@ -801,6 +801,15 @@ export default function TopProductsChart({
             <LineChart
               data={bindGraph}
               margin={{ top: 20, right: 30, left: 0, bottom: 20 }}
+              onMouseMove={(state)=>{
+                if(state.activePayload && state.activePayload.length)
+                {
+                  setHoveredProductId(state.activePayload[0].dataKey)
+                }
+              }}
+              onMouseLeave={()=>{
+                setHoveredProductId(null)
+              }}
             >
               {/* Grid lines */}
               <CartesianGrid
@@ -856,9 +865,6 @@ export default function TopProductsChart({
                     connectNulls={true}
                     isAnimationActive={false}
                     dot={false}
-                    // These are crucial for setting the hovered product
-                    onMouseEnter={() => setHoveredProductId(product.id)}
-                    onMouseLeave={() => setHoveredProductId(null)} // Reset when leaving this specific line
                   />
                 );
               })}
