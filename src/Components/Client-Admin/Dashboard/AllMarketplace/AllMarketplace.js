@@ -29,7 +29,6 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import DottedCircleLoading from '../../../Loading/DotLoading';
 import SkeletonTableMyProducts from '../MyProducts/ProductsLoading/MyProductLoading';
 import LoadingAllMarketplace from './LoadingAllMarketplace';
-import CardComponent from '../CardComponet';
 
 const fontStyles = {
     fontSize: '16px',
@@ -248,9 +247,6 @@ export default function AllMarketplace({ widgetData, marketPlaceId, brand_id, pr
 
 
     return (
-        <Box>
-            <CardComponent   widgetData={befePreset} marketPlaceId={selectedCategory == 'all' ? selectedCategory : filterFinal} DateStartDate={appliedStartDate} DateEndDate={appliedEndDate} brand_id={selectedBrandFilter} product_id={mergedProductsFilter} manufacturer_name={selectedManufacturerFilter} fulfillment_channel={selectedFulfillment}/>
-        
         <Paper elevation={3} sx={{ marginTop: '10px', boxShadow: 'none', p: 4, border: '1px solid #e0e0e0', borderRadius: '8px' }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
                 <Box>
@@ -461,6 +457,5 @@ export default function AllMarketplace({ widgetData, marketPlaceId, brand_id, pr
                 </Box>
             </Collapse>
         </Paper>
-        </Box>
     );
 }
