@@ -330,6 +330,7 @@ const [hoveredProductId, setHoveredProductId] = useState(null);
                 end_date: DateEndDate,
                 timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             });
+            console.log('SKU',response)
             setApiResponse(response.data);
         } catch (error) {
             console.error("Error fetching data:", error);
