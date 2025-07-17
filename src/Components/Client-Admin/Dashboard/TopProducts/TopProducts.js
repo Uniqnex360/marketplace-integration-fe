@@ -368,7 +368,7 @@ export default function TopProductsChart({
           fulfillment_channel: fulfillment_channel,
           start_date: DateStartDate,
           end_date: DateEndDate,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          timeZone: "US/Pacific" 
         }
       );
       console.log("get_top_products", response);
