@@ -1516,10 +1516,10 @@ options={[
           {/* <CardCount marketPlaceId={ selectedCategory == 'all' ? selectedCategory : filterFinal} DateStartDate={appliedStartDate} DateEndDate={appliedEndDate} /> */}
         </Grid>
 
-      <Grid item xs={12} sm={12} sx={{paddingLeft: '40px'}}
+      {/* <Grid item xs={12} sm={12} sx={{paddingLeft: '40px'}}
       >
           <CardComponent   widgetData={befePreset} marketPlaceId={selectedCategory == 'all' ? selectedCategory : filterFinal} DateStartDate={appliedStartDate} DateEndDate={appliedEndDate} brand_id={selectedBrandFilter} product_id={mergedProductsFilter} manufacturer_name={selectedManufacturerFilter} fulfillment_channel={selectedFulfillment}/>
-        </Grid>
+        </Grid> */}
         <Grid container spacing={2}>
   {/* Left side - Insight */}
   {/* <Grid item xs={12} md={3}>
