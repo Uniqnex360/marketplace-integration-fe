@@ -30,7 +30,7 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { format } from "date-fns";
 import DonutChart from "./DonutChart";
-import { utcToZonedTime } from "date-fns-tz";
+import { utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
 
 const TotalOrdersGraph = ({
   widgetData,
@@ -114,7 +114,7 @@ const TotalOrdersGraph = ({
         // Map the data to format it for the chart
         const formattedData = orderResponse.data.data.order_days.map(
           (item) => ({
-            date: new Date(item.date), // Convert date string to Date object
+            date: zonedTimeToUtc(item.date,"US/Pacific"), // Convert date string to Date object
             revenue: item.order_value,
             orderCount: item.order_count, // Add order count
           })
