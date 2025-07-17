@@ -1516,7 +1516,10 @@ options={[
           {/* <CardCount marketPlaceId={ selectedCategory == 'all' ? selectedCategory : filterFinal} DateStartDate={appliedStartDate} DateEndDate={appliedEndDate} /> */}
         </Grid>
 
-        
+      <Grid item xs={12} sm={12} sx={{paddingLeft: '40px'}}
+      >
+          <CardComponent   widgetData={befePreset} marketPlaceId={selectedCategory == 'all' ? selectedCategory : filterFinal} DateStartDate={appliedStartDate} DateEndDate={appliedEndDate} brand_id={selectedBrandFilter} product_id={mergedProductsFilter} manufacturer_name={selectedManufacturerFilter} fulfillment_channel={selectedFulfillment}/>
+        </Grid>
         <Grid container spacing={2}>
   {/* Left side - Insight */}
   {/* <Grid item xs={12} md={3}>
@@ -1701,8 +1704,6 @@ options={[
           </Box>
 
           <Grid item xs={12} sm={12} sx={{width:'99%'}}>
-            <CardComponent   widgetData={befePreset} marketPlaceId={selectedCategory == 'all' ? selectedCategory : filterFinal} DateStartDate={appliedStartDate} DateEndDate={appliedEndDate} brand_id={selectedBrandFilter} product_id={mergedProductsFilter} manufacturer_name={selectedManufacturerFilter} fulfillment_channel={selectedFulfillment}/>
-
           <AllMarketplace  widgetData={befePreset} marketPlaceId={selectedCategory === 'all' ? selectedCategory : filterFinal} brand_id={selectedBrandFilter} product_id={mergedProductsFilter?.id} manufacturer_name={selectedManufacturerFilter} fulfillment_channel={selectedFulfillment}  DateStartDate={appliedStartDate} DateEndDate={appliedEndDate} />
         </Grid>
         <Grid item xs={12} sm={12} sx={{width:'99%'}}>

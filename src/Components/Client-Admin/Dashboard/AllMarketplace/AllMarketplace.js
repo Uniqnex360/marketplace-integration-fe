@@ -29,6 +29,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import DottedCircleLoading from '../../../Loading/DotLoading';
 import SkeletonTableMyProducts from '../MyProducts/ProductsLoading/MyProductLoading';
 import LoadingAllMarketplace from './LoadingAllMarketplace';
+import CardComponent from '../CardComponet';
 
 const fontStyles = {
     fontSize: '16px',
@@ -37,7 +38,6 @@ const fontStyles = {
 };
 
 function MarketplaceRow({ row, index }) {
-    const [open, setOpen] = useState(false);
     const isFirstRow = index === 0;
     const cellStyle = {
         ...fontStyles,
@@ -247,6 +247,18 @@ export default function AllMarketplace({ widgetData, marketPlaceId, brand_id, pr
 
 
     return (
+        <Box>
+            <CardComponent
+  widgetData={widgetData}
+  marketPlaceId={marketPlaceId}
+  DateStartDate={DateStartDate}
+  DateEndDate={DateEndDate}
+  brand_id={brand_id}
+  product_id={product_id}
+  manufacturer_name={manufacturer_name}
+  fulfillment_channel={fulfillment_channel}
+/>
+        
         <Paper elevation={3} sx={{ marginTop: '10px', boxShadow: 'none', p: 4, border: '1px solid #e0e0e0', borderRadius: '8px' }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
                 <Box>
@@ -457,5 +469,6 @@ export default function AllMarketplace({ widgetData, marketPlaceId, brand_id, pr
                 </Box>
             </Collapse>
         </Paper>
+        </Box>
     );
 }
