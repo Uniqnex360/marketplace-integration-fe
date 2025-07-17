@@ -291,9 +291,9 @@ const CardComponent = ({widgetData, marketPlaceId, DateStartDate, DateEndDate, b
 
 
                 {/* Custom Bar Chart */}
-                <Grid item xs={12} sm={6}>
+                {/* <Grid item xs={12} sm={6}>
                     <CustomBarChart marketPlaceId={marketPlaceId} />
-                </Grid>
+                </Grid> */}
 
                 
                         {/* <Grid item xs={12} sm={4}>
