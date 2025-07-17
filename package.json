@@ -13,6 +13,7 @@
     "@testing-library/react": "^16.2.0",
     "axios": "^1.8.1",
     "date-fns": "^2.29.3",
+    "date-fns-tz": "^1.1.5",
     "dayjs": "^1.11.13",
     "file-saver": "^2.0.5",
     "highcharts": "^12.2.0",
