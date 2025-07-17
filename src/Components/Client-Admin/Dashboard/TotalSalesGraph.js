@@ -30,7 +30,6 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { format } from "date-fns";
 import DonutChart from "./DonutChart";
-import { format } from "date-fns";
 import { utcToZonedTime } from "date-fns-tz";
 
 const TotalOrdersGraph = ({
