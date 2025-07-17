@@ -9,7 +9,6 @@ import axios from 'axios';
 import { format, parseISO, isSameDay } from 'date-fns';
 import DottedCircleLoading from '../../../Loading/DotLoading';
 import { Download, Delete, KeyboardArrowDown, KeyboardArrowUp, MoreVert } from '@mui/icons-material';
-import { utcToZonedTime } from 'date-fns-tz';
 const ShowIcon = (props) => (
   <SvgIcon {...props} viewBox="0 0 512 512" sx={{ fontSize: 16 }}>
     <path fill="currentColor" d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" />
@@ -71,20 +70,15 @@ const InsightsSection = () => {
 
         const sortedAlerts = [...data.alerts_feed].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        setNotifications(sortedAlerts.map(alert => {
-          const parsedDate=parseISO(alert.date)
-          const pacificDate=utcToZonedTime(parsedDate,"US/Pacific")
-          return {
+        setNotifications(sortedAlerts.map(alert => ({
           id: Math.random(),
           title: alert.title,
           desc: alert.message,
           tag: alert.type,
           color: getColorByType(alert.type),
-          date: format(pacificDate('MMM d, yyyy h:mm aaaa zzz',{timeZone:"US/Pacific"})),
+          date: parseISO(alert.date), // Parse the date string
           textColor: getTextColorForBackground(getColorByType(alert.type)),
-          }
-         
-        }));
+        })));
         setIsLoading(false);
       } catch (err) {
         setError(err.message);
