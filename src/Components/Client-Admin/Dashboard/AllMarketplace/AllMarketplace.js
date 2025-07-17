@@ -675,17 +675,29 @@ export default function AllMarketplace({
                       <Tooltip
                         formatter={(value, name, props) => {
                           const { payload } = props
-                          let additionalInfo = ""
                           if (payload) {
+                            // Find the corresponding marketplace data
                             const marketplaceData = orderData.find((item) => item.name === payload.name)
                             if (marketplaceData) {
                               const orderValue = marketplaceData.orderValue || 0
-                              additionalInfo = `Order Count: ${marketplaceData.value} | Order Value: $${orderValue.toFixed(2)}`
+                              return [`Order Count: ${marketplaceData.value}`, `Order Value: $${orderValue.toFixed(2)}`]
                             }
                           }
-                          return [additionalInfo]
+                          return [value]
                         }}
-                        contentStyle={{ fontSize: "12px" }}
+                        labelFormatter={(label) => `${label}`}
+                        contentStyle={{
+                          fontSize: "14px",
+                          backgroundColor: "white",
+                          border: "1px solid #ccc",
+                          borderRadius: "4px",
+                          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                        }}
+                        itemStyle={{
+                          color: "#485E75",
+                          fontFamily:
+                            "'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif",
+                        }}
                       />
                       <Legend
                         formatter={(value, entry) => (
