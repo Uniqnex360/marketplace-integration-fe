@@ -452,10 +452,7 @@ const LastOrders = React.memo(
               <Typography
                 sx={{ mb: 1, fontSize: "16px", color: "grey", fontWeight: 600 }}
               >
-                {new Date().toLocaleDateString("en-US", {
-                  month: "long",
-                  day: "numeric",
-                })}
+               {dayjs().tz("US/Pacific").format("MMMM D")}
               </Typography>
               <Paper
                 elevation={2}
