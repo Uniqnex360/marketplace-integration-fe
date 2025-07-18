@@ -726,7 +726,7 @@ export default function AllMarketplace({
               sx={{
                 border: "1px solid #e0e0e0",
                 borderRadius: "8px",
-                p: 2,
+                p: 0, // ✅ Removed padding here
                 height: "100%",
                 display: "flex",
                 flexDirection: "column",
@@ -744,27 +744,17 @@ export default function AllMarketplace({
                   <DottedCircleLoading />
                 </Box>
               ) : totalOrders > 0 ? (
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 2,
-                  }}
-                >
-                  <ResponsiveContainer width="100%" height={200}>
-                    <CardComponent
-                      widgetData={widgetData}
-                      marketPlaceId={marketPlaceId}
-                      DateStartDate={DateStartDate}
-                      DateEndDate={DateEndDate}
-                      brand_id={brand_id}
-                      product_id={product_id}
-                      manufacturer_name={manufacturer_name}
-                      fulfillment_channel={fulfillment_channel}
-                    />
-                  </ResponsiveContainer>
-                </Box>
+                // ✅ Directly render CardComponent without extra wrappers
+                <CardComponent
+                  widgetData={widgetData}
+                  marketPlaceId={marketPlaceId}
+                  DateStartDate={DateStartDate}
+                  DateEndDate={DateEndDate}
+                  brand_id={brand_id}
+                  product_id={product_id}
+                  manufacturer_name={manufacturer_name}
+                  fulfillment_channel={fulfillment_channel}
+                />
               ) : (
                 <Box
                   sx={{
