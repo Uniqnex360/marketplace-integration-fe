@@ -37,6 +37,7 @@ const CardComponent = ({
   brand_id,
   product_id,
   manufacturer_name,
+  sx
 }) => {
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState({});
@@ -259,7 +260,7 @@ const CardComponent = ({
   };
 
   return (
-    <Box p={2}>
+    <Box sx={sx} p={2}>//added sx to make it align with AllMarketplace
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
           <Card
