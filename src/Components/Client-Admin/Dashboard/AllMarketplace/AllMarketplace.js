@@ -721,11 +721,11 @@ export default function AllMarketplace({
           </Grid>
 
           {/* Right side - Orders Chart */}
+          {/* Right side - Orders Chart */}
           <Grid item xs={12} md={4}>
             <Box
               sx={{
                 height: "100%",
-                minHeight: 330, // Set a minimum height to match other cards
                 display: "flex",
                 flexDirection: "column",
               }}
@@ -736,8 +736,7 @@ export default function AllMarketplace({
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    height: "100%",
-                    minHeight: 330,
+                    flex: 1, // Allow it to grow and fill the space
                     border: "1px solid #e0e0e0",
                     borderRadius: "8px",
                   }}
@@ -756,26 +755,11 @@ export default function AllMarketplace({
                   fulfillment_channel={fulfillment_channel}
                   sx={{
                     flex: 1, // This makes it fill available space
-                    height: "100%",
-                    width:"100%",
-                    minHeight: 330,
                     boxShadow: "none",
                     border: "1px solid #e0e0e0",
                     borderRadius: "8px",
-                    
-                    "& .MuiCard-root": {
-                      // Target the inner Card component
-                      height: "100%",
-                      display: "flex",
-                      width:"100%",
-                      flexDirection: "column",
-                    },
-                    "& .MuiCardContent-root": {
-                      // Target the CardContent
-                      flex: 1,
-                      display: "flex",
-                      flexDirection: "column",
-                    },
+                    display: "flex",
+                    flexDirection: "column",
                   }}
                 />
               ) : (
@@ -784,8 +768,7 @@ export default function AllMarketplace({
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    height: "100%",
-                    minHeight: 330,
+                    flex: 1, // Allow it to grow and fill the space
                     border: "1px solid #e0e0e0",
                     borderRadius: "8px",
                   }}
