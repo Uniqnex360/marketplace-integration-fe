@@ -39,9 +39,7 @@ function UserList() {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
 
-  const handleDialogOpen = () => {
-    setOpenDialog(true);
-  };
+
 
   const handleDialogClose = () => {
     setOpenDialog(false);

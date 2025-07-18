@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
-import { Box, Typography, Card, CardContent, CircularProgress } from "@mui/material";
+import { PieChart, Pie, Cell, Tooltip } from "recharts";
+import { Box, Typography, Card, CardContent } from "@mui/material";
 import axios from "axios";
 import DottedCircleLoading from "../../Loading/DotLoading";
 

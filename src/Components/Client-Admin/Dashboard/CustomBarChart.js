@@ -1,7 +1,7 @@
 import React, { useEffect, useState ,useRef} from 'react';
 import axios from 'axios';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Legend, Cell, LabelList } from 'recharts';
-import { Box, CircularProgress, FormControl, InputLabel, Select, MenuItem, Typography, Card, CardContent } from '@mui/material';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend, LabelList } from 'recharts';
+import { Box, CircularProgress, Typography, Card, CardContent } from '@mui/material';
 
 const colors = ["#0F67B1", "#64bef0"]; // Green for current and Orange for previous
 

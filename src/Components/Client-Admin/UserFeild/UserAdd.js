@@ -15,21 +15,6 @@ import {
 import axios from "axios";
 import { CameraAlt } from "@mui/icons-material"; // To show camera icon for uploading image
 
-const useDebounce = (value, delay) => {
-  const [debouncedValue, setDebouncedValue] = useState(value);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
-
-  return debouncedValue;
-};
 
 function UserAdd({ clientData, onClose, reloadUser }) {
   const user = JSON.parse(localStorage.getItem("user"));
