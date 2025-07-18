@@ -722,63 +722,67 @@ export default function AllMarketplace({
 
           {/* Right side - Orders Chart */}
           <Grid item xs={12} md={4}>
-            <Box
-              sx={{
-                border: "1px solid #e0e0e0",
-                borderRadius: "8px",
-                p: 0, // ✅ Removed padding here
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              {cardLoading ? (
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    flexGrow: 1,
-                  }}
-                >
-                  <DottedCircleLoading />
-                </Box>
-              ) : totalOrders > 0 ? (
-                // ✅ Directly render CardComponent without extra wrappers
-                <CardComponent
-                  widgetData={widgetData}
-                  marketPlaceId={marketPlaceId}
-                  DateStartDate={DateStartDate}
-                  DateEndDate={DateEndDate}
-                  brand_id={brand_id}
-                  product_id={product_id}
-                  manufacturer_name={manufacturer_name}
-                  fulfillment_channel={fulfillment_channel}
-                />
-              ) : (
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    flexGrow: 1,
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      textAlign: "center",
-                      fontSize: "14px",
-                      fontWeight: "bold",
-                      color: "#888",
-                    }}
-                  >
-                    No total orders found
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-          </Grid>
+  <Box
+    sx={{
+      height: "100%",
+      display: "flex",
+      flexDirection: "column",
+    }}
+  >
+    {cardLoading ? (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: 330, // Match the CardComponent height
+        }}
+      >
+        <DottedCircleLoading />
+      </Box>
+    ) : totalOrders > 0 ? (
+      <CardComponent
+        widgetData={widgetData}
+        marketPlaceId={marketPlaceId}
+        DateStartDate={DateStartDate}
+        DateEndDate={DateEndDate}
+        brand_id={brand_id}
+        product_id={product_id}
+        manufacturer_name={manufacturer_name}
+        fulfillment_channel={fulfillment_channel}
+        sx={{
+          height: "100%",
+          boxShadow: "none",
+          border: "1px solid #e0e0e0", // Consistent with other elements
+          borderRadius: "8px",
+        }}
+      />
+    ) : (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: 330, // Match the CardComponent height
+          border: "1px solid #e0e0e0",
+          borderRadius: "8px",
+        }}
+      >
+        <Typography
+          variant="body2"
+          sx={{
+            textAlign: "center",
+            fontSize: "14px",
+            fontWeight: "bold",
+            color: "#888",
+          }}
+        >
+          No total orders found
+        </Typography>
+      </Box>
+    )}
+  </Box>
+</Grid>
         </Grid>
 
         {/* Marketplace Breakdown Section */}
