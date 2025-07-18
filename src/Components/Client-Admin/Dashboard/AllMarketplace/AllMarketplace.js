@@ -165,7 +165,7 @@ export default function AllMarketplace({
 
   // CardComponent states
   const [orderData, setOrderData] = useState([])
-  const [totalOrders, setTotalOrders] = useState(0)
+  const [totalOrders, setTotalOrders] = useState(0) 
   const [cardLoading, setCardLoading] = useState(true)
 
   const lastParamsRef = useRef("")

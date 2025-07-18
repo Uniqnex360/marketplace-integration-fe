@@ -735,68 +735,49 @@ if (startDate && endDate) {
     }
   };
   const handleClearFilter = () => {
-    // Previous state values
-    const prevFilterFinal = filterFinal;
-    const prevSelectedCategory = selectedCategory;
-    const prevFilter = filter;
-    const prevStartDate = startDate;
-    const prevEndDate = endDate;
-    const prevAppliedStartDate = appliedStartDate;
-    const prevAppliedEndDate = appliedEndDate;
-    const prevIsFiltering = isFiltering;
+  // Reset all filter-related states
+  setSelectedCategory({ id: "all", name: "All Channels" });
+  setFilterFinal({ id: "all", name: "All Channels" });
+  setFilter("all");
   
-    // Reset values
-    setFilterFinal({ id: "all", name: "All Channels" });
-    setSelectedCategory({ id: "all", name: "All Channels" });
-    setFilter("all"); 
-    setSelectedBrand([]);
-    setSelectedManufacturer([]);
-    setSelectedSku([]);
-    setSelectedAsin([]);
-    setselectFulfillment("");
-    setInputValueBrand("");
-    setInputValueManufactuer("");
-    setInputValueSku("");
-    setInputValueAsin("");
-    setSearchQuery("");
-    setMergedProducts([]);
-    setAsinList([]);
-    setSkuList([]);
-    setBrandList([]);
-    setManufacturerList([]);
-    setSelectedPreset('Today');
-    setBefePreset('Today');
-    setStartDate(null);
-    setEndDate(null);
-    setAppliedStartDate(null);
-    setAppliedEndDate(null);
-    setIsFiltering(false);
+  // Clear brand, SKU, ASIN, manufacturer selections
+  setSelectedBrand([]);
+  setSelectedManufacturer([]);
+  setSelectedSku([]);
+  setSelectedAsin([]);
+  setMergedProducts([]);
+  setMergedProductsFilter([]);
+  setSelectedBrandFilter([]);
+  setSelectedManufacturerFilter([]);
   
-    // Check if any value was changed
-    const isChanged =
-      prevFilterFinal.id !== "all" ||
-      prevSelectedCategory.id !== "all" ||
-      prevFilter !== "all" ||
-      prevStartDate !== null ||
-      prevEndDate !== null ||
-      prevAppliedStartDate !== null ||
-      prevAppliedEndDate !== null ||
-      prevIsFiltering !== false;
+  // Reset date filters
+  setStartDate(null);
+  setEndDate(null);
+  setAppliedStartDate(null);
+  setAppliedEndDate(null);
   
-    // Show toast only if something was changed
-    if (isChanged) {
-      setTimeout(() => {
-        toast.success("Reset Successfully", {
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-      }, 0);
-    }
-  };
+  // Reset search inputs
+  setInputValueBrand("");
+  setInputValueManufactuer("");
+  setInputValueSku("");
+  setInputValueAsin("");
+  
+  // Reset preset
+  setSelectedPreset('Today');
+  setBefePreset('Today');
+  
+  // Force a re-fetch with default filters
+  setIsFiltering(false);
+
+  // Show success toast
+  toast.success("Filters reset successfully!", {
+    position: "top-right",
+    autoClose: 2000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+  });
+};
   
   return (
     <Box sx={{ marginTop: '5%'}}>
