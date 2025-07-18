@@ -777,7 +777,7 @@ if (startDate && endDate) {
     closeOnClick: true,
     pauseOnHover: true,
   });
-};
+}
   
   return (
     <Box sx={{ marginTop: '5%'}}>
