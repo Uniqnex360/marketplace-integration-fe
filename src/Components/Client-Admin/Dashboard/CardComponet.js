@@ -261,7 +261,6 @@ const CardComponent = ({
 
   return (
     <Box sx={sx} p={2}>
-      //added sx to make it align with AllMarketplace
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
           <Card
