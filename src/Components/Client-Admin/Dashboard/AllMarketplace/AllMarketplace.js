@@ -721,7 +721,7 @@ export default function AllMarketplace({
           </Grid>
 
           {/* Right side - Orders Chart */}
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12}>
             <Box
               sx={{
                 height: "100%",
