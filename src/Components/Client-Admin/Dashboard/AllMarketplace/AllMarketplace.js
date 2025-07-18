@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react"
 import {
   Box,
   Typography,
@@ -20,51 +20,43 @@ import {
   Tooltip,
   ListItemText,
   Avatar,
-} from "@mui/material";
-import {
-  Download,
-  Delete,
-  KeyboardArrowDown,
-  KeyboardArrowUp,
-  MoreVert,
-} from "@mui/icons-material";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import { PieChart, Pie, Cell, Legend, ResponsiveContainer } from "recharts";
-import { saveAs } from "file-saver";
-import axios from "axios";
-import dayjs from "dayjs";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import DottedCircleLoading from "../../../Loading/DotLoading";
-import CardComponent from "../CardComponet";
+} from "@mui/material"
+import { Download, Delete, KeyboardArrowDown, KeyboardArrowUp, MoreVert } from "@mui/icons-material"
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile"
+import { saveAs } from "file-saver"
+import axios from "axios"
+import dayjs from "dayjs"
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward"
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward"
+import DottedCircleLoading from "../../../Loading/DotLoading"
+import CardComponent from "../CardComponet"
 
 const fontStyles = {
   fontSize: "16px",
   color: "#485E75",
-  fontFamily:
-    "'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif",
-};
+  fontFamily: "'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif",
+}
 
 function MarketplaceRow({ row, index }) {
-  const [open, setOpen] = useState(false);
-  const isFirstRow = index === 0;
+  const [open, setOpen] = useState(false)
+  const isFirstRow = index === 0
   const cellStyle = {
     ...fontStyles,
     color: "black",
     fontWeight: 600,
     fontSize: "14px",
-  };
+  }
 
   const formatCurrency = (value) => {
-    if (value == null || isNaN(value)) return "-";
-    const number = Number(value);
+    if (value == null || isNaN(value)) return "-"
+    const number = Number(value)
     const formatted = number.toLocaleString("en-US", {
       style: "currency",
       currency: "USD",
       minimumFractionDigits: 0,
-    });
-    return formatted;
-  };
+    })
+    return formatted
+  }
 
   return (
     <>
@@ -76,8 +68,7 @@ function MarketplaceRow({ row, index }) {
         </TableCell>
         <TableCell
           sx={{
-            fontFamily:
-              "'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif",
+            fontFamily: "'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif",
             display: "flex",
             alignItems: "center",
             fontWeight: "600",
@@ -94,8 +85,7 @@ function MarketplaceRow({ row, index }) {
                 width: 20,
                 height: 20,
                 color: "#485E75",
-                fontFamily:
-                  "'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif",
+                fontFamily: "'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif",
                 fontSize: "14px",
                 fontWeight: "800",
                 mr: 1,
@@ -140,30 +130,20 @@ function MarketplaceRow({ row, index }) {
         >
           {formatCurrency(row.currency_list[0]?.netProfit)}
         </TableCell>
-        <TableCell sx={{ ...cellStyle, borderBottom: "none" }}>
-          {row.currency_list[0]?.margin?.toFixed(2)}%
-        </TableCell>
-        <TableCell sx={{ ...cellStyle, borderBottom: "none" }}>
-          {row.currency_list[0]?.roi?.toFixed(2)}%
-        </TableCell>
-        <TableCell sx={{ ...cellStyle, borderBottom: "none" }}>
-          {row.currency_list[0]?.refunds}
-        </TableCell>
-        <TableCell sx={{ ...cellStyle, borderBottom: "none" }}>
-          {row.currency_list[0]?.unitsSold}
-        </TableCell>
+        <TableCell sx={{ ...cellStyle, borderBottom: "none" }}>{row.currency_list[0]?.margin?.toFixed(2)}%</TableCell>
+        <TableCell sx={{ ...cellStyle, borderBottom: "none" }}>{row.currency_list[0]?.roi?.toFixed(2)}%</TableCell>
+        <TableCell sx={{ ...cellStyle, borderBottom: "none" }}>{row.currency_list[0]?.refunds}</TableCell>
+        <TableCell sx={{ ...cellStyle, borderBottom: "none" }}>{row.currency_list[0]?.unitsSold}</TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={10}>
           <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 1 }}>
-              {/* Add more details here if needed */}
-            </Box>
+            <Box sx={{ margin: 1 }}>{/* Add more details here if needed */}</Box>
           </Collapse>
         </TableCell>
       </TableRow>
     </>
-  );
+  )
 }
 
 export default function AllMarketplace({
@@ -176,27 +156,21 @@ export default function AllMarketplace({
   DateStartDate,
   DateEndDate,
 }) {
-  const [showBreakdown, setShowBreakdown] = useState(true);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const menuOpen = Boolean(anchorEl);
-  const [marketplaceData, setMarketplaceData] = useState(null);
-  const [openTooltip, setOpenTooltip] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  // CardComponent states
-  const [orderData, setOrderData] = useState([]);
-  const [totalOrders, setTotalOrders] = useState(0);
-  const [cardLoading, setCardLoading] = useState(true);
-
-  const lastParamsRef = useRef("");
+  const [showBreakdown, setShowBreakdown] = useState(true)
+  const [anchorEl, setAnchorEl] = useState(null)
+  const menuOpen = Boolean(anchorEl)
+  const [marketplaceData, setMarketplaceData] = useState(null)
+  const [openTooltip, setOpenTooltip] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const lastParamsRef = useRef("")
 
   const handleTooltipOpen = () => {
-    setOpenTooltip(true);
-  };
+    setOpenTooltip(true)
+  }
 
   const handleTooltipClose = () => {
-    setOpenTooltip(false);
-  };
+    setOpenTooltip(false)
+  }
 
   const handleDownloadCSV = async () => {
     try {
@@ -212,16 +186,16 @@ export default function AllMarketplace({
           start_date: DateStartDate,
           end_date: DateEndDate,
         },
-        { responseType: "blob" }
-      );
+        { responseType: "blob" },
+      )
       const blob = new Blob([response.data], {
         type: "text/csv;charset=utf-8;",
-      });
-      saveAs(blob, "marketplace-data.csv");
+      })
+      saveAs(blob, "marketplace-data.csv")
     } catch (error) {
-      console.error("CSV Download Error:", error);
+      console.error("CSV Download Error:", error)
     }
-  };
+  }
 
   const handleDownloadXLS = async () => {
     try {
@@ -235,144 +209,47 @@ export default function AllMarketplace({
           manufacturer_name: manufacturer_name,
           fulfillment_channel: fulfillment_channel,
         },
-        { responseType: "blob" }
-      );
+        { responseType: "blob" },
+      )
       const blob = new Blob([response.data], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-      saveAs(blob, "marketplace-data.xlsx");
+      })
+      saveAs(blob, "marketplace-data.xlsx")
     } catch (error) {
-      console.error("XLS Download Error:", error);
+      console.error("XLS Download Error:", error)
     }
-  };
+  }
 
-  const fetchOrderData = async () => {
-    try {
-      const userData = localStorage.getItem("user");
-      let userIds = "";
-      if (userData) {
-        const data = JSON.parse(userData);
-        userIds = data.id;
-      }
-
-      const orderSam = await axios.get(
-        `${process.env.REACT_APP_IP}ordersCountForDashboard/`,
-        {
-          params: {
-            preset: widgetData,
-            marketplace_id: marketPlaceId.id,
-            start_date: DateStartDate,
-            end_date: DateEndDate,
-            user_id: userIds,
-            brand_id: brand_id,
-            product_id: product_id,
-            manufacturer_name: manufacturer_name,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          },
-        }
-      );
-
-      if (orderSam.data?.data) {
-        const { total_order_count, ...marketplaces } = orderSam.data.data;
-        setTotalOrders(total_order_count?.value || 0);
-
-        if (marketPlaceId.id === "all") {
-          const pieData = Object.entries(marketplaces).map(([name, data]) => {
-            let color;
-            if (name === "Amazon") color = "#0b3954";
-            else if (name === "Walmart") color = "#ff6663";
-            else if (name === "custom") color = "#9381ff";
-            else color = getRandomColor();
-
-            return {
-              name,
-              value: data?.count || 0,
-              percentage: Number.parseFloat(data?.percentage || 0).toFixed(2),
-              color: color,
-              orderValue: data?.order_value || 0,
-            };
-          });
-          setOrderData(pieData);
-        } else {
-          const marketplaceName = Object.keys(marketplaces)[0];
-          const marketplaceData = marketplaces[marketplaceName];
-          if (marketplaceData) {
-            let color = "#000000";
-            if (marketplaceName === "Amazon") color = "#0b3954";
-            else if (marketplaceName === "Walmart") color = "#ff6663";
-            else if (marketplaceName === "custom") color = "#9381ff";
-
-            setOrderData([
-              {
-                name: marketplaceName,
-                value: marketplaceData.value || marketplaceData.count,
-                percentage: Number.parseFloat(
-                  marketplaceData.percentage || 0
-                ).toFixed(2),
-                color: color,
-                orderValue: marketplaceData?.order_value || 0,
-              },
-            ]);
-          } else {
-            setOrderData([]);
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching order data:", error);
-    } finally {
-      setCardLoading(false);
-    }
-  };
-
-  const getRandomColor = () => {
-    const letters = "0123456789ABCDEF";
-    let color = "#";
-    for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-  };
-
-  const fromDate = marketplaceData?.from_date;
-  const toDate = marketplaceData?.to_date;
-  const formattedCurrentDate = fromDate
-    ? dayjs(fromDate).format("MMM DD, YYYY")
-    : "";
+  const fromDate = marketplaceData?.from_date
+  const toDate = marketplaceData?.to_date
+  const formattedCurrentDate = fromDate ? dayjs(fromDate).format("MMM DD, YYYY") : ""
   const formattedDateRange =
-    fromDate && toDate
-      ? `${dayjs(fromDate).format("MMM DD, YYYY")} - ${dayjs(toDate).format(
-          "MMM DD, YYYY"
-        )}`
-      : "";
+    fromDate && toDate ? `${dayjs(fromDate).format("MMM DD, YYYY")} - ${dayjs(toDate).format("MMM DD, YYYY")}` : ""
 
   const fetchAllMarketplace = async () => {
-    setLoading(true);
+    setLoading(true)
     try {
-      const userData = JSON.parse(localStorage.getItem("user") || "{}");
-      const userId = userData?.id || "";
-      const response = await axios.post(
-        `${process.env.REACT_APP_IP}allMarketplaceData/`,
-        {
-          user_id: userId,
-          preset: widgetData,
-          marketplace_id: marketPlaceId.id,
-          brand_id: brand_id,
-          product_id: product_id,
-          manufacturer_name: manufacturer_name,
-          fulfillment_channel: fulfillment_channel,
-          start_date: DateStartDate,
-          end_date: DateEndDate,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        }
-      );
-      setMarketplaceData(response.data);
+      const userData = JSON.parse(localStorage.getItem("user") || "{}")
+      const userId = userData?.id || ""
+      const response = await axios.post(`${process.env.REACT_APP_IP}allMarketplaceData/`, {
+        user_id: userId,
+        preset: widgetData,
+        marketplace_id: marketPlaceId.id,
+        brand_id: brand_id,
+        product_id: product_id,
+        manufacturer_name: manufacturer_name,
+        fulfillment_channel: fulfillment_channel,
+        start_date: DateStartDate,
+        end_date: DateEndDate,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      })
+      setMarketplaceData(response.data)
     } catch (error) {
-      console.error("Failed to fetch marketplace data:", error);
+      console.error("Failed to fetch marketplace data:", error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
     const currentParams = JSON.stringify({
@@ -384,12 +261,10 @@ export default function AllMarketplace({
       fulfillment_channel,
       DateStartDate,
       DateEndDate,
-    });
-
+    })
     if (lastParamsRef.current !== currentParams) {
-      lastParamsRef.current = currentParams;
-      fetchAllMarketplace();
-      fetchOrderData();
+      lastParamsRef.current = currentParams
+      fetchAllMarketplace()
     }
   }, [
     widgetData,
@@ -400,18 +275,18 @@ export default function AllMarketplace({
     fulfillment_channel,
     DateStartDate,
     DateEndDate,
-  ]);
+  ])
 
   const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
+    setAnchorEl(event.currentTarget)
+  }
 
   const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
+    setAnchorEl(null)
+  }
 
-  const rows = marketplaceData?.custom?.marketplace_list || [];
-  const allMarketplaceData = marketplaceData?.custom?.all_marketplace || {};
+  const rows = marketplaceData?.custom?.marketplace_list || []
+  const allMarketplaceData = marketplaceData?.custom?.all_marketplace || {}
 
   return (
     <Box>
@@ -425,12 +300,7 @@ export default function AllMarketplace({
         }}
       >
         {/* Header Section */}
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          mb={3}
-        >
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
           <Box>
             <Typography
               variant="h5"
@@ -444,17 +314,13 @@ export default function AllMarketplace({
               All Marketplaces
             </Typography>
             <Typography sx={{ ...fontStyles, fontSize: "14px", mb: 0.5 }}>
-              {widgetData === "Today" || widgetData === "Yesterday"
-                ? formattedCurrentDate
-                : formattedDateRange}
+              {widgetData === "Today" || widgetData === "Yesterday" ? formattedCurrentDate : formattedDateRange}
             </Typography>
           </Box>
           <Box display="flex" alignItems="center">
             <Tooltip
               title={
-                <Typography
-                  sx={{ fontWeight: 100, fontSize: "14px", color: "#485E75" }}
-                >
+                <Typography sx={{ fontWeight: 100, fontSize: "14px", color: "#485E75" }}>
                   All currencies have been converted to{" "}
                   <Box component="span" sx={{ fontWeight: 700 }}>
                     $ USD
@@ -520,8 +386,8 @@ export default function AllMarketplace({
             >
               <MenuItem
                 onClick={() => {
-                  handleDownloadCSV();
-                  handleMenuClose();
+                  handleDownloadCSV()
+                  handleMenuClose()
                 }}
                 sx={{
                   color: "rgb(72, 94, 117)",
@@ -530,9 +396,7 @@ export default function AllMarketplace({
                 }}
               >
                 <ListItemIcon sx={{ color: "rgb(72, 94, 117)", minWidth: 36 }}>
-                  <InsertDriveFileIcon
-                    sx={{ color: "rgb(72, 94, 117)", fontSize: "16px" }}
-                  />
+                  <InsertDriveFileIcon sx={{ color: "rgb(72, 94, 117)", fontSize: "16px" }} />
                 </ListItemIcon>
                 <ListItemText
                   sx={{
@@ -545,8 +409,8 @@ export default function AllMarketplace({
               </MenuItem>
               <MenuItem
                 onClick={() => {
-                  handleDownloadXLS();
-                  handleMenuClose();
+                  handleDownloadXLS()
+                  handleMenuClose()
                 }}
                 sx={{
                   color: "rgb(72, 94, 117)",
@@ -555,9 +419,7 @@ export default function AllMarketplace({
                 }}
               >
                 <ListItemIcon sx={{ color: "rgb(72, 94, 117)", minWidth: 36 }}>
-                  <Download
-                    sx={{ color: "rgb(72, 94, 117)", fontSize: "16px" }}
-                  />
+                  <Download sx={{ color: "rgb(72, 94, 117)", fontSize: "16px" }} />
                 </ListItemIcon>
                 <ListItemText
                   sx={{
@@ -577,9 +439,7 @@ export default function AllMarketplace({
                 }}
               >
                 <ListItemIcon sx={{ color: "rgb(72, 94, 117)", minWidth: 36 }}>
-                  <Delete
-                    sx={{ color: "rgb(72, 94, 117)", fontSize: "16px" }}
-                  />
+                  <Delete sx={{ color: "rgb(72, 94, 117)", fontSize: "16px" }} />
                 </ListItemIcon>
                 <ListItemText
                   sx={{
@@ -603,54 +463,27 @@ export default function AllMarketplace({
                 {[
                   {
                     title: "Gross Revenue",
-                    value: `$${
-                      allMarketplaceData?.grossRevenue?.current?.toFixed(2) ||
-                      "0.00"
-                    }`,
-                    change: `${
-                      allMarketplaceData?.grossRevenue?.delta < 0 ? "-" : ""
-                    }$${Math.abs(
-                      allMarketplaceData?.grossRevenue?.delta || 0
-                    ).toFixed(2)}`,
-                    changeType:
-                      allMarketplaceData?.grossRevenue?.delta >= 0
-                        ? "up"
-                        : "down",
+                    value: `$${allMarketplaceData?.grossRevenue?.current?.toFixed(2) || "0.00"}`,
+                    change: `${allMarketplaceData?.grossRevenue?.delta < 0 ? "-" : ""}$${Math.abs(allMarketplaceData?.grossRevenue?.delta || 0).toFixed(2)}`,
+                    changeType: allMarketplaceData?.grossRevenue?.delta >= 0 ? "up" : "down",
                   },
                   {
                     title: "Expenses",
-                    value: `-$${
-                      allMarketplaceData?.expenses?.current?.toFixed(2) ||
-                      "0.00"
-                    }`,
-                    change: `${
-                      allMarketplaceData?.expenses?.delta < 0 ? "-" : ""
-                    }$${Math.abs(
-                      allMarketplaceData?.expenses?.delta || 0
-                    ).toFixed(2)}`,
-                    changeType:
-                      allMarketplaceData?.expenses?.delta >= 0 ? "up" : "down",
+                    value: `-$${allMarketplaceData?.expenses?.current?.toFixed(2) || "0.00"}`,
+                    change: `${allMarketplaceData?.expenses?.delta < 0 ? "-" : ""}$${Math.abs(allMarketplaceData?.expenses?.delta || 0).toFixed(2)}`,
+                    changeType: allMarketplaceData?.expenses?.delta >= 0 ? "up" : "down",
                   },
                   {
                     title: "Net Profit",
-                    value: `$${
-                      allMarketplaceData?.netProfit?.current?.toFixed(2) ||
-                      "0.00"
-                    }`,
-                    change: `${
-                      allMarketplaceData?.netProfit?.delta < 0 ? "-" : ""
-                    }$${Math.abs(
-                      allMarketplaceData?.netProfit?.delta || 0
-                    ).toFixed(2)}`,
-                    changeType:
-                      allMarketplaceData?.netProfit?.delta >= 0 ? "up" : "down",
+                    value: `$${allMarketplaceData?.netProfit?.current?.toFixed(2) || "0.00"}`,
+                    change: `${allMarketplaceData?.netProfit?.delta < 0 ? "-" : ""}$${Math.abs(allMarketplaceData?.netProfit?.delta || 0).toFixed(2)}`,
+                    changeType: allMarketplaceData?.netProfit?.delta >= 0 ? "up" : "down",
                   },
                   {
                     title: "Units Sold",
                     value: `${allMarketplaceData?.unitsSold?.current || "0"}`,
                     change: `${allMarketplaceData?.unitsSold?.delta || "0"}`,
-                    changeType:
-                      allMarketplaceData?.unitsSold?.delta >= 0 ? "up" : "down",
+                    changeType: allMarketplaceData?.unitsSold?.delta >= 0 ? "up" : "down",
                   },
                 ].map((item, idx) => (
                   <Grid
@@ -659,16 +492,11 @@ export default function AllMarketplace({
                     sm={6}
                     key={idx}
                     sx={{
-                      borderLeft:
-                        idx !== 0 && idx % 2 === 0
-                          ? "1px solid #e0e0e0"
-                          : "none",
+                      borderLeft: idx !== 0 && idx % 2 === 0 ? "1px solid #e0e0e0" : "none",
                       pl: idx !== 0 && idx % 2 === 0 ? 3 : 0,
                     }}
                   >
-                    <Typography sx={{ ...fontStyles, fontWeight: 500, mb: 1 }}>
-                      {item.title}
-                    </Typography>
+                    <Typography sx={{ ...fontStyles, fontWeight: 500, mb: 1 }}>{item.title}</Typography>
                     <Typography
                       variant="h4"
                       sx={{
@@ -694,23 +522,15 @@ export default function AllMarketplace({
                       <Box
                         component="span"
                         sx={{
-                          color:
-                            item.changeType === "down" ? "#dc2626" : "#16a34a",
+                          color: item.changeType === "down" ? "#dc2626" : "#16a34a",
                           fontSize: "14px",
                           ml: 0.5,
                         }}
                       >
                         {item.changeType === "down" ? (
-                          <ArrowDownwardIcon
-                            sx={{ fontSize: "14px", color: "red" }}
-                          />
+                          <ArrowDownwardIcon sx={{ fontSize: "14px", color: "red" }} />
                         ) : (
-                          <ArrowUpwardIcon
-                            sx={{
-                              fontSize: "14px",
-                              color: "rgb(51, 204, 153)",
-                            }}
-                          />
+                          <ArrowUpwardIcon sx={{ fontSize: "14px", color: "rgb(51, 204, 153)" }} />
                         )}
                       </Box>
                     </Typography>
@@ -720,73 +540,17 @@ export default function AllMarketplace({
             )}
           </Grid>
 
-          {/* Right side - Orders Chart */}
-          {/* Right side - Orders Chart */}
+          {/* Right side - CardComponent instead of Orders Chart */}
           <Grid item xs={12} md={4}>
-            <Box
-              sx={{
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              {cardLoading ? (
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    flex: 1, // Allow it to grow and fill the space
-                    border: "1px solid #e0e0e0",
-                    borderRadius: "8px",
-                  }}
-                >
-                  <DottedCircleLoading />
-                </Box>
-              ) : totalOrders > 0 ? (
-                <CardComponent
-                  widgetData={widgetData}
-                  marketPlaceId={marketPlaceId}
-                  DateStartDate={DateStartDate}
-                  DateEndDate={DateEndDate}
-                  brand_id={brand_id}
-                  product_id={product_id}
-                  manufacturer_name={manufacturer_name}
-                  fulfillment_channel={fulfillment_channel}
-                  sx={{
-                    flex: 1, // This makes it fill available space
-                    boxShadow: "none",
-                    border: "1px solid #e0e0e0",
-                    borderRadius: "8px",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                />
-              ) : (
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    flex: 1, // Allow it to grow and fill the space
-                    border: "1px solid #e0e0e0",
-                    borderRadius: "8px",
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      textAlign: "center",
-                      fontSize: "14px",
-                      fontWeight: "bold",
-                      color: "#888",
-                    }}
-                  >
-                    No total orders found
-                  </Typography>
-                </Box>
-              )}
-            </Box>
+            <CardComponent
+              widgetData={widgetData}
+              marketPlaceId={marketPlaceId}
+              DateStartDate={DateStartDate}
+              DateEndDate={DateEndDate}
+              brand_id={brand_id}
+              product_id={product_id}
+              manufacturer_name={manufacturer_name}
+            />
           </Grid>
         </Grid>
 
@@ -867,46 +631,14 @@ export default function AllMarketplace({
                     >
                       Marketplace
                     </TableCell>
-                    <TableCell
-                      sx={{ ...fontStyles, fontSize: "12px", color: "#485E75" }}
-                    >
-                      Gross Revenue
-                    </TableCell>
-                    <TableCell
-                      sx={{ ...fontStyles, fontSize: "12px", color: "#485E75" }}
-                    >
-                      Expenses
-                    </TableCell>
-                    <TableCell
-                      sx={{ ...fontStyles, fontSize: "12px", color: "#485E75" }}
-                    >
-                      COGS
-                    </TableCell>
-                    <TableCell
-                      sx={{ ...fontStyles, fontSize: "12px", color: "#485E75" }}
-                    >
-                      Net Profit
-                    </TableCell>
-                    <TableCell
-                      sx={{ ...fontStyles, fontSize: "12px", color: "#485E75" }}
-                    >
-                      Margin
-                    </TableCell>
-                    <TableCell
-                      sx={{ ...fontStyles, fontSize: "12px", color: "#485E75" }}
-                    >
-                      ROI
-                    </TableCell>
-                    <TableCell
-                      sx={{ ...fontStyles, fontSize: "12px", color: "#485E75" }}
-                    >
-                      Refunds
-                    </TableCell>
-                    <TableCell
-                      sx={{ ...fontStyles, fontSize: "12px", color: "#485E75" }}
-                    >
-                      Units Sold
-                    </TableCell>
+                    <TableCell sx={{ ...fontStyles, fontSize: "12px", color: "#485E75" }}>Gross Revenue</TableCell>
+                    <TableCell sx={{ ...fontStyles, fontSize: "12px", color: "#485E75" }}>Expenses</TableCell>
+                    <TableCell sx={{ ...fontStyles, fontSize: "12px", color: "#485E75" }}>COGS</TableCell>
+                    <TableCell sx={{ ...fontStyles, fontSize: "12px", color: "#485E75" }}>Net Profit</TableCell>
+                    <TableCell sx={{ ...fontStyles, fontSize: "12px", color: "#485E75" }}>Margin</TableCell>
+                    <TableCell sx={{ ...fontStyles, fontSize: "12px", color: "#485E75" }}>ROI</TableCell>
+                    <TableCell sx={{ ...fontStyles, fontSize: "12px", color: "#485E75" }}>Refunds</TableCell>
+                    <TableCell sx={{ ...fontStyles, fontSize: "12px", color: "#485E75" }}>Units Sold</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -920,5 +652,5 @@ export default function AllMarketplace({
         </Collapse>
       </Paper>
     </Box>
-  );
+  )
 }
