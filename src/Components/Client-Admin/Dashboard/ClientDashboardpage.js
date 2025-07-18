@@ -735,12 +735,13 @@ if (startDate && endDate) {
       });
     }
   };
-  const handleClearFilter = () => {
+ const handleClearFilter = () => {
   // Reset all filter-related states
   setSelectedCategory({ id: "all", name: "All Channels" });
   setFilterFinal({ id: "all", name: "All Channels" });
   setFilter("all");
-  setResetCounter(prev=>prev+1)
+  setResetCounter(prev => prev + 1);
+
   // Clear brand, SKU, ASIN, manufacturer selections
   setSelectedBrand([]);
   setSelectedManufacturer([]);
@@ -750,23 +751,23 @@ if (startDate && endDate) {
   setMergedProductsFilter([]);
   setSelectedBrandFilter([]);
   setSelectedManufacturerFilter([]);
-  
+
   // Reset date filters
   setStartDate(null);
   setEndDate(null);
   setAppliedStartDate(null);
   setAppliedEndDate(null);
-  
+
   // Reset search inputs
   setInputValueBrand("");
   setInputValueManufactuer("");
   setInputValueSku("");
   setInputValueAsin("");
-  
+
   // Reset preset
   setSelectedPreset('Today');
   setBefePreset('Today');
-  
+
   // Force a re-fetch with default filters
   setIsFiltering(false);
 
@@ -779,6 +780,7 @@ if (startDate && endDate) {
     pauseOnHover: true,
   });
 }
+
   
   return (
     <Box sx={{ marginTop: '5%'}}>
