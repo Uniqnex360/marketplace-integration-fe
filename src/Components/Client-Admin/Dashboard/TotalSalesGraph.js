@@ -37,6 +37,7 @@ const TotalOrdersGraph = ({
   marketPlaceId,
   DateStartDate,
   DateEndDate,
+  brand_id
 }) => {
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState({});
@@ -99,6 +100,7 @@ const TotalOrdersGraph = ({
         `${process.env.REACT_APP_IP}salesAnalytics/`,
         {
           preset: widgetData,
+          brand_id: brand_id,
           marketplace_id: marketPlaceId.id,
           date_range: filter,
           start_date: DateStartDate,
