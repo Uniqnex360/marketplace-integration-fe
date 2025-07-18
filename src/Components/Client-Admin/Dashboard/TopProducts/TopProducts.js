@@ -27,9 +27,9 @@ import {
 } from "@mui/material";
 import { Info as InfoIcon } from "@mui/icons-material";
 import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
+import utc from 'dayjs/plugin/utc'
 import "dayjs/locale/en-in";
-import timezone from "dayjs/plugin/timezone";
+import timezone from 'dayjs/plugin/timezone'
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -40,8 +40,8 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import TooltipName from "./TooltipName";
 import DottedCircleLoading from "../../../Loading/DotLoading";
 // import './Helium.css';
-dayjs.extend(utc);
-dayjs.extend(timezone);
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 // Define a consistent set of colors
 const colors = ["#0d47a1", "#00bcd4", "#00897b", "#9c27b0", "#f44336"];
@@ -368,7 +368,7 @@ export default function TopProductsChart({
           fulfillment_channel: fulfillment_channel,
           start_date: DateStartDate,
           end_date: DateEndDate,
-          timeZone: "US/Pacific",
+          timeZone: "US/Pacific" 
         }
       );
       console.log("get_top_products", response);
@@ -459,20 +459,8 @@ export default function TopProductsChart({
 
       const sortedChartData = [...allTimestamps]
         .sort((a, b) => new Date(a) - new Date(b))
-        .map((timestamp) => {
-          const dataPoint = chartDataMap[timestamp];
-          const entries = Object.entries(dataPoint).filter(
-            ([key]) => key !== "date"
-          );
-          const topEntry = entries.reduce((acc, curr) => {
-            return curr[1] > (acc?.[1] || 0) ? curr : acc;
-          }, null);
-          return {
-            data: dataPoint.date,
-            topProductId: topEntry?.[0] || null,
-            value: topEntry?.[1] || null,
-          };
-        });
+        .map((timestamp) => chartDataMap[timestamp]);
+
       setBindGraph(sortedChartData);
     }
   }, [apiResponse, widgetData]);
@@ -862,8 +850,9 @@ export default function TopProductsChart({
                   <Line
                     key={product.id}
                     type="monotone"
-                    dataKey="value"
-                    stroke="#0d47a1"
+                    dataKey={product.id} // This is the ID that will appear in payload.dataKey
+                    stroke={product.color}
+                    strokeWidth={2}
                     connectNulls={true}
                     isAnimationActive={false}
                     dot={false}
