@@ -95,6 +95,7 @@ function ClientDashboardpage() {
   const brand_id = selectedBrand.map(item => item.id);
   const [mergedProducts, setMergedProducts] = useState([]);
     const [mergedProductsFilter, setMergedProductsFilter] = useState([]);
+  const [resetCounter,setResetCounter]=useState(0)
 
   let productuniqueById = [];
   const [isTyping, setIsTyping] = useState(false);
@@ -739,7 +740,7 @@ if (startDate && endDate) {
   setSelectedCategory({ id: "all", name: "All Channels" });
   setFilterFinal({ id: "all", name: "All Channels" });
   setFilter("all");
-  
+  setResetCounter(prev=>prev+1)
   // Clear brand, SKU, ASIN, manufacturer selections
   setSelectedBrand([]);
   setSelectedManufacturer([]);
@@ -1647,6 +1648,7 @@ options={[
       )}
       {tab === 2 && (
         <TotalOrdersGraph
+        key={setResetCounter}
           widgetData={befePreset}
           marketPlaceId={selectedCategory === 'all' ? selectedCategory : filterFinal}
           DateStartDate={appliedStartDate}

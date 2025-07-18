@@ -37,7 +37,10 @@ const TotalOrdersGraph = ({
   marketPlaceId,
   DateStartDate,
   DateEndDate,
-  brand_id
+  brand_id,
+  product_id,
+  manufacturer_name,
+  fulfillment_channel
 }) => {
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState({});
