@@ -500,7 +500,7 @@ export default function AllMarketplace({
         {/* Main Content Grid */}
         <Grid container spacing={3} mb={3}>
           {/* Left side - Metrics */}
-          <Grid item xs={12} md={8}>
+          <Grid item xs={12} md={4}>
             {!loading && (
               <Grid container spacing={3}>
                 {[
