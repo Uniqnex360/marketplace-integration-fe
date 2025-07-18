@@ -317,30 +317,32 @@ const CardComponent = ({
                     </Pie>
                     <Tooltip
                       formatter={(value, name, props) => {
+                        console.log("Tooltip Debug:", { value, name, props });
                         const { payload } = props;
                         let additionalInfo = "";
 
                         if (payload) {
+                          console.log("Payload:", payload);
                           // Find the corresponding marketplace data
                           const marketplaceData = orderData.find(
                             (item) => item.name === payload.name
                           );
+                          console.log(
+                            "Found marketplace data:",
+                            marketplaceData
+                          );
+
                           if (marketplaceData) {
                             const orderValue = marketplaceData.orderValue || 0;
+                            console.log("Order value:", orderValue);
                             additionalInfo = `
-                                                Order Count: ${
-                                                  marketplaceData.value
-                                                } |
-                                                Order Value: $${orderValue.toFixed(
-                                                  2
-                                                )}
-                                            `;
+          Order Count: ${marketplaceData.value} |
+          Order Value: $${orderValue.toFixed(2)}
+        `;
                           }
                         }
 
-                        return [
-                          additionalInfo, // Show additional info (Order Count & Value)
-                        ];
+                        return [additionalInfo];
                       }}
                       contentStyle={{ fontSize: "14px" }}
                     />

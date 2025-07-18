@@ -36,6 +36,7 @@ import dayjs from "dayjs";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import DottedCircleLoading from "../../../Loading/DotLoading";
+import CardComponent from "../CardComponet";
 
 const fontStyles = {
   fontSize: "16px",
@@ -768,58 +769,16 @@ export default function AllMarketplace({
               ) : totalOrders > 0 ? (
                 <Box sx={{ flexGrow: 1 }}>
                   <ResponsiveContainer width="100%" height={200}>
-                    <PieChart>
-                      <Pie
-                        data={orderData}
-                        dataKey="value"
-                        nameKey="name"
-                        innerRadius={30}
-                        outerRadius={60}
-                      >
-                        {orderData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        formatter={(value, name, props) => {
-                          const { payload } = props;
-                          let additionalInfo = "";
-
-                          if (payload) {
-                            const marketplaceData = orderData.find(
-                              (item) => item.name === payload.name
-                            );
-                            if (marketplaceData) {
-                              const orderValue =
-                                marketplaceData.orderValue || 0;
-                              additionalInfo = `
-              Order Count: ${marketplaceData.value} |
-              Order Value: $${orderValue.toFixed(2)}
-            `;
-                            }
-                          }
-
-                          return [additionalInfo];
-                        }}
-                        contentStyle={{
-                          fontSize: "14px",
-                          backgroundColor: "white",
-                          border: "1px solid #ccc",
-                          borderRadius: "4px",
-                          padding: "8px 12px",
-                          fontFamily: "'Nunito Sans', sans-serif",
-                        }}
-                      />
-                      <Legend
-                        formatter={(value, entry) => (
-                          <span
-                            style={{ fontSize: "12px", color: entry.color }}
-                          >
-                            {value} ({entry.payload.percentage}%)
-                          </span>
-                        )}
-                      />
-                    </PieChart>
+                    <CardComponent
+                      widgetData={widgetData}
+                      marketPlaceId={marketPlaceId}
+                      DateStartDate={DateStartDate}
+                      DateEndDate={DateEndDate}
+                      brand_id={brand_id}
+                      product_id={product_id}
+                      manufacturer_name={manufacturer_name}
+                      fulfillment_channel={fulfillment_channel}
+                    />
                   </ResponsiveContainer>
                 </Box>
               ) : (
