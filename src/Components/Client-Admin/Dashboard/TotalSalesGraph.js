@@ -135,8 +135,18 @@ const TotalOrdersGraph = ({
   };
 
   useEffect(() => {
-    fetchData();
-  }, [widgetData, marketPlaceId?.id, DateStartDate, DateEndDate, filter]);
+  fetchData();
+}, [
+  widgetData,
+  marketPlaceId?.id,
+  DateStartDate,
+  DateEndDate,
+  filter,
+  JSON.stringify(brand_id),
+  JSON.stringify(product_id),
+  JSON.stringify(manufacturer_name),
+  fulfillment_channel
+]);
 
   const getRandomColor = () => {
     const letters = "0123456789ABCDEF";
