@@ -732,29 +732,6 @@ export default function AllMarketplace({
                 flexDirection: "column",
               }}
             >
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  mb: 2,
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  sx={{ fontSize: "16px", fontWeight: 600, color: "#111827" }}
-                >
-                  🛒 Total Orders
-                </Typography>
-                <Typography
-                  variant="h5"
-                  fontWeight="bold"
-                  sx={{ fontSize: "24px", color: "#111827" }}
-                >
-                  {totalOrders}
-                </Typography>
-              </Box>
-
               {cardLoading ? (
                 <Box
                   sx={{
@@ -767,7 +744,14 @@ export default function AllMarketplace({
                   <DottedCircleLoading />
                 </Box>
               ) : totalOrders > 0 ? (
-                <Box sx={{ flexGrow: 1 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    mb: 2,
+                  }}
+                >
                   <ResponsiveContainer width="100%" height={200}>
                     <CardComponent
                       widgetData={widgetData}
