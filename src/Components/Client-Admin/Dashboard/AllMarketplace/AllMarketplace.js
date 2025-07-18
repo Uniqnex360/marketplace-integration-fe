@@ -722,67 +722,86 @@ export default function AllMarketplace({
 
           {/* Right side - Orders Chart */}
           <Grid item xs={12} md={4}>
-  <Box
-    sx={{
-      height: "100%",
-      display: "flex",
-      flexDirection: "column",
-    }}
-  >
-    {cardLoading ? (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: 330, // Match the CardComponent height
-        }}
-      >
-        <DottedCircleLoading />
-      </Box>
-    ) : totalOrders > 0 ? (
-      <CardComponent
-        widgetData={widgetData}
-        marketPlaceId={marketPlaceId}
-        DateStartDate={DateStartDate}
-        DateEndDate={DateEndDate}
-        brand_id={brand_id}
-        product_id={product_id}
-        manufacturer_name={manufacturer_name}
-        fulfillment_channel={fulfillment_channel}
-        sx={{
-          height: "100%",
-          boxShadow: "none",
-          border: "1px solid #e0e0e0", // Consistent with other elements
-          borderRadius: "8px",
-        }}
-      />
-    ) : (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: 330, // Match the CardComponent height
-          border: "1px solid #e0e0e0",
-          borderRadius: "8px",
-        }}
-      >
-        <Typography
-          variant="body2"
-          sx={{
-            textAlign: "center",
-            fontSize: "14px",
-            fontWeight: "bold",
-            color: "#888",
-          }}
-        >
-          No total orders found
-        </Typography>
-      </Box>
-    )}
-  </Box>
-</Grid>
+            <Box
+              sx={{
+                height: "100%",
+                minHeight: 330, // Set a minimum height to match other cards
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              {cardLoading ? (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "100%",
+                    minHeight: 330,
+                    border: "1px solid #e0e0e0",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <DottedCircleLoading />
+                </Box>
+              ) : totalOrders > 0 ? (
+                <CardComponent
+                  widgetData={widgetData}
+                  marketPlaceId={marketPlaceId}
+                  DateStartDate={DateStartDate}
+                  DateEndDate={DateEndDate}
+                  brand_id={brand_id}
+                  product_id={product_id}
+                  manufacturer_name={manufacturer_name}
+                  fulfillment_channel={fulfillment_channel}
+                  sx={{
+                    flex: 1, // This makes it fill available space
+                    height: "100%",
+                    minHeight: 330,
+                    boxShadow: "none",
+                    border: "1px solid #e0e0e0",
+                    borderRadius: "8px",
+                    "& .MuiCard-root": {
+                      // Target the inner Card component
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                    },
+                    "& .MuiCardContent-root": {
+                      // Target the CardContent
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                    },
+                  }}
+                />
+              ) : (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "100%",
+                    minHeight: 330,
+                    border: "1px solid #e0e0e0",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      textAlign: "center",
+                      fontSize: "14px",
+                      fontWeight: "bold",
+                      color: "#888",
+                    }}
+                  >
+                    No total orders found
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+          </Grid>
         </Grid>
 
         {/* Marketplace Breakdown Section */}
