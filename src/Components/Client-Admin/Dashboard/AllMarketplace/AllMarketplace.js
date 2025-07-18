@@ -721,7 +721,7 @@ export default function AllMarketplace({
           </Grid>
 
           {/* Right side - Orders Chart */}
-          <Grid item xs={12}>
+          <Grid item xs={12} md={4}>
             <Box
               sx={{
                 height: "100%",
@@ -757,14 +757,17 @@ export default function AllMarketplace({
                   sx={{
                     flex: 1, // This makes it fill available space
                     height: "100%",
+                    width:"100%",
                     minHeight: 330,
                     boxShadow: "none",
                     border: "1px solid #e0e0e0",
                     borderRadius: "8px",
+                    
                     "& .MuiCard-root": {
                       // Target the inner Card component
                       height: "100%",
                       display: "flex",
+                      width:"100%",
                       flexDirection: "column",
                     },
                     "& .MuiCardContent-root": {
