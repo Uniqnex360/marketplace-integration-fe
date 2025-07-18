@@ -624,8 +624,7 @@ export default function AllMarketplace({
           </Grid>
 
           {/* Right side - CardComponent instead of Orders Chart */}
-          <Grid item xs={12} md={4}>
-            <Box width="100%">
+          <Grid item xs={12} md={2}>
               <CardComponent
                 widgetData={widgetData}
                 marketPlaceId={marketPlaceId}
@@ -635,7 +634,6 @@ export default function AllMarketplace({
                 product_id={product_id}
                 manufacturer_name={manufacturer_name}
               />
-            </Box>
           </Grid>
         </Grid>
 
