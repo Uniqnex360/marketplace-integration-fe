@@ -84,7 +84,6 @@ const CustomTooltip = ({
 }) => {
   if (!active || !payload || payload.length === 0) return null;
 
-  // Modified approach: If no specific product is hovered, show data for all products
   const filteredPayload = hoveredProductId
     ? payload.filter((entry) => entry.dataKey === hoveredProductId)
     : payload;

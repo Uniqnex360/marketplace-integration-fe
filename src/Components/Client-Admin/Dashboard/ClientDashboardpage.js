@@ -19,20 +19,13 @@ import {
   Menu,
   Collapse,
   Autocomplete,
-  ListSubheader,
-  Checkbox,
-  Chip,
 } from "@mui/material";
 import axios from "axios";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import AppsIcon from "@mui/icons-material/Apps";
 import ImageIcon from "@mui/icons-material/Image";
-import DottedCircleLoading from "../../Loading/DotLoading";
-import CardCount from "./CardCount";
-import CardComponent from "../Dashboard/CardComponet";
 import ProductTableDashboard from "./ProductTableDashboard";
 import { ToggleButtonGroup, ToggleButton } from "@mui/material";
-import { AttachMoney } from "@mui/icons-material";
 import debounce from "lodash/debounce";
 
 // Correct import
@@ -76,7 +69,6 @@ import TestRevenue from "./Revenue/TestRevenue";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import { set } from "date-fns";
 import CompareChart from "./Revenue/DataChangeRevenue";
 
 function ClientDashboardpage() {
@@ -441,17 +433,6 @@ function ClientDashboardpage() {
     return () => clearTimeout(delayDebounceFn);
   }, [inputValueBrand, debouncedFetchBrandList]);
 
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      if (inputValueBrand.trim() === "") {
-        fetchBrandList("");
-      } else {
-        debouncedFetchBrandList(inputValueBrand);
-      }
-    }, 300);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [inputValueBrand, debouncedFetchBrandList]);
 
   const fetchBrandList = async (search = "") => {
     setIsLoading(true);
