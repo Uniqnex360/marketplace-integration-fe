@@ -289,6 +289,7 @@ function ClientDashboardpage() {
   // Fetch marketplace list (Categories)
   useEffect(() => {
     fetchMarketplaceList();
+    fetchBrandList("")
   }, []);
 
   const fetchMarketplaceList = async () => {
@@ -416,9 +417,7 @@ function ClientDashboardpage() {
     return () => clearTimeout(delayDebounceFn);
   }, [inputValueManufactuer]);
 
-  useEffect(() => {
-    fetchBrandList();
-  }, [brandLimit, selectedCategory?.id, userIds]);
+
 
   const debouncedFetchBrandList = useCallback(
     debounce((search) => {
@@ -442,6 +441,7 @@ function ClientDashboardpage() {
 
 
   const fetchBrandList = async (search = "") => {
+    if(isLoading)return
     setIsLoading(true);
     try {
       const response = await axios.get(
@@ -478,18 +478,6 @@ function ClientDashboardpage() {
     }
   }, [selectedCategory]);
 
-  // Debounced API call on search input
-  useEffect(() => {
-    if (inputValueBrand.trim()) {
-      setIsTyping(true);
-      const delay = setTimeout(() => {
-        fetchBrandList(inputValueBrand.trim());
-      }, 300);
-      return () => clearTimeout(delay);
-    } else {
-      setIsTyping(false);
-    }
-  }, [inputValueBrand]);
 
   const fetchSkuList = async (searchText = "") => {
     setIsLoading(true);
