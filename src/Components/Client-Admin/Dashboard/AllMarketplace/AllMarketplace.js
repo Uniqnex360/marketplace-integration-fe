@@ -298,8 +298,6 @@ export default function AllMarketplace({
     widgetData,
     marketPlaceId,
     brand_id,
-    JSON.stringify(product_id),
-    JSON.stringify(product_id),
     manufacturer_name,
     fulfillment_channel,
     DateStartDate,

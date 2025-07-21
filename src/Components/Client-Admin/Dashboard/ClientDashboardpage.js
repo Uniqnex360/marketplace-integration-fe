@@ -76,6 +76,7 @@ import TestRevenue from "./Revenue/TestRevenue";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import { set } from "date-fns";
 import CompareChart from "./Revenue/DataChangeRevenue";
 
 function ClientDashboardpage() {
@@ -289,7 +290,6 @@ function ClientDashboardpage() {
   // Fetch marketplace list (Categories)
   useEffect(() => {
     fetchMarketplaceList();
-    fetchBrandList("")
   }, []);
 
   const fetchMarketplaceList = async () => {
@@ -417,7 +417,9 @@ function ClientDashboardpage() {
     return () => clearTimeout(delayDebounceFn);
   }, [inputValueManufactuer]);
 
-
+  useEffect(() => {
+    fetchBrandList();
+  }, [brandLimit, selectedCategory?.id, userIds]);
 
   const debouncedFetchBrandList = useCallback(
     debounce((search) => {
@@ -439,9 +441,19 @@ function ClientDashboardpage() {
     return () => clearTimeout(delayDebounceFn);
   }, [inputValueBrand, debouncedFetchBrandList]);
 
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (inputValueBrand.trim() === "") {z
+        fetchBrandList("");
+      } else {
+        debouncedFetchBrandList(inputValueBrand);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [inputValueBrand, debouncedFetchBrandList]);
 
   const fetchBrandList = async (search = "") => {
-    if(isLoading)return
     setIsLoading(true);
     try {
       const response = await axios.get(
@@ -478,6 +490,18 @@ function ClientDashboardpage() {
     }
   }, [selectedCategory]);
 
+  // Debounced API call on search input
+  useEffect(() => {
+    if (inputValueBrand.trim()) {
+      setIsTyping(true);
+      const delay = setTimeout(() => {
+        fetchBrandList(inputValueBrand.trim());
+      }, 300);
+      return () => clearTimeout(delay);
+    } else {
+      setIsTyping(false);
+    }
+  }, [inputValueBrand]);
 
   const fetchSkuList = async (searchText = "") => {
     setIsLoading(true);
@@ -1920,7 +1944,7 @@ function ClientDashboardpage() {
                 selectedCategory === "all" ? selectedCategory : filterFinal
               }
               brand_id={selectedBrandFilter}
-               product_id={mergedProductsFilter}
+              product_id={mergedProductsFilter}
               manufacturer_name={selectedManufacturerFilter}
               fulfillment_channel={selectedFulfillment}
               DateStartDate={appliedStartDate}
