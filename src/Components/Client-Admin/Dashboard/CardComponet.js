@@ -102,7 +102,6 @@ const CardComponent = ({widgetData, marketPlaceId, DateStartDate, DateEndDate, b
             start_date: DateStartDate,
             end_date: DateEndDate,
             user_id: userIds,
-            
             brand_id: brand_id,
             product_id: product_id,
             manufacturer_name: manufacturer_name,
@@ -179,7 +178,8 @@ const CardComponent = ({widgetData, marketPlaceId, DateStartDate, DateEndDate, b
             lastFetchParamsRef.current = currentParams;
             fetchData();
         }
-    }, [widgetData,marketPlaceId?.id, DateStartDate, DateEndDate, filter ,brand_id, product_id,manufacturer_name]);
+    }, [widgetData,marketPlaceId?.id, DateStartDate, DateEndDate, filter ,brand_id, product_id,manufacturer_name,JSON.stringify(product_id),
+]);
 
     const getRandomColor = () => {
         const letters = "0123456789ABCDEF";
