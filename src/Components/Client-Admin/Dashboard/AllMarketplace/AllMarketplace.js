@@ -288,6 +288,7 @@ export default function AllMarketplace({
       manufacturer_name,
       fulfillment_channel,
       DateStartDate,
+      product_id, 
       DateEndDate,
     });
     if (lastParamsRef.current !== currentParams) {
