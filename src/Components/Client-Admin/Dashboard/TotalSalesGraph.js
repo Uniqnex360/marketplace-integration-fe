@@ -104,6 +104,7 @@ const TotalOrdersGraph = ({
         {
           preset: widgetData,
           brand_id: brand_id,
+          product_id: product_id,
           marketplace_id: marketPlaceId.id,
           date_range: filter,
           start_date: DateStartDate,
