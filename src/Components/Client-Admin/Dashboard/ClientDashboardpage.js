@@ -443,7 +443,7 @@ function ClientDashboardpage() {
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      if (inputValueBrand.trim() === "") {z
+      if (inputValueBrand.trim() === "") {
         fetchBrandList("");
       } else {
         debouncedFetchBrandList(inputValueBrand);
