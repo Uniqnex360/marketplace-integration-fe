@@ -289,7 +289,7 @@ const TestCard = ({marketPlaceId, brand_id, product_id, manufacturer_name, fulfi
     fetchMetrics(selectedDate);
         }
        
-  }, [selectedDate, marketPlaceId, brand_id, product_id, manufacturer_name, fulfillment_channel, ]);
+  }, [selectedDate, marketPlaceId, brand_id, JSON.stringify(product_id), manufacturer_name, fulfillment_channel, ]);
 
   // Get current Pacific time
   const today = dayjs().tz(TIMEZONE);
