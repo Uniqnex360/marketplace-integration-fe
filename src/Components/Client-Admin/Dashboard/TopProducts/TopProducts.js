@@ -498,20 +498,7 @@ export default function TopProductsChart({
     );
   }
 
-  if(!loading && (!productList ||productList.length===0))
-  {
-    return (
-      <Box p={2} display='flex' flexDirection="column" alignItems="center" justifyContent="center" height="400px">
-        <Typography variant="h6" color="text.secondary" gutterBottom>
-          No products available
-        </Typography>
-        <Typography variant="h6" color="text.secondary" gutterBottom>
-          Try adjusting your filters or date range to see the products in this view
-        </Typography>
 
-      </Box>
-    )
-  }
   return (
     <Box p={2}>
       <Typography sx={{ fontSize: "20px" }} fontWeight="bold" mb={1}>

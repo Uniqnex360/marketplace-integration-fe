@@ -95,6 +95,7 @@ function ClientDashboardpage() {
     id: "all",
     name: "All Channels",
   });
+  const MemoizedTopProducts=React.memo(TopProducts)
   const [isFiltering, setIsFiltering] = useState(false); // State to check if filter is applied
   const userData = localStorage.getItem("user");
   const [tab, setTab] = React.useState(0);
@@ -1832,7 +1833,7 @@ function ClientDashboardpage() {
       )
 )} */}
                 {tab === 1 && (
-                  <TopProducts
+                  <MemoizedTopProducts
                     startDate={startDateHelium}
                     endDate={endDateHelium}
                     widgetData={befePreset}
@@ -1840,7 +1841,7 @@ function ClientDashboardpage() {
                       selectedCategory == "all" ? selectedCategory : filterFinal
                     }
                     brand_id={selectedBrandFilter}
-                    product_id={mergedProductsFilter?.id}
+                    product_id={mergedProductsFilter}
                     manufacturer_name={selectedManufacturerFilter}
                     fulfillment_channel={selectedFulfillment}
                     DateStartDate={appliedStartDate}
