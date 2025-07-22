@@ -1658,6 +1658,7 @@ function ClientDashboardpage() {
             marketPlaceId={
               selectedCategory == "all" ? selectedCategory : filterFinal
             }
+            widgetData={befePreset}
             brand_id={selectedBrandFilter}
             product_id={mergedProductsFilter}
             manufacturer_name={selectedManufacturerFilter}
