@@ -1960,7 +1960,7 @@ function ClientDashboardpage() {
               brand_id={selectedBrandFilter}
               fulfillment_channel={selectedFulfillment}
               manufacturer_name={selectedManufacturerFilter}
-              product_id={mergedProductsFilter?.id}
+              product_id={mergedProductsFilter}
               DateStartDate={appliedStartDate}
               DateEndDate={appliedEndDate}
             />
