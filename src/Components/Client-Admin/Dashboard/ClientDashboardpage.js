@@ -95,7 +95,6 @@ function ClientDashboardpage() {
     id: "all",
     name: "All Channels",
   });
-  const MemoizedTopProducts=React.memo(TopProducts)
   const [isFiltering, setIsFiltering] = useState(false); // State to check if filter is applied
   const userData = localStorage.getItem("user");
   const [tab, setTab] = React.useState(0);
@@ -1833,7 +1832,7 @@ function ClientDashboardpage() {
       )
 )} */}
                 {tab === 1 && (
-                  <MemoizedTopProducts
+                  <TopProducts
                     startDate={startDateHelium}
                     endDate={endDateHelium}
                     widgetData={befePreset}
