@@ -1840,6 +1840,7 @@ function ClientDashboardpage() {
                       selectedCategory == "all" ? selectedCategory : filterFinal
                     }
                     brand_id={selectedBrandFilter}
+                    product_id={mergedProductsFilter?.id}
                     manufacturer_name={selectedManufacturerFilter}
                     fulfillment_channel={selectedFulfillment}
                     DateStartDate={appliedStartDate}
