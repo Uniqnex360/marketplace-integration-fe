@@ -324,6 +324,7 @@ const TestCard = ({
       product_id,
       manufacturer_name,
       fulfillment_channel,
+      widgetData
     });
 
     if (lastParamsRef.current !== currentParams) {
