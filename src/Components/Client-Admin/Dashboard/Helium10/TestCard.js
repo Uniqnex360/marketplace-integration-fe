@@ -48,16 +48,16 @@ const MetricItem = ({
 }) => {
   const absValue = Math.abs(value ?? 0);
   const absChange = Math.abs(change ?? 0);
-   const [selectedStartDate, setSelectedStartDate] = useState(() => {
-      const saved = localStorage.getItem("selectedStartDate");
-      return saved ? new Date(saved) : null;
-    });
-  
-    const [selectedEndDate, setSelectedEndDate] = useState(() => {
-      const saved = localStorage.getItem("selectedEndDate");
-      return saved ? new Date(saved) : null;
-    });
-  
+  const [selectedStartDate, setSelectedStartDate] = useState(() => {
+    const saved = localStorage.getItem("selectedStartDate");
+    return saved ? new Date(saved) : null;
+  });
+
+  const [selectedEndDate, setSelectedEndDate] = useState(() => {
+    const saved = localStorage.getItem("selectedEndDate");
+    return saved ? new Date(saved) : null;
+  });
+
   const displayValue = `${(value ?? 0) < 0 ? "-" : ""}${
     currencySymbol ?? ""
   }${absValue}${percentSymbol ?? ""}`;
@@ -130,7 +130,7 @@ const TestCard = ({
   const theme = useTheme();
   // Initialize with current Pacific time
   const [selectedDate, setSelectedDate] = useState(dayjs().tz(TIMEZONE));
-  const [displayDate,setDisplayDate]=useState(dayjs().tz(TIMEZONE))
+  const [displayDate, setDisplayDate] = useState(dayjs().tz(TIMEZONE));
   const [metrics, setMetrics] = useState({});
   const [previous, setPrevious] = useState({});
   const [difference, setDifference] = useState({});
@@ -192,48 +192,53 @@ const TestCard = ({
       setSvgOffset({ left: rect.left, top: rect.top });
     }
   }, []);
-  useEffect(()=>{
-    fetchMetrics(selectedDate)
-
-  },[selectedDate,widgetData])
+  useEffect(() => {
+    fetchMetrics(selectedDate);
+  }, [selectedDate, widgetData]);
 
   const fetchMetrics = async (date) => {
     setLoading(true);
     try {
+      const payload = {
+        target_date: date.format("DD/MM/YYYY"),
+        user_id: userId,
+        preset: widgetData,
+        marketplace_id: marketPlaceId.id,
+        brand_id: brand_id,
+        product_id: product_id,
+        manufacturer_name: manufacturer_name,
+        fulfillment_channel: fulfillment_channel,
+        timezone: TIMEZONE,
+      };
+
+      // Conditionally add optional fields
+      if (DateStartDate && dayjs(DateStartDate).isValid()) {
+        payload.start_date = dayjs(DateStartDate).format("DD/MM/YYYY");
+      }
+
+      if (DateEndDate && dayjs(DateEndDate).isValid()) {
+        payload.end_date = dayjs(DateEndDate).format("DD/MM/YYYY");
+      }
+
       const response = await axios.post(
         `${process.env.REACT_APP_IP}get_metrics_by_date_range/`,
-        {
-          target_date: date.format("DD/MM/YYYY"),
-          user_id: userId,
-          preset: widgetData,
-          marketplace_id: marketPlaceId.id,
-          brand_id: brand_id,
-          start_date: dayjs(DateStartDate).format("DD/MM/YYYY"),
-          end_date: dayjs(DateEndDate).format("DD/MM/YYYY"),
-          product_id: product_id,
-          manufacturer_name: manufacturer_name,
-          fulfillment_channel: fulfillment_channel,
-          timezone: TIMEZONE, // Always use Pacific timezone
-        }
+        payload
       );
 
       const data = response.data.data;
 
-      // Set metrics, previous, and difference as usual
       setMetrics(data.targeted || {});
       setPrevious(data.previous || {});
       setDifference(data.difference || {});
 
-      // ✅ Only show metrics that are returned in "targeted"
       const selectedMetricKeys = Object.keys(data.targeted || {});
-      setVisibleMetrics(selectedMetricKeys); // ← this ensures only those metrics are shown
+      setVisibleMetrics(selectedMetricKeys);
 
-      // Transform graph data for chart
       const transformedGraphData = Object.entries(data.graph_data || {}).map(
         ([rawDate, values]) => {
           const capitalizedDate =
-            rawDate.charAt(0).toUpperCase() + rawDate.slice(1); // "april 25, 2025" -> "April 25, 2025"
-          const parsedDate = dayjs(capitalizedDate).tz(TIMEZONE); // Parse in Pacific time
+            rawDate.charAt(0).toUpperCase() + rawDate.slice(1);
+          const parsedDate = dayjs(capitalizedDate).tz(TIMEZONE);
           const formattedDate = parsedDate.format("MMM DD");
           return {
             date: formattedDate,
@@ -250,68 +255,69 @@ const TestCard = ({
       setLoading(false);
     }
   };
-   useEffect(() => {
+
+  useEffect(() => {
     const today = dayjs().tz(TIMEZONE);
     switch (widgetData) {
       case "Today":
-        setDisplayDate (today);
-        setSelectedDate (today);
+        setDisplayDate(today);
+        setSelectedDate(today);
         break;
       case "Yesterday":
-        setDisplayDate (today.subtract(1, "day"))
-        setSelectedDate (today.subtract(1, "day"))
+        setDisplayDate(today.subtract(1, "day"));
+        setSelectedDate(today.subtract(1, "day"));
         break;
       case "This Week":
-        setDisplayDate (today.startOf("week"))
-        setSelectedDate (today.endOf("week"))
+        setDisplayDate(today.startOf("week"));
+        setSelectedDate(today.endOf("week"));
         break;
       case "Last Week":
-        setDisplayDate  (today.subtract(1, "week").startOf("week"))
-        setSelectedDate (today.subtract(1, "week").endOf("week"))
+        setDisplayDate(today.subtract(1, "week").startOf("week"));
+        setSelectedDate(today.subtract(1, "week").endOf("week"));
         break;
       case "Last 7 days":
-        setDisplayDate (today.subtract(6, "day"))
-        setSelectedDate (today)
+        setDisplayDate(today.subtract(6, "day"));
+        setSelectedDate(today);
         break;
       case "Last 14 days":
-        setDisplayDate (today.subtract(13, "day"))
-        setSelectedDate  (today)
+        setDisplayDate(today.subtract(13, "day"));
+        setSelectedDate(today);
         break;
       case "Last 30 days":
-        setDisplayDate  (today.subtract(29, "day"))
-        setSelectedDate  (today)
+        setDisplayDate(today.subtract(29, "day"));
+        setSelectedDate(today);
         break;
       case "Last 60 days":
-        setDisplayDate (today.subtract(59, "day"))
-        setSelectedDate (today)
+        setDisplayDate(today.subtract(59, "day"));
+        setSelectedDate(today);
         break;
       case "Last 90 days":
-        setDisplayDate (today.subtract(89, "day"))
-        setSelectedDate (today)
+        setDisplayDate(today.subtract(89, "day"));
+        setSelectedDate(today);
         break;
       case "This Month":
-        setDisplayDate (today.startOf("month"))
-        setSelectedDate  (today.endOf("month"))
+        setDisplayDate(today.startOf("month"));
+        setSelectedDate(today.endOf("month"));
         break;
       case "Last Month":
-        setDisplayDate (today.subtract(1, "month").startOf("month"))
-        setSelectedDate (today.subtract(1, "month").endOf("month"))
+        setDisplayDate(today.subtract(1, "month").startOf("month"));
+        setSelectedDate(today.subtract(1, "month").endOf("month"));
         break;
       case "This Quarter":
-        setDisplayDate (today.startOf("quarter"))
-        setSelectedDate (today.endOf("quarter"))
+        setDisplayDate(today.startOf("quarter"));
+        setSelectedDate(today.endOf("quarter"));
         break;
       case "Last Quarter":
-        setDisplayDate (today.subtract(1, "quarter").startOf("quarter"))
-        setSelectedDate (today.subtract(1, "quarter").endOf("quarter"))
+        setDisplayDate(today.subtract(1, "quarter").startOf("quarter"));
+        setSelectedDate(today.subtract(1, "quarter").endOf("quarter"));
         break;
       case "This Year":
-        setDisplayDate (today.startOf("year"))
-        setSelectedDate  (today.endOf("year"))
+        setDisplayDate(today.startOf("year"));
+        setSelectedDate(today.endOf("year"));
         break;
       case "Last Year":
-        setDisplayDate (today.subtract(1, "year").startOf("year"))
-        setSelectedDate (today.subtract(1, "year").endOf("year"))
+        setDisplayDate(today.subtract(1, "year").startOf("year"));
+        setSelectedDate(today.subtract(1, "year").endOf("year"));
         break;
       // Add more cases for other presets as needed
       default:
