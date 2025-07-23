@@ -990,7 +990,7 @@ const MetricCard = ({
           fulfillment_channel: fulfillment_channel,
           start_date: DateStartDate,
           end_date: DateEndDate,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          timezone: "US/Pacific",
         }
       );
 
@@ -1010,10 +1010,8 @@ const MetricCard = ({
 
     // Helper function to safely format dates
     const safeFormatDate = (dateString, formatter) => {
-      if(!dateString)return ""
       try {
-        const dateOnlyString=dateString.slice(0,10)
-        return formatter.format(new Date(dateOnlyString))
+        return dateString ? formatter.format(new Date(dateString)) : "";
       } catch (e) {
         console.warn("Date formatting error:", e);
         return "";
