@@ -990,7 +990,7 @@ const MetricCard = ({
           fulfillment_channel: fulfillment_channel,
           start_date: DateStartDate,
           end_date: DateEndDate,
-          timezone: "US/Pacific",
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         }
       );
 
@@ -1005,125 +1005,157 @@ const MetricCard = ({
     }
   };
 
-  const transformData = (data) => {
-    if (!data) return [];
+  const transformData = (data, originalStartDate, originalEndDate) => {
+  if (!data) return [];
 
-    // Helper function to safely format dates
-    const safeFormatDate = (dateString, formatter) => {
-      try {
-        return dateString ? formatter.format(new Date(dateString)) : "";
-      } catch (e) {
-        console.warn("Date formatting error:", e);
-        return "";
-      }
-    };
-
-    // Helper function to safely access nested properties
-    const safeGet = (obj, path, defaultValue = 0) => {
-      try {
-        return (
-          path.split(".").reduce((acc, part) => acc && acc[part], obj) ??
-          defaultValue
-        );
-      } catch (e) {
-        return defaultValue;
-      }
-    };
-
-    const periods = ["today", "yesterday", "last7Days", "custom"];
-    return periods.reduce((acc, period) => {
-      if (!data[period]) return acc;
-
-      const periodData = data[period];
-
-      try {
-        const cardData = {
-          title:
-            period === "last7Days"
-              ? "Last 7 Days"
-              : period.charAt(0).toUpperCase() + period.slice(1),
-
-          dateRange: periodData.dateRanges?.current
-            ? `${safeFormatDate(
-                periodData.dateRanges.current.from,
-                formatterLong
-              )} - ${safeFormatDate(
-                periodData.dateRanges.current.to,
-                formatterLong
-              )}`
-            : "",
-
-          dateRangePrev: periodData.dateRanges?.previous
-            ? `${safeFormatDate(
-                periodData.dateRanges.previous.from,
-                formatterLong
-              )} - ${safeFormatDate(
-                periodData.dateRanges.previous.to,
-                formatterLong
-              )}`
-            : "",
-
-          dateRangeFormat: periodData.dateRanges?.current
-            ? `${safeFormatDate(
-                periodData.dateRanges.current.from,
-                formatterShort
-              )} - ${safeFormatDate(
-                periodData.dateRanges.current.to,
-                formatterShort
-              )}`
-            : "",
-
-          dateRangePrevFormat: periodData.dateRanges?.previous
-            ? `${safeFormatDate(
-                periodData.dateRanges.previous.from,
-                formatterShort
-              )} - ${safeFormatDate(
-                periodData.dateRanges.previous.to,
-                formatterShort
-              )}`
-            : "",
-
-          grossRevenue: `$${safeGet(
-            periodData,
-            "summary.grossRevenue.current",
-            0
-          ).toFixed(2)}`,
-          expenses: `-$${safeGet(
-            periodData,
-            "summary.expenses.current",
-            0
-          ).toFixed(2)}`,
-          netProfit: `$${safeGet(
-            periodData,
-            "summary.netProfit.current",
-            0
-          ).toFixed(2)}`,
-          netPrevious: `$${safeGet(
-            periodData,
-            "summary.netProfit.previous",
-            0
-          ).toFixed(2)}`,
-          margin: `${safeGet(periodData, "summary.margin.current", 0).toFixed(
-            2
-          )}%`,
-          orders: safeGet(periodData, "summary.orders.current", 0),
-          unitsSold: safeGet(periodData, "summary.unitsSold.current", 0),
-          refunds: safeGet(periodData, "summary.refunds.current", 0),
-          previous: safeGet(periodData, "summary.grossRevenue.previous", 0),
-          revenueChange: `${
-            safeGet(periodData, "summary.grossRevenue.delta", 0) >= 0 ? "+" : ""
-          }$${safeGet(periodData, "summary.grossRevenue.delta", 0).toFixed(2)}`,
-          netProfitCalculation: periodData.netProfitCalculation || {},
-        };
-
-        acc.push(cardData);
-      } catch (error) {
-        console.error(`Error processing ${period} data:`, error);
-      }
-
-      return acc;
-    }, []);
+  // Helper function to safely format dates
+  const safeFormatDate = (dateString, formatter) => {
+    try {
+      return dateString ? formatter.format(new Date(dateString)) : "";
+    } catch (e) {
+      console.warn("Date formatting error:", e);
+      return "";
+    }
   };
+
+  // Helper function to safely access nested properties
+  const safeGet = (obj, path, defaultValue = 0) => {
+    try {
+      return (
+        path.split(".").reduce((acc, part) => acc && acc[part], obj) ??
+        defaultValue
+      );
+    } catch (e) {
+      return defaultValue;
+    }
+  };
+
+  const periods = ["today", "yesterday", "last7Days", "custom"];
+  return periods.reduce((acc, period) => {
+    if (!data[period]) return acc;
+
+    const periodData = data[period];
+
+    try {
+      let dateRange, dateRangeFormat;
+      
+      // Special handling for custom period - use original dates if available
+      if (period === "custom" && originalStartDate && originalEndDate) {
+        const startDate = new Date(originalStartDate);
+        const endDate = new Date(originalEndDate);
+        
+        dateRange = `${startDate.toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric", 
+          year: "numeric"
+        })} - ${endDate.toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric"
+        })}`;
+        
+        dateRangeFormat = `${startDate.toLocaleDateString("en-US", {
+          year: "2-digit",
+          month: "2-digit",
+          day: "2-digit"
+        })} - ${endDate.toLocaleDateString("en-US", {
+          year: "2-digit", 
+          month: "2-digit",
+          day: "2-digit"
+        })}`;
+      } else {
+        // Use backend dates for other periods
+        dateRange = periodData.dateRanges?.current
+          ? `${safeFormatDate(
+              periodData.dateRanges.current.from,
+              formatterLong
+            )} - ${safeFormatDate(
+              periodData.dateRanges.current.to,
+              formatterLong
+            )}`
+          : "";
+
+        dateRangeFormat = periodData.dateRanges?.current
+          ? `${safeFormatDate(
+              periodData.dateRanges.current.from,
+              formatterShort
+            )} - ${safeFormatDate(
+              periodData.dateRanges.current.to,
+              formatterShort
+            )}`
+          : "";
+      }
+
+      const cardData = {
+        title:
+          period === "last7Days"
+            ? "Last 7 Days"
+            : period.charAt(0).toUpperCase() + period.slice(1),
+
+        dateRange,
+        dateRangeFormat,
+
+        dateRangePrev: periodData.dateRanges?.previous
+          ? `${safeFormatDate(
+              periodData.dateRanges.previous.from,
+              formatterLong
+            )} - ${safeFormatDate(
+              periodData.dateRanges.previous.to,
+              formatterLong
+            )}`
+          : "",
+
+        dateRangePrevFormat: periodData.dateRanges?.previous
+          ? `${safeFormatDate(
+              periodData.dateRanges.previous.from,
+              formatterShort
+            )} - ${safeFormatDate(
+              periodData.dateRanges.previous.to,
+              formatterShort
+            )}`
+          : "",
+
+        grossRevenue: `$${safeGet(
+          periodData,
+          "summary.grossRevenue.current",
+          0
+        ).toFixed(2)}`,
+        expenses: `-$${safeGet(
+          periodData,
+          "summary.expenses.current",
+          0
+        ).toFixed(2)}`,
+        netProfit: `$${safeGet(
+          periodData,
+          "summary.netProfit.current",
+          0
+        ).toFixed(2)}`,
+        netPrevious: `$${safeGet(
+          periodData,
+          "summary.netProfit.previous",
+          0
+        ).toFixed(2)}`,
+        margin: `${safeGet(periodData, "summary.margin.current", 0).toFixed(
+          2
+        )}%`,
+        orders: safeGet(periodData, "summary.orders.current", 0),
+        unitsSold: safeGet(periodData, "summary.unitsSold.current", 0),
+        refunds: safeGet(periodData, "summary.refunds.current", 0),
+        previous: safeGet(periodData, "summary.grossRevenue.previous", 0),
+        revenueChange: `${
+          safeGet(periodData, "summary.grossRevenue.delta", 0) >= 0 ? "+" : ""
+        }$${safeGet(periodData, "summary.grossRevenue.delta", 0).toFixed(2)}`,
+        netProfitCalculation: periodData.netProfitCalculation || {},
+      };
+
+      acc.push(cardData);
+    } catch (error) {
+      console.error(`Error processing ${period} data:`, error);
+    }
+
+    return acc;
+  }, []);
+};
   const processedData = metricsData ? transformData(metricsData) : [];
 
   return (
