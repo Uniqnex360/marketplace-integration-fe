@@ -242,18 +242,15 @@ export default function AllMarketplace({
 
   const fromDate = marketplaceData?.from_date;
   const toDate = marketplaceData?.to_date;
-  const getDateString = (isoString) => {
-    // isoString: "2025-07-15T00:00:00-07:00"
-    // Returns: "Jul 15, 2025"
-    return dayjs(isoString.substring(0, 10)).format("MMM DD, YYYY");
-  };
-  const formattedCurrentDate = fromDate
-    ? dayjs(fromDate).format("MMM DD, YYYY")
-    : "";
-  const formattedDateRange =
-    fromDate && toDate
-      ? `${getDateString(fromDate)} - ${getDateString(toDate)}`
+   const formattedCurrentDate = fromDate
+      ? dayjs.utc(fromDate).format("MMM DD, YYYY")
       : "";
+  const formattedDateRange =
+      fromDate && toDate
+        ? `${dayjs.utc(fromDate).format("MMM DD, YYYY")} - ${dayjs
+            .utc(toDate)
+            .format("MMM DD, YYYY")}`
+        : "";
 
   const fetchAllMarketplace = async () => {
     setLoading(true);
@@ -292,7 +289,7 @@ export default function AllMarketplace({
       manufacturer_name,
       fulfillment_channel,
       DateStartDate,
-      product_id,
+      product_id, 
       DateEndDate,
     });
     if (lastParamsRef.current !== currentParams) {
@@ -352,7 +349,7 @@ export default function AllMarketplace({
             </Typography>
             <Typography sx={{ ...fontStyles, fontSize: "14px", mb: 0.5 }}>
               {widgetData === "Today" || widgetData === "Yesterday"
-                ? getDateString(fromDate)
+                ? formattedCurrentDate
                 : formattedDateRange}
             </Typography>
           </Box>
@@ -629,15 +626,15 @@ export default function AllMarketplace({
 
           {/* Right side - CardComponent instead of Orders Chart */}
           <Grid item xs={12} md={8}>
-            <CardComponent
-              widgetData={widgetData}
-              marketPlaceId={marketPlaceId}
-              DateStartDate={DateStartDate}
-              DateEndDate={DateEndDate}
-              brand_id={brand_id}
-              product_id={product_id}
-              manufacturer_name={manufacturer_name}
-            />
+              <CardComponent
+                widgetData={widgetData}
+                marketPlaceId={marketPlaceId}
+                DateStartDate={DateStartDate}
+                DateEndDate={DateEndDate}
+                brand_id={brand_id}
+                product_id={product_id}
+                manufacturer_name={manufacturer_name}
+              />
           </Grid>
         </Grid>
 
