@@ -229,10 +229,8 @@ const TestCard = ({
 
   const getDisplayDateText = (widgetData, DateStartDate, DateEndDate, displayDate, selectedDate) => {
     const today = dayjs().tz(TIMEZONE);
-    if (DateStartDate && DateEndDate) {
-      const start = dayjs(DateStartDate).tz(TIMEZONE);
-      const end = dayjs(DateEndDate).tz(TIMEZONE);
-      return `${start.format("MMM DD")} - ${end.format("MMM DD")}`;
+     if (DateStartDate && DateEndDate) {
+    return `Custom Date Range: ${dayjs(DateStartDate).format("MMM DD")} - ${dayjs(DateEndDate).add(1, 'day').format("MMM DD")}`;
     }
 
     switch (widgetData) {
