@@ -1,18 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { Card, Grid, CardContent, Typography, FormControl, InputLabel, Select, MenuItem, IconButton, Box } from "@mui/material";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import CustomBarChart from "./CustomBarChart";
+import { Card, Grid, CardContent } from "@mui/material";
+import { Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import DottedCircleLoading from "../../Loading/DotLoading";
 import { format } from 'date-fns';
-import DonutChart from "./DonutChart";
 
 const CardComponent = ({widgetData, marketPlaceId, DateStartDate, DateEndDate, brand_id, product_id,manufacturer_name }) => {
     const [loading, setLoading] = useState(true);
-    const [order, setOrder] = useState({});
-    const [market, setMarket] = useState("");
-    const [shipping, setShipping] = useState({});
-    const [fulfillment, setFulfillment] = useState({});
     const [categories, setCategories] = useState([]);
     const [orderData, setOrderData] = useState([]);
     const [totalOrders, setTotalOrders] = useState(0);
@@ -29,24 +23,8 @@ const CardComponent = ({widgetData, marketPlaceId, DateStartDate, DateEndDate, b
       const data = JSON.parse(userData);
       userIds = data.id;
     }
-    const handleFilterChange = (event) => {
-        setFilter(event.target.value);
-    };
+    
 
-    const handleScroll = (direction) => {
-        if (chartContainerRef.current) {
-            const containerWidth = chartContainerRef.current.offsetWidth;
-            const scrollAmount = containerWidth * 0.8; // Scroll 80% of the container width
-
-            if (direction === 'left') {
-                chartContainerRef.current.scrollLeft -= scrollAmount;
-                setChartOffset(prevOffset => Math.max(0, prevOffset - scrollAmount));
-            } else {
-                chartContainerRef.current.scrollLeft += scrollAmount;
-                setChartOffset(prevOffset => prevOffset + scrollAmount);
-            }
-        }
-    };
 
     const fetchData = async () => {
         console.log('verA',marketPlaceId)

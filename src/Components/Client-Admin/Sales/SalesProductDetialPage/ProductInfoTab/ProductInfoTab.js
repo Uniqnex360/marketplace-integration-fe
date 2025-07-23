@@ -10,7 +10,7 @@ import {
   Tooltip,
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
 import CostOfGoodsSold from '../ProductInfoTab/COGSTab';

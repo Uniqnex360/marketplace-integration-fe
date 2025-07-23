@@ -132,22 +132,12 @@ const InventoryGraph = ({ productId, widgetData, startDate, endDate }) => {
   const [loading, setLoading] = useState(false);
   const lastParamsRef = useRef('');
   const [inventoryDate, setInventoryDate] = useState(''); // Initialize with empty string
-
-  // The summary and graph state variables are not used in this component's logic
-  // but are present in the provided CSV download logic, so I'll keep them as null initially.
-  const [summary, setSummary] = useState(null);
-  const [graph, setGraph] = useState(null); // This seems to be the same as 'data'
-  const [summaryOther, setSummaryOther] = useState(null);
-  const [summaryDate, setSummaryDate] = useState(null); // This seems to be the same as 'inventoryDate'
   const [anchorEl, setAnchorEl] = useState(null);
 
   const openDownloadMenu = Boolean(anchorEl);
   const downloadButtonRef = useRef(null);
   const chartContainerRef = useRef(null); // Ref for the chart container
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
 
   const handleRemoveWidget = () => {
     console.log('Remove widget clicked');

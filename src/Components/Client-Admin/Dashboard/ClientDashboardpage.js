@@ -4,7 +4,6 @@ import {
   Grid,
   Typography,
   Button,
-  Paper,
   Tabs,
   Tab,
   Tooltip,
@@ -19,24 +18,14 @@ import {
   Menu,
   Collapse,
   Autocomplete,
-  ListSubheader,
-  Checkbox,
-  Chip,
 } from "@mui/material";
 import axios from "axios";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import AppsIcon from "@mui/icons-material/Apps";
 import ImageIcon from "@mui/icons-material/Image";
-import DottedCircleLoading from "../../Loading/DotLoading";
-import CardCount from "./CardCount";
-import CardComponent from "../Dashboard/CardComponet";
-import ProductTableDashboard from "./ProductTableDashboard";
-import { ToggleButtonGroup, ToggleButton } from "@mui/material";
-import { AttachMoney } from "@mui/icons-material";
 import debounce from "lodash/debounce";
 
 // Correct import
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
@@ -47,24 +36,15 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 
 import { Refresh } from "@mui/icons-material";
-import RevenueGraph from "./RevenueGraph";
 import TotalOrdersGraph from "./TotalSalesGraph";
 import LastOrders from "./LastOrder/LastOrders";
 import TopProducts from "../Dashboard/TopProducts/TopProducts";
-import HeliumCard from "./Helium10/HeliumCard";
 import InsightCategory from "./Helium10/InsightCategory";
 import PeriodComparission from "./PeriodCompare/PeriodComparission";
 import BarChartOutlined from "@mui/icons-material/BarChartOutlined";
 import EmojiEventsOutlined from "@mui/icons-material/EmojiEventsOutlined";
 import AttachMoneyOutlined from "@mui/icons-material/AttachMoneyOutlined";
 import ShoppingCartOutlined from "@mui/icons-material/ShoppingCartOutlined";
-
-import {
-  BarChart,
-  EmojiEvents,
-  RocketLaunch,
-  ShoppingCart,
-} from "@mui/icons-material";
 import TestCard from "./Helium10/TestCard";
 import MetricCard from "./CardComparission/MetricCard";
 import SalesIncreasing from "../Sales/SalesIncreasing";
@@ -72,11 +52,9 @@ import SalesDecreasing from "../Sales/SalesDecreasing";
 import AllMarketplace from "./AllMarketplace/AllMarketplace";
 import ProfitAndLoss from "./ProfitAndLoss/ProfitAndLoss";
 import MyProductList from "./MyProducts/ProductsLoading/MyProductList";
-import TestRevenue from "./Revenue/TestRevenue";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import { set } from "date-fns";
 import CompareChart from "./Revenue/DataChangeRevenue";
 
 function ClientDashboardpage() {
@@ -98,8 +76,6 @@ function ClientDashboardpage() {
   const [isFiltering, setIsFiltering] = useState(false); // State to check if filter is applied
   const userData = localStorage.getItem("user");
   const [tab, setTab] = React.useState(0);
-  const [compare, setCompare] = React.useState("Compare to past");
-  const [events, setEvents] = React.useState(true);
   const [startDateHelium, setStartDateHelium] = useState(
     dayjs().subtract(7, "day")
   );
@@ -119,8 +95,6 @@ function ClientDashboardpage() {
   const [brandList, setBrandList] = useState([]);
   const [selectedBrand, setSelectedBrand] = useState([]);
   const [selectedBrandFilter, setSelectedBrandFilter] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [open, setOpen] = useState(false);
   const [brandLimit, setBrandLimit] = useState(1); // start with 11
   const [skuLimit, setSkuLimit] = useState(1); // start with 11
   const [befePreset, setBefePreset] = useState("Today");
@@ -175,18 +149,13 @@ function ClientDashboardpage() {
   //   }
   // };
 
-  const handleStartDateChangeHelium = (newDate) => {
-    setStartDateHelium(newDate);
-  };
+ 
 
-  const handleEndDateChangeHelium = (newDate) => {
-    setEndDateHelium(newDate);
-  };
+ 
 
   const [value, setValue] = useState([dayjs().subtract(6, "day"), dayjs()]);
   const [selectedPreset, setSelectedPreset] = useState("Today");
 
-  const [brandListPage, setBrandListPage] = React.useState(1); // Initialize page to 1
   const [hasMore, setHasMore] = React.useState(true); // Track if there are more items to load
 
   const handleChange = (newValue) => {
