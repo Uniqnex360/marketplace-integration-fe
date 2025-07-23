@@ -36,8 +36,7 @@ import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import DottedCircleLoading from "../../../Loading/DotLoading";
 import CardComponent from "../CardComponet";
-import timezone from "timezone";
-const TIMEZONE = "US/Pacific";
+dayjs.extend(utc);
 
 const fontStyles = {
   fontSize: "16px",
@@ -66,8 +65,7 @@ function MarketplaceRow({ row, index }) {
     });
     return formatted;
   };
-  dayjs.extend(utc)
-  dayjs.extend(timezone)
+
   return (
     <>
       <TableRow sx={{ ...fontStyles, borderBottom: "none" }}>
@@ -244,15 +242,15 @@ export default function AllMarketplace({
 
   const fromDate = marketplaceData?.from_date;
   const toDate = marketplaceData?.to_date;
-  const formattedCurrentDate = fromDate
-    ? dayjs(fromDate).tz(TIMEZONE).format("MMM DD, YYYY")
-    : "";
-  const formattedDateRange =
-    fromDate && toDate
-      ? `${dayjs(fromDate).tz(TIMEZONE).format("MMM DD, YYYY")} - ${dayjs(toDate).format(
-          "MMM DD, YYYY"
-        )}`
+   const formattedCurrentDate = fromDate
+      ? dayjs.utc(fromDate).format("MMM DD, YYYY")
       : "";
+  const formattedDateRange =
+      fromDate && toDate
+        ? `${dayjs.utc(fromDate).format("MMM DD, YYYY")} - ${dayjs
+            .utc(toDate)
+            .format("MMM DD, YYYY")}`
+        : "";
 
   const fetchAllMarketplace = async () => {
     setLoading(true);
