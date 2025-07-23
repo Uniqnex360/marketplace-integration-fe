@@ -118,8 +118,8 @@ const TestCard = ({
 }) => {
   const theme = useTheme();
   // Initialize with current Pacific time
-  const [selectedDate, setSelectedDate] = useState(dayjs().tz(TIMEZONE));
-  const [displayDate,setDisplayDate]=useState(dayjs().tz(TIMEZONE))
+  let [selectedDate, setSelectedDate] = useState(dayjs().tz(TIMEZONE));
+  let [displayDate,setDisplayDate]=useState(dayjs().tz(TIMEZONE))
   const [metrics, setMetrics] = useState({});
   const [previous, setPrevious] = useState({});
   const [difference, setDifference] = useState({});
