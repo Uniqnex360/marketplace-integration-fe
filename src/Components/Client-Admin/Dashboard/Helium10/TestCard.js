@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -11,7 +11,7 @@ import {
   DialogContent,
 } from "@mui/material";
 import "./Helium.css";
-import SettingsIcon from "@mui/icons-material/Settings"; // or SettingsOutlined
+import SettingsIcon from "@mui/icons-material/Settings";
 
 import {
   ArrowDownward,
@@ -34,9 +34,9 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.locale("en");
 
-// Set the default timezone to US/Pacific
-const TIMEZONE = "US/Pacific"; // US/Pacific timezone
+const TIMEZONE = "US/Pacific";
 
+// Fixed MetricItem component - removed unnecessary state
 const MetricItem = ({
   title,
   value,
@@ -48,15 +48,6 @@ const MetricItem = ({
 }) => {
   const absValue = Math.abs(value ?? 0);
   const absChange = Math.abs(change ?? 0);
-  const [selectedStartDate, setSelectedStartDate] = useState(() => {
-    const saved = localStorage.getItem("selectedStartDate");
-    return saved ? new Date(saved) : null;
-  });
-
-  const [selectedEndDate, setSelectedEndDate] = useState(() => {
-    const saved = localStorage.getItem("selectedEndDate");
-    return saved ? new Date(saved) : null;
-  });
 
   const displayValue = `${(value ?? 0) < 0 ? "-" : ""}${
     currencySymbol ?? ""
@@ -128,25 +119,26 @@ const TestCard = ({
   fulfillment_channel,
 }) => {
   const theme = useTheme();
-  // Initialize with current Pacific time
   const [selectedDate, setSelectedDate] = useState(dayjs().tz(TIMEZONE));
   const [displayDate, setDisplayDate] = useState(dayjs().tz(TIMEZONE));
   const [metrics, setMetrics] = useState({});
   const [previous, setPrevious] = useState({});
   const [difference, setDifference] = useState({});
   const [bindGraph, setBindGraph] = useState([]);
-  const [tooltipData, setTooltipData] = useState(null); // tooltip state
-  const [hoverIndex, setHoverIndex] = useState(null);
+  const [tooltipData, setTooltipData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
 
-  const userData = JSON.parse(localStorage.getItem("user") || "{}");
-  const userId = userData?.id || "";
+  // Get userId once and memoize it
+  const userId = React.useMemo(() => {
+    const userData = JSON.parse(localStorage.getItem("user") || "{}");
+    return userData?.id || "";
+  }, []);
+
   const graphContainerRef = useRef(null);
   const svgRef = useRef(null);
   const [svgOffset, setSvgOffset] = useState({ left: 0, top: 0 });
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [open, setOpen] = useState(false);
-  let lastParamsRef = useRef("");
+  const lastParamsRef = useRef("");
 
   const [visibleMetrics, setVisibleMetrics] = useState([
     "gross_revenue",
@@ -159,44 +151,40 @@ const TestCard = ({
     "business_value",
   ]);
 
-  const handleOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    console.log("oppoClose");
+  // Memoize handlers
+  const handleOpen = useCallback(() => setOpen(true), []);
+  
+  const handleClose = useCallback(() => {
     setOpen(false);
     fetchMetrics(selectedDate);
-  };
+  }, [selectedDate]);
 
-  const handleMetricToggle = (metric) => {
+  const handleMetricToggle = useCallback((metric) => {
     setVisibleMetrics((prev) =>
       prev.includes(metric)
         ? prev.filter((m) => m !== metric)
         : [...prev, metric]
     );
-  };
+  }, []);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setVisibleMetrics([]);
-  };
+  }, []);
 
-  const handleApply = () => {
-    // Logic to apply the selected metrics
+  const handleApply = useCallback(() => {
     console.log("Applied Metrics:", visibleMetrics);
-  };
+  }, [visibleMetrics]);
 
+  // Update SVG offset when component mounts
   useEffect(() => {
     if (svgRef.current) {
       const rect = svgRef.current.getBoundingClientRect();
       setSvgOffset({ left: rect.left, top: rect.top });
     }
   }, []);
-  useEffect(() => {
-    fetchMetrics(selectedDate);
-  }, [selectedDate, widgetData]);
 
-  const fetchMetrics = async (date) => {
+  // Memoize fetchMetrics to prevent unnecessary recreations
+  const fetchMetrics = useCallback(async (date) => {
     setLoading(true);
     try {
       const payload = {
@@ -211,7 +199,6 @@ const TestCard = ({
         timezone: TIMEZONE,
       };
 
-      // Conditionally add optional fields
       if (DateStartDate && dayjs(DateStartDate).isValid()) {
         payload.start_date = dayjs(DateStartDate).format("DD/MM/YYYY");
       }
@@ -254,83 +241,199 @@ const TestCard = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId, widgetData, marketPlaceId, brand_id, product_id, manufacturer_name, fulfillment_channel, DateStartDate, DateEndDate]);
 
+  // Initial fetch and dependency-based refetch
+  useEffect(() => {
+    const currentParams = JSON.stringify({
+      selectedDate: selectedDate.format(),
+      marketPlaceId,
+      brand_id,
+      product_id,
+      manufacturer_name,
+      fulfillment_channel,
+      widgetData,
+      DateStartDate,
+      DateEndDate,
+    });
+
+    if (lastParamsRef.current !== currentParams) {
+      lastParamsRef.current = currentParams;
+      fetchMetrics(selectedDate);
+    }
+  }, [selectedDate, fetchMetrics]);
+
+  // Date logic based on widget data
   useEffect(() => {
     const today = dayjs().tz(TIMEZONE);
+    let newDisplayDate, newSelectedDate;
+
     switch (widgetData) {
       case "Today":
-        setDisplayDate(today);
-        setSelectedDate(today);
+        newDisplayDate = today;
+        newSelectedDate = today;
         break;
       case "Yesterday":
-        setDisplayDate(today.subtract(1, "day"));
-        setSelectedDate(today.subtract(1, "day"));
+        newDisplayDate = today.subtract(1, "day");
+        newSelectedDate = today.subtract(1, "day");
         break;
       case "This Week":
-        setDisplayDate(today.startOf("week"));
-        setSelectedDate(today.endOf("week"));
+        newDisplayDate = today.startOf("week");
+        newSelectedDate = today.endOf("week");
         break;
       case "Last Week":
-        setDisplayDate(today.subtract(1, "week").startOf("week"));
-        setSelectedDate(today.subtract(1, "week").endOf("week"));
+        newDisplayDate = today.subtract(1, "week").startOf("week");
+        newSelectedDate = today.subtract(1, "week").endOf("week");
         break;
       case "Last 7 days":
-        setDisplayDate(today.subtract(6, "day"));
-        setSelectedDate(today);
+        newDisplayDate = today.subtract(6, "day");
+        newSelectedDate = today;
         break;
       case "Last 14 days":
-        setDisplayDate(today.subtract(13, "day"));
-        setSelectedDate(today);
+        newDisplayDate = today.subtract(13, "day");
+        newSelectedDate = today;
         break;
       case "Last 30 days":
-        setDisplayDate(today.subtract(29, "day"));
-        setSelectedDate(today);
+        newDisplayDate = today.subtract(29, "day");
+        newSelectedDate = today;
         break;
       case "Last 60 days":
-        setDisplayDate(today.subtract(59, "day"));
-        setSelectedDate(today);
+        newDisplayDate = today.subtract(59, "day");
+        newSelectedDate = today;
         break;
       case "Last 90 days":
-        setDisplayDate(today.subtract(89, "day"));
-        setSelectedDate(today);
+        newDisplayDate = today.subtract(89, "day");
+        newSelectedDate = today;
         break;
       case "This Month":
-        setDisplayDate(today.startOf("month"));
-        setSelectedDate(today.endOf("month"));
+        newDisplayDate = today.startOf("month");
+        newSelectedDate = today.endOf("month");
         break;
       case "Last Month":
-        setDisplayDate(today.subtract(1, "month").startOf("month"));
-        setSelectedDate(today.subtract(1, "month").endOf("month"));
+        newDisplayDate = today.subtract(1, "month").startOf("month");
+        newSelectedDate = today.subtract(1, "month").endOf("month");
         break;
       case "This Quarter":
-        setDisplayDate(today.startOf("quarter"));
-        setSelectedDate(today.endOf("quarter"));
+        newDisplayDate = today.startOf("quarter");
+        newSelectedDate = today.endOf("quarter");
         break;
       case "Last Quarter":
-        setDisplayDate(today.subtract(1, "quarter").startOf("quarter"));
-        setSelectedDate(today.subtract(1, "quarter").endOf("quarter"));
+        newDisplayDate = today.subtract(1, "quarter").startOf("quarter");
+        newSelectedDate = today.subtract(1, "quarter").endOf("quarter");
         break;
       case "This Year":
-        setDisplayDate(today.startOf("year"));
-        setSelectedDate(today.endOf("year"));
+        newDisplayDate = today.startOf("year");
+        newSelectedDate = today.endOf("year");
         break;
       case "Last Year":
-        setDisplayDate(today.subtract(1, "year").startOf("year"));
-        setSelectedDate(today.subtract(1, "year").endOf("year"));
+        newDisplayDate = today.subtract(1, "year").startOf("year");
+        newSelectedDate = today.subtract(1, "year").endOf("year");
         break;
-      // Add more cases for other presets as needed
       default:
-        setDisplayDate(today);
-        setSelectedDate(today);
+        newDisplayDate = today;
+        newSelectedDate = today;
     }
+
+    setDisplayDate(newDisplayDate);
+    setSelectedDate(newSelectedDate);
   }, [widgetData]);
-  // Format currency
-  const formatCurrency = (value) =>
+
+  // Navigation handlers
+  const today = dayjs().tz(TIMEZONE);
+  
+  const handlePrevious = useCallback(() => {
+    setSelectedDate((prev) => prev.subtract(1, "day"));
+  }, []);
+
+  const handleNext = useCallback(() => {
+    if (!selectedDate.isSame(today, "day")) {
+      setSelectedDate((prev) => prev.add(1, "day"));
+    }
+  }, [selectedDate, today]);
+
+  const handleBackToToday = useCallback(() => {
+    setSelectedDate(today);
+  }, [today]);
+
+  // Helper functions
+  const formatCurrency = useCallback((value) =>
     new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
-    }).format(value ?? 0);
+    }).format(value ?? 0), []);
+
+  const getDisplayDateText = useCallback((widgetData, displayDate, selectedDate) => {
+    switch (widgetData) {
+      case "Today":
+      case "Yesterday":
+        return selectedDate.format("ddd, MMM DD");
+      case "This Week":
+      case "Last Week":
+      case "Last 7 days":
+      case "Last 14 days":
+      case "Last 30 days":
+      case "Last 60 days":
+      case "Last 90 days":
+      case "This Month":
+      case "Last Month":
+      case "This Quarter":
+      case "Last Quarter":
+      case "This Year":
+      case "Last Year":
+        return `${displayDate.format("MMM DD")} - ${selectedDate.format("MMM DD")}`;
+      default:
+        if (displayDate && selectedDate && !displayDate.isSame(selectedDate, "day")) {
+          return `${displayDate.format("MMM DD")} - ${selectedDate.format("MMM DD")}`;
+        }
+        return selectedDate.format("ddd, MMM DD");
+    }
+  }, []);
+
+  const getSubtitleText = useCallback((widgetData, displayDate, selectedDate) => {
+    if (widgetData === "Today" || widgetData === "Yesterday") {
+      return displayDate.isSame(today, "day") ? (
+        "Today"
+      ) : (
+        <span
+          style={{
+            color: "#0A6FE8",
+            fontWeight: "bold",
+            fontFamily: "'Nunito Sans', sans-serif",
+            fontSize: 14,
+            cursor: "pointer",
+            textDecoration: "none",
+          }}
+          onClick={handleBackToToday}
+        >
+          Back to Today
+        </span>
+      );
+    }
+    return widgetData;
+  }, [today, handleBackToToday]);
+
+  // Graph functions
+  const getGraphPoints = useCallback(() => {
+    if (bindGraph.length === 0) return "";
+    const maxRevenue = Math.max(...bindGraph.map((d) => d.revenue), 1);
+    return bindGraph
+      .map((item, index) => {
+        const x = (index / (bindGraph.length - 1)) * 280 + 10;
+        const y = 50 - (item.revenue / maxRevenue) * 30;
+        return `${x},${y}`;
+      })
+      .join(" ");
+  }, [bindGraph]);
+
+  const getCirclePoints = useCallback(() => {
+    if (bindGraph.length === 0) return [];
+    const maxRevenue = Math.max(...bindGraph.map((d) => d.revenue), 1);
+    return bindGraph.map((item, index) => {
+      const x = (index / (bindGraph.length - 1)) * 280 + 10;
+      const y = 50 - (item.revenue / maxRevenue) * 30;
+      return { ...item, cx: x, cy: y };
+    });
+  }, [bindGraph]);
 
   const METRICS_CONFIG = {
     total_orders: {
@@ -359,9 +462,7 @@ const TestCard = ({
       tooltip: (date, today, prev) =>
         date.isSame(today, "day")
           ? `Yesterday: ${formatCurrency(prev)}`
-          : `${date.subtract(1, "day").format("MMM DD")}: ${formatCurrency(
-              prev
-            )}`,
+          : `${date.subtract(1, "day").format("MMM DD")}: ${formatCurrency(prev)}`,
       currencySymbol: "$",
     },
     net_profit: {
@@ -369,9 +470,7 @@ const TestCard = ({
       tooltip: (date, today, prev) =>
         date.isSame(today, "day")
           ? `Yesterday: ${formatCurrency(prev)}`
-          : `${date.subtract(1, "day").format("MMM DD")}: ${formatCurrency(
-              prev
-            )}`,
+          : `${date.subtract(1, "day").format("MMM DD")}: ${formatCurrency(prev)}`,
       currencySymbol: "$",
     },
     margin: {
@@ -387,106 +486,16 @@ const TestCard = ({
       tooltip: (date, today, prev) =>
         date.isSame(today, "day")
           ? `Yesterday: ${formatCurrency(prev)}`
-          : `${date.subtract(1, "day").format("MMM DD")}: ${formatCurrency(
-              prev
-            )}`,
+          : `${date.subtract(1, "day").format("MMM DD")}: ${formatCurrency(prev)}`,
       currencySymbol: "$",
     },
   };
 
-  useEffect(() => {
-    const currentParams = JSON.stringify({
-      selectedDate,
-      marketPlaceId,
-      brand_id,
-      product_id,
-      manufacturer_name,
-      fulfillment_channel,
-      widgetData,
-      DateStartDate,
-      DateEndDate,
-    });
-
-    if (lastParamsRef.current !== currentParams) {
-      lastParamsRef.current = currentParams;
-
-      fetchMetrics(selectedDate);
-    }
-  }, [
-    selectedDate,
-    marketPlaceId,
-    brand_id,
-    widgetData,
-    product_id,
-    DateStartDate,
-    DateEndDate,
-    manufacturer_name,
-    fulfillment_channel,
-  ]);
-
-  // Get current Pacific time
-  const today = dayjs().tz(TIMEZONE);
-  const yesterday = today.subtract(1, "day");
-
-  // Go to previous day
-  const handlePrevious = () => {
-    setSelectedDate((prev) => prev.subtract(1, "day"));
-  };
-
-  // Go to next day (but not beyond today)
-  const handleNext = () => {
-    if (!selectedDate.isSame(today, "day")) {
-      setSelectedDate((prev) => prev.add(1, "day"));
-    }
-  };
-
-  // Back to today (Pacific time)
-  const handleBackToToday = () => {
-    setSelectedDate(today);
-  };
-
-  // const handlePrevious = () => setSelectedDate((prev) => prev.subtract(1, 'day'));
-  // const handleNext = () => setSelectedDate((prev) => prev.add(1, 'day'));
-
-  const getGraphPoints = () => {
-    const maxRevenue = Math.max(...bindGraph.map((d) => d.revenue), 1);
-    return bindGraph
-      .map((item, index) => {
-        const x = (index / (bindGraph.length - 1)) * 280 + 10;
-        const y = 50 - (item.revenue / maxRevenue) * 30;
-        return `${x},${y}`;
-      })
-      .join(" ");
-  };
-
-  const getTooltipText = (date) => {
-    const formattedDate = dayjs(date).tz(TIMEZONE).format("MMM DD");
-    return date.isSame(yesterday, "day")
-      ? `Yesterday: ${formatCurrency(previous.gross_revenue)}`
-      : `${formattedDate}: ${formatCurrency(previous.gross_revenue)}`;
-  };
-
-  const getDynamicTooltip = (previousValue) => {
-    return selectedDate.isSame(today, "day")
-      ? `Yesterday: ${previousValue}`
-      : `${selectedDate.subtract(1, "day").format("MMM DD")}: ${previousValue}`;
-  };
-
-  const getCirclePoints = () => {
-    const maxRevenue = Math.max(...bindGraph.map((d) => d.revenue), 1);
-    return bindGraph.map((item, index) => {
-      const x = (index / (bindGraph.length - 1)) * 280 + 10;
-      const y = 50 - (item.revenue / maxRevenue) * 30;
-      return { ...item, cx: x, cy: y };
-    });
-  };
-
   const metricBlockStyle = {
-    flex: "0 0 180px", // 👈 fixed width for all cards
+    flex: "0 0 180px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    // borderRight: '1px solid #e0e0e0',
     borderBottom: "1px solid #e0e0e0",
     py: 1,
     px: 2,
@@ -537,7 +546,9 @@ const TestCard = ({
                 <ChevronLeft fontSize="small" />
               </IconButton>
 
-              <Tooltip title={selectedDate.format("DD/MM/YYYY")}>
+              <Tooltip
+                title={`${displayDate.format("DD/MM/YYYY")} - ${selectedDate.format("DD/MM/YYYY")}`}
+              >
                 <Box>
                   <Typography
                     fontWeight="bold"
@@ -547,7 +558,7 @@ const TestCard = ({
                       fontSize: 14,
                     }}
                   >
-                    {selectedDate.format("ddd, MMM DD")}
+                    {getDisplayDateText(widgetData, displayDate, selectedDate)}
                   </Typography>
                   <Box display="flex" justifyContent="center">
                     <Typography
@@ -561,23 +572,7 @@ const TestCard = ({
                         width: "100%",
                       }}
                     >
-                      {displayDate.isSame(today, "day") ? (
-                        "Today"
-                      ) : (
-                        <span
-                          style={{
-                            color: "#0A6FE8",
-                            fontWeight: "bold",
-                            fontFamily: "'Nunito Sans', sans-serif",
-                            fontSize: 14,
-                            cursor: "pointer",
-                            textDecoration: "none",
-                          }}
-                          onClick={handleBackToToday}
-                        >
-                          Back to Today
-                        </span>
-                      )}
+                      {getSubtitleText(widgetData, displayDate, selectedDate)}
                     </Typography>
                   </Box>
                 </Box>
@@ -594,28 +589,24 @@ const TestCard = ({
           {/* Gross Revenue */}
           {visibleMetrics.includes("gross_revenue") && (
             <Box sx={metricBlockStyle}>
-              {visibleMetrics.includes("gross_revenue") && (
-                <MetricItem
-                  title="Gross Revenue"
-                  value={metrics.gross_revenue}
-                  change={difference.gross_revenue}
-                  isNegative={String(difference.gross_revenue).startsWith("-")}
-                  tooltip={
-                    selectedDate.isSame(today, "day")
-                      ? `Yesterday: ${formatCurrency(previous.gross_revenue)}`
-                      : `${selectedDate
-                          .subtract(1, "day")
-                          .format("MMM DD")}: ${formatCurrency(
-                          previous.gross_revenue
-                        )}`
-                  }
-                  currencySymbol="$"
-                />
-              )}
+              <MetricItem
+                title="Gross Revenue"
+                value={metrics.gross_revenue}
+                change={difference.gross_revenue}
+                isNegative={String(difference.gross_revenue).startsWith("-")}
+                tooltip={
+                  selectedDate.isSame(today, "day")
+                    ? `Yesterday: ${formatCurrency(previous.gross_revenue)}`
+                    : `${selectedDate
+                        .subtract(1, "day")
+                        .format("MMM DD")}: ${formatCurrency(previous.gross_revenue)}`
+                }
+                currencySymbol="$"
+              />
             </Box>
           )}
-          {/* Chart */}
 
+          {/* Chart */}
           {visibleMetrics.includes("gross_revenue") && (
             <Box sx={{ borderRight: "1px solid #e0e0e0" }}>
               <Box
@@ -752,13 +743,13 @@ const TestCard = ({
               </Box>
             </Box>
           )}
+
           {/* Other Metric Cards */}
           {[
             "total_orders",
             "total_units",
             "refund",
             "total_cogs",
-            // 'net_profit',
             "margin",
             "business_value",
           ].map((id, idx) => {
@@ -772,7 +763,7 @@ const TestCard = ({
                     value={metrics[id]}
                     change={difference[id]}
                     isNegative={String(difference[id]).startsWith("-")}
-                    tooltip={item.tooltip(selectedDate, today, previous[id])} // ✅ call the function
+                    tooltip={item.tooltip(selectedDate, today, previous[id])}
                     currencySymbol={item.currencySymbol}
                     percentSymbol={item.percentSymbol}
                   />
@@ -786,7 +777,6 @@ const TestCard = ({
             onClick={handleOpen}
             sx={{
               marginTop: "-1px",
-
               display: "flex",
               alignItems: "center",
               gap: 1,
