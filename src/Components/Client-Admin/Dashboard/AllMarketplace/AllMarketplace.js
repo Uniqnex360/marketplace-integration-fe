@@ -241,14 +241,24 @@ export default function AllMarketplace({
   };
 
   const fromDate = marketplaceData?.from_date;
-const toDate = marketplaceData?.to_date;
- const formattedCurrentDate = fromDate
-    ? dayjs(fromDate).format("MMM DD, YYYY") 
+  const toDate = marketplaceData?.to_date;
+
+  // Helper function to safely parse only the date part of the string
+  const parseDateOnly = (dateString) => {
+    if (!dateString) return null;
+    // Use dayjs.utc to prevent the browser from shifting the date
+    return dayjs.utc(dateString.slice(0, 10));
+  };
+
+  const formattedCurrentDate = parseDateOnly(fromDate)
+    ? parseDateOnly(fromDate).format("MMM DD, YYYY")
     : "";
-const formattedDateRange =
+
+  const formattedDateRange =
     fromDate && toDate
-      ? `${dayjs(fromDate).format("MMM DD, YYYY")} - ${dayjs(toDate)
-          .format("MMM DD, YYYY")}`
+      ? `${parseDateOnly(fromDate).format("MMM DD, YYYY")} - ${parseDateOnly(
+          toDate
+        ).format("MMM DD, YYYY")}`
       : "";
   const fetchAllMarketplace = async () => {
     setLoading(true);
@@ -287,7 +297,7 @@ const formattedDateRange =
       manufacturer_name,
       fulfillment_channel,
       DateStartDate,
-      product_id, 
+      product_id,
       DateEndDate,
     });
     if (lastParamsRef.current !== currentParams) {
@@ -624,15 +634,15 @@ const formattedDateRange =
 
           {/* Right side - CardComponent instead of Orders Chart */}
           <Grid item xs={12} md={8}>
-              <CardComponent
-                widgetData={widgetData}
-                marketPlaceId={marketPlaceId}
-                DateStartDate={DateStartDate}
-                DateEndDate={DateEndDate}
-                brand_id={brand_id}
-                product_id={product_id}
-                manufacturer_name={manufacturer_name}
-              />
+            <CardComponent
+              widgetData={widgetData}
+              marketPlaceId={marketPlaceId}
+              DateStartDate={DateStartDate}
+              DateEndDate={DateEndDate}
+              brand_id={brand_id}
+              product_id={product_id}
+              manufacturer_name={manufacturer_name}
+            />
           </Grid>
         </Grid>
 
