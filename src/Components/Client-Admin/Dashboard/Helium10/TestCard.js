@@ -7,12 +7,8 @@ import {
   Tooltip,
   IconButton,
   useTheme,
-  Popover,
   Dialog,
-  DialogTitle,
   DialogContent,
-  DialogActions,
-  Button,
 } from "@mui/material";
 import "./Helium.css";
 import SettingsIcon from "@mui/icons-material/Settings"; // or SettingsOutlined
@@ -20,18 +16,9 @@ import SettingsIcon from "@mui/icons-material/Settings"; // or SettingsOutlined
 import {
   ArrowDownward,
   ArrowUpward,
-  BorderBottom,
   ChevronLeft,
   ChevronRight,
 } from "@mui/icons-material";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
-  Tooltip as RechartTooltip,
-} from "recharts";
 import dayjs from "dayjs";
 import weekOfYear from "dayjs/plugin/weekOfYear";
 import utc from "dayjs/plugin/utc";
@@ -132,6 +119,7 @@ const TestCard = ({
   const theme = useTheme();
   // Initialize with current Pacific time
   const [selectedDate, setSelectedDate] = useState(dayjs().tz(TIMEZONE));
+  const [displayDate,setDisplayDate]=useState(dayjs().tz(TIMEZONE))
   const [metrics, setMetrics] = useState({});
   const [previous, setPrevious] = useState({});
   const [difference, setDifference] = useState({});
@@ -186,6 +174,19 @@ const TestCard = ({
   const handleApply = () => {
     // Logic to apply the selected metrics
     console.log("Applied Metrics:", visibleMetrics);
+    if(widgetData==='Today')
+    {
+      setDisplayDate(dayjs().tz(timezone))
+    }
+    else if(widgetData==='Yesterday')
+    {
+      setDisplayDate(dayjs().tz(TIMEZONE).subtract(1,'day'))
+    }
+    else if(widgetData==='Last 7 days')
+    {
+      setDisplayDate(dayjs().tz(TIMEZONE)).subtract(6,'day')
+    }
+
   };
 
   useEffect(() => {
@@ -324,7 +325,7 @@ const TestCard = ({
       product_id,
       manufacturer_name,
       fulfillment_channel,
-      widgetData
+      widgetData,
     });
 
     if (lastParamsRef.current !== currentParams) {
@@ -479,8 +480,8 @@ const TestCard = ({
                         width: "100%",
                       }}
                     >
-                      {selectedDate.isSame(today, "day") ? (
-                        "Today"
+                      {displayDate.isSame(dayjs().tz(TIMEZONE), "day") ? (
+                        displayDate.format("DD/MM/YYYY")
                       ) : (
                         <span
                           style={{
