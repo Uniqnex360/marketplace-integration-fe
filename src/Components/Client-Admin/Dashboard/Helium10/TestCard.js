@@ -250,7 +250,7 @@ const TestCard = ({
         break;
       case "This Week":
         setDisplayDate = (today.startOf("week"))
-        end = today.endOf(("week"))
+        setSelectedDate = today.endOf(("week"))
         break;
       case "Last Week":
         setDisplayDate = (today.subtract(1, "week").startOf("week"))
