@@ -229,8 +229,10 @@ const TestCard = ({
 
   const getDisplayDateText = (widgetData, DateStartDate, DateEndDate, displayDate, selectedDate) => {
     const today = dayjs().tz(TIMEZONE);
-     if (DateStartDate && DateEndDate) {
-    return `Custom Date Range: ${dayjs(DateStartDate).format("MMM DD")} - ${dayjs(DateEndDate).add(1, 'day').format("MMM DD")}`;
+    if (DateStartDate && DateEndDate) {
+      const start = dayjs(DateStartDate).tz(TIMEZONE);
+      const end = dayjs(DateEndDate).tz(TIMEZONE);
+      return `${start.format("MMM DD")} - ${end.format("MMM DD")}`;
     }
 
     switch (widgetData) {
@@ -269,14 +271,18 @@ const TestCard = ({
     return widgetData;
   };
 
+  // Fixed date initialization logic
   useEffect(() => {
+    const today = dayjs().tz(TIMEZONE);
+    
+    // Handle custom date range - FIX: Use exact dates without startOf/endOf
     if (DateStartDate && DateEndDate) {
       setDisplayDate(dayjs(DateStartDate).tz(TIMEZONE));
       setSelectedDate(dayjs(DateEndDate).tz(TIMEZONE));
       return;
     }
 
-    const today = dayjs().tz(TIMEZONE);
+    // Handle preset date ranges
     switch (widgetData) {
       case "Today":
         setDisplayDate(today);
@@ -295,22 +301,49 @@ const TestCard = ({
         setSelectedDate(today.subtract(1, "week").endOf("week"));
         break;
       case "Last 7 days":
-        case "Last 14 days":
-        case "Last 30 days":
-        case "Last 60 days":
-        case "Last 90 days":
-        case "This Month":
-        case "Last Month":
-        case "This Quarter":
-        case "Last Quarter":
-        case "This Year":
-        case "Last Year":
-          const [unit, count] = widgetData.split(" ")[1] === "days" 
-            ? ["day", parseInt(widgetData.split(" ")[1]) - 1]
-            : [widgetData.split(" ")[1].toLowerCase(), 1];
-          setDisplayDate(today.subtract(count, unit).startOf(unit));
-          setSelectedDate(today.subtract(count, unit).endOf(unit));
-          break;
+        setDisplayDate(today.subtract(6, "day")); // 6 days back + today = 7 days
+        setSelectedDate(today);
+        break;
+      case "Last 14 days":
+        setDisplayDate(today.subtract(13, "day")); // 13 days back + today = 14 days
+        setSelectedDate(today);
+        break;
+      case "Last 30 days":
+        setDisplayDate(today.subtract(29, "day")); // 29 days back + today = 30 days
+        setSelectedDate(today);
+        break;
+      case "Last 60 days":
+        setDisplayDate(today.subtract(59, "day")); // 59 days back + today = 60 days
+        setSelectedDate(today);
+        break;
+      case "Last 90 days":
+        setDisplayDate(today.subtract(89, "day")); // 89 days back + today = 90 days
+        setSelectedDate(today);
+        break;
+      case "This Month":
+        setDisplayDate(today.startOf("month"));
+        setSelectedDate(today.endOf("month"));
+        break;
+      case "Last Month":
+        setDisplayDate(today.subtract(1, "month").startOf("month"));
+        setSelectedDate(today.subtract(1, "month").endOf("month"));
+        break;
+      case "This Quarter":
+        setDisplayDate(today.startOf("quarter"));
+        setSelectedDate(today.endOf("quarter"));
+        break;
+      case "Last Quarter":
+        setDisplayDate(today.subtract(1, "quarter").startOf("quarter"));
+        setSelectedDate(today.subtract(1, "quarter").endOf("quarter"));
+        break;
+      case "This Year":
+        setDisplayDate(today.startOf("year"));
+        setSelectedDate(today.endOf("year"));
+        break;
+      case "Last Year":
+        setDisplayDate(today.subtract(1, "year").startOf("year"));
+        setSelectedDate(today.subtract(1, "year").endOf("year"));
+        break;
       default:
         setDisplayDate(today);
         setSelectedDate(today);
