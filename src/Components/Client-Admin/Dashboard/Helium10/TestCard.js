@@ -337,7 +337,7 @@ const TestCard = ({
     marketPlaceId,
     brand_id,
     widgetData,
-    JSON.stringify(product_id),
+    product_id,
     manufacturer_name,
     fulfillment_channel,
   ]);
