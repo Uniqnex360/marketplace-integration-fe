@@ -250,9 +250,10 @@ export default function AllMarketplace({
   const formattedCurrentDate = fromDate
     ? dayjs(fromDate).format("MMM DD, YYYY")
     : "";
-  const formattedDateRange = fromDate && toDate
-  ? `${getDateString(fromDate)} - ${getDateString(dayjs(toDate).subtract(1, 'day').format('YYYY-MM-DD'))}`
-  : "";
+  const formattedDateRange =
+    fromDate && toDate
+      ? `${getDateString(fromDate)} - ${getDateString(toDate)}`
+      : "";
 
   const fetchAllMarketplace = async () => {
     setLoading(true);
