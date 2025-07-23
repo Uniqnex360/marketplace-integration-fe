@@ -118,8 +118,8 @@ const TestCard = ({
 }) => {
   const theme = useTheme();
   // Initialize with current Pacific time
-  let [selectedDate, setSelectedDate] = useState(dayjs().tz(TIMEZONE));
-  let [displayDate,setDisplayDate]=useState(dayjs().tz(TIMEZONE))
+  const [selectedDate, setSelectedDate] = useState(dayjs().tz(TIMEZONE));
+  const [displayDate,setDisplayDate]=useState(dayjs().tz(TIMEZONE))
   const [metrics, setMetrics] = useState({});
   const [previous, setPrevious] = useState({});
   const [difference, setDifference] = useState({});
@@ -241,64 +241,64 @@ const TestCard = ({
     const today = dayjs().tz(TIMEZONE);
     switch (widgetData) {
       case "Today":
-        setDisplayDate = (today);
-        setSelectedDate = (today);
+        setDisplayDate (today);
+        setSelectedDate (today);
         break;
       case "Yesterday":
-        setDisplayDate = (today.subtract(1, "day"))
-        setSelectedDate = (today.subtract(1, "day"))
+        setDisplayDate (today.subtract(1, "day"))
+        setSelectedDate (today.subtract(1, "day"))
         break;
       case "This Week":
-        setDisplayDate = (today.startOf("week"))
-        setSelectedDate = today.endOf(("week"))
+        setDisplayDate (today.startOf("week"))
+        setSelectedDate (today.endOf("week"))
         break;
       case "Last Week":
-        setDisplayDate = (today.subtract(1, "week").startOf("week"))
-        setSelectedDate = (today.subtract(1, "week").endOf("week"))
+        setDisplayDate  (today.subtract(1, "week").startOf("week"))
+        setSelectedDate (today.subtract(1, "week").endOf("week"))
         break;
       case "Last 7 days":
-        setDisplayDate = (today.subtract(6, "day"))
-        setSelectedDate = (today)
+        setDisplayDate (today.subtract(6, "day"))
+        setSelectedDate (today)
         break;
       case "Last 14 days":
-        setDisplayDate = (today.subtract(13, "day"))
-        setSelectedDate = (today)
+        setDisplayDate (today.subtract(13, "day"))
+        setSelectedDate  (today)
         break;
       case "Last 30 days":
-        setDisplayDate = (today.subtract(29, "day"))
-        setSelectedDate = (today)
+        setDisplayDate  (today.subtract(29, "day"))
+        setSelectedDate  (today)
         break;
       case "Last 60 days":
-        setDisplayDate = (today.subtract(59, "day"))
-        setSelectedDate = (today)
+        setDisplayDate (today.subtract(59, "day"))
+        setSelectedDate (today)
         break;
       case "Last 90 days":
-        setDisplayDate = today.subtract(89, "day");
-        setSelectedDate = today;
+        setDisplayDate (today.subtract(89, "day"))
+        setSelectedDate (today)
         break;
       case "This Month":
-        setDisplayDate = (today.startOf("month"))
-        setSelectedDate = (today.endOf("month"))
+        setDisplayDate (today.startOf("month"))
+        setSelectedDate  (today.endOf("month"))
         break;
       case "Last Month":
-        setDisplayDate = (today.subtract(1, "month").startOf("month"))
-        setSelectedDate = (today.subtract(1, "month").endOf("month"))
+        setDisplayDate (today.subtract(1, "month").startOf("month"))
+        setSelectedDate (today.subtract(1, "month").endOf("month"))
         break;
       case "This Quarter":
-        setDisplayDate = (today.startOf("quarter"))
-        setSelectedDate = (today.endOf("quarter"))
+        setDisplayDate (today.startOf("quarter"))
+        setSelectedDate (today.endOf("quarter"))
         break;
       case "Last Quarter":
-        setDisplayDate = (today.subtract(1, "quarter").startOf("quarter"))
-        setSelectedDate = (today.subtract(1, "quarter").endOf("quarter"))
+        setDisplayDate (today.subtract(1, "quarter").startOf("quarter"))
+        setSelectedDate (today.subtract(1, "quarter").endOf("quarter"))
         break;
       case "This Year":
-        setDisplayDate = (today.startOf("year"))
-        setSelectedDate = (today.endOf("year"))
+        setDisplayDate (today.startOf("year"))
+        setSelectedDate  (today.endOf("year"))
         break;
       case "Last Year":
-        setDisplayDate = (today.subtract(1, "year").startOf("year"))
-        setSelectedDate = (today.subtract(1, "year").endOf("year"))
+        setDisplayDate (today.subtract(1, "year").startOf("year"))
+        setSelectedDate (today.subtract(1, "year").endOf("year"))
         break;
       // Add more cases for other presets as needed
       default:
