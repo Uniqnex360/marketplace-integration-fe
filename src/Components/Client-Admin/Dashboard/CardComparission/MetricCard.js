@@ -1010,8 +1010,10 @@ const MetricCard = ({
 
     // Helper function to safely format dates
     const safeFormatDate = (dateString, formatter) => {
+      if(!dateString)return ""
       try {
-        return dateString ? formatter.format(new Date(dateString)) : "";
+        const dateOnlyString=dateString.slice(0,10)
+        return formatter.format(new Date(dateOnlyString))
       } catch (e) {
         console.warn("Date formatting error:", e);
         return "";
