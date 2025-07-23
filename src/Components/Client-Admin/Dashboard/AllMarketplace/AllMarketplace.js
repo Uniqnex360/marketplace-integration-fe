@@ -241,17 +241,15 @@ export default function AllMarketplace({
   };
 
   const fromDate = marketplaceData?.from_date;
-  const toDate = marketplaceData?.to_date;
-   const formattedCurrentDate = fromDate
-      ? dayjs.utc(fromDate).format("MMM DD, YYYY")
+const toDate = marketplaceData?.to_date;
+ const formattedCurrentDate = fromDate
+    ? dayjs(fromDate).format("MMM DD, YYYY") 
+    : "";
+const formattedDateRange =
+    fromDate && toDate
+      ? `${dayjs(fromDate).format("MMM DD, YYYY")} - ${dayjs(toDate)
+          .format("MMM DD, YYYY")}`
       : "";
-  const formattedDateRange =
-      fromDate && toDate
-        ? `${dayjs.utc(fromDate).format("MMM DD, YYYY")} - ${dayjs
-            .utc(toDate)
-            .format("MMM DD, YYYY")}`
-        : "";
-
   const fetchAllMarketplace = async () => {
     setLoading(true);
     try {
