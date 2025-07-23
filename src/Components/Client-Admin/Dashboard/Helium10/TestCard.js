@@ -147,7 +147,6 @@ const TestCard = ({
     "margin",
     "business_value",
   ]);
-  const handleClick = (event) => setAnchorEl(event.currentTarget);
 
   const handleOpen = () => {
     setOpen(true);
@@ -174,19 +173,6 @@ const TestCard = ({
   const handleApply = () => {
     // Logic to apply the selected metrics
     console.log("Applied Metrics:", visibleMetrics);
-    if(widgetData==='Today')
-    {
-      setDisplayDate(dayjs().tz(timezone))
-    }
-    else if(widgetData==='Yesterday')
-    {
-      setDisplayDate(dayjs().tz(TIMEZONE).subtract(1,'day'))
-    }
-    else if(widgetData==='Last 7 days')
-    {
-      setDisplayDate(dayjs().tz(TIMEZONE)).subtract(6,'day')
-    }
-
   };
 
   useEffect(() => {
@@ -195,6 +181,10 @@ const TestCard = ({
       setSvgOffset({ left: rect.left, top: rect.top });
     }
   }, []);
+  useEffect(()=>{
+    fetchMetrics(selectedDate)
+
+  },[selectedDate,widgetData])
 
   const fetchMetrics = async (date) => {
     setLoading(true);
@@ -247,7 +237,27 @@ const TestCard = ({
       setLoading(false);
     }
   };
-
+   useEffect(() => {
+    const today = dayjs().tz(TIMEZONE);
+    switch (widgetData) {
+      case "Today":
+        setDisplayDate(today);
+        setSelectedDate(today);
+        break;
+      case "Yesterday":
+        setDisplayDate(today.subtract(1, "day"));
+        setSelectedDate(today.subtract(1, "day"));
+        break;
+      case "Last 7 Days":
+        setDisplayDate(today.subtract(6, "day")); // Start of the range
+        setSelectedDate(today.subtract(6, "day"));
+        break;
+      // Add more cases for other presets as needed
+      default:
+        setDisplayDate(today);
+        setSelectedDate(today);
+    }
+  }, [widgetData]);
   // Format currency
   const formatCurrency = (value) =>
     new Intl.NumberFormat("en-US", {
@@ -480,8 +490,8 @@ const TestCard = ({
                         width: "100%",
                       }}
                     >
-                      {displayDate.isSame(dayjs().tz(TIMEZONE), "day") ? (
-                        displayDate.format("DD/MM/YYYY")
+                      {displayDate.isSame(today, "day") ? (
+                        "Today"
                       ) : (
                         <span
                           style={{
