@@ -255,9 +255,14 @@ const TestCard = ({
       setLoading(false);
     }
   };
-  const getDisplayDateText = (widgetData, displayDate, selectedDate) => {
+  const getDisplayDateText = (widgetData,DateStartDate,DateEndDate, displayDate, selectedDate) => {
     const today = dayjs().tz(TIMEZONE);
-
+    if(DateStartDate && DateEndDate)
+    {
+      const start=dayjs(DateStartDate).tz(TIMEZONE)
+      const end=dayjs(DateEndDate).tz(TIMEZONE)
+      return `${start.format("MMM DD")}- ${end.format("MMM DD")}`
+    }
     switch (widgetData) {
       case "Today":
         return selectedDate.format("ddd, MMM DD");
@@ -331,9 +336,12 @@ const TestCard = ({
   };
 
   // Add this helper function to get the subtitle text
-  const getSubtitleText = (widgetData, displayDate, selectedDate) => {
+  const getSubtitleText = (widgetData, DateStartDate,DateEndDate,displayDate, selectedDate) => {
     const today = dayjs().tz(TIMEZONE);
-
+    if(DateStartDate&& DateEndDate)
+    {
+      return "Custom Date Range"
+    }
     // For single day presets, show "Today" or "Back to Today"
     if (widgetData === "Today" || widgetData === "Yesterday") {
       return displayDate.isSame(today, "day") ? (
@@ -903,7 +911,7 @@ const TestCard = ({
                 onApply={handleApply}
               />
             </DialogContent>
-          </Dialog>
+          </Dialog> 
         </Box>
       )}
     </Box>

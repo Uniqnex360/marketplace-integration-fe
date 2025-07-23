@@ -15,11 +15,8 @@ import {
 } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import InfoIcon from "@mui/icons-material/Info";
 import { styled } from "@mui/material/styles";
 import NotificationTooltip from "./NotificationTooltip";
 
@@ -143,13 +140,11 @@ const PerformanceCard = ({
   grossRevenueChange,
   expenses,
   netProfit,
-  netProfitChange,
   margin,
   orders,
   unitsSold,
   refunds,
   netProfitCalculation,
-  organicOrders,
   sponsoredOrders,
   totalOrders,
 }) => {
@@ -168,7 +163,6 @@ const PerformanceCard = ({
   const [anchorElNetProfit, setAnchorElNetProfit] = useState(null);
   const [openNetProfitPopover, setOpenNetProfitPopover] = useState(false);
 
-  const [loading, setLoading] = useState(false);
 
   const openOrder = Boolean(anchorElOrders);
   const previousGrossRevenue = parseFloat(previous);
