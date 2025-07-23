@@ -48,7 +48,16 @@ const MetricItem = ({
 }) => {
   const absValue = Math.abs(value ?? 0);
   const absChange = Math.abs(change ?? 0);
-
+   const [selectedStartDate, setSelectedStartDate] = useState(() => {
+      const saved = localStorage.getItem("selectedStartDate");
+      return saved ? new Date(saved) : null;
+    });
+  
+    const [selectedEndDate, setSelectedEndDate] = useState(() => {
+      const saved = localStorage.getItem("selectedEndDate");
+      return saved ? new Date(saved) : null;
+    });
+  
   const displayValue = `${(value ?? 0) < 0 ? "-" : ""}${
     currencySymbol ?? ""
   }${absValue}${percentSymbol ?? ""}`;
@@ -199,6 +208,8 @@ const TestCard = ({
           preset: widgetData,
           marketplace_id: marketPlaceId.id,
           brand_id: brand_id,
+          start_date: DateStartDate,
+          end_date: DateEndDate,
           product_id: product_id,
           manufacturer_name: manufacturer_name,
           fulfillment_channel: fulfillment_channel,
@@ -386,6 +397,8 @@ const TestCard = ({
       manufacturer_name,
       fulfillment_channel,
       widgetData,
+      DateStartDate,
+      DateEndDate,
     });
 
     if (lastParamsRef.current !== currentParams) {

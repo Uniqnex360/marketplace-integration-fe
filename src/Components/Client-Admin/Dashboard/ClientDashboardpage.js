@@ -1658,6 +1658,8 @@ function ClientDashboardpage() {
             marketPlaceId={
               selectedCategory == "all" ? selectedCategory : filterFinal
             }
+            startDate={startDateHelium}
+            endDate={endDateHelium}
             widgetData={befePreset}
             brand_id={selectedBrandFilter}
             product_id={mergedProductsFilter}
