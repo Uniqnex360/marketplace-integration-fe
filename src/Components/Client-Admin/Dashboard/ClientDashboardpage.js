@@ -1663,6 +1663,8 @@ function ClientDashboardpage() {
             product_id={mergedProductsFilter}
             manufacturer_name={selectedManufacturerFilter}
             fulfillment_channel={selectedFulfillment}
+            DateStartDate={appliedStartDate}
+            DateEndDate={appliedEndDate}
           />
           {/* <CardCount marketPlaceId={ selectedCategory == 'all' ? selectedCategory : filterFinal} DateStartDate={appliedStartDate} DateEndDate={appliedEndDate} /> */}
         </Grid>

@@ -113,6 +113,8 @@ const TestCard = ({
   brand_id,
   widgetData,
   product_id,
+  DateStartDate,
+  DateEndDate,
   manufacturer_name,
   fulfillment_channel,
 }) => {
@@ -397,6 +399,8 @@ const TestCard = ({
     brand_id,
     widgetData,
     product_id,
+    DateStartDate,
+    DateEndDate,
     manufacturer_name,
     fulfillment_channel,
   ]);
