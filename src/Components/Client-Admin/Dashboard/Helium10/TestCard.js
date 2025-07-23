@@ -342,7 +342,6 @@ const TestCard = ({
     {
       return "Custom Date Range"
     }
-    // For single day presets, show "Today" or "Back to Today"
     if (widgetData === "Today" || widgetData === "Yesterday") {
       return displayDate.isSame(today, "day") ? (
         "Today"
