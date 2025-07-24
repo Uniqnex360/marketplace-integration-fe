@@ -18,23 +18,20 @@ import {
   Menu,
   Collapse,
   Autocomplete,
+  Chip,
 } from "@mui/material";
 import axios from "axios";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import AppsIcon from "@mui/icons-material/Apps";
 import ImageIcon from "@mui/icons-material/Image";
 import debounce from "lodash/debounce";
-
-// Correct import
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import IconButton from "@mui/material/IconButton";
-
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
-
 import { Refresh } from "@mui/icons-material";
 import TotalOrdersGraph from "./TotalSalesGraph";
 import LastOrders from "./LastOrder/LastOrders";
@@ -56,7 +53,6 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import CompareChart from "./Revenue/DataChangeRevenue";
-
 function ClientDashboardpage() {
   const [selectedCategory, setSelectedCategory] = useState({
     id: "all",
@@ -68,14 +64,15 @@ function ClientDashboardpage() {
   const [endDate, setEndDate] = useState(null);
   const [appliedStartDate, setAppliedStartDate] = useState(null);
   const [appliedEndDate, setAppliedEndDate] = useState(null);
-  const [filter, setFilter] = useState("all"); // Default filter state
+  const [filter, setFilter] = useState("all");
   const [filterFinal, setFilterFinal] = useState({
     id: "all",
     name: "All Channels",
   });
-  const [isFiltering, setIsFiltering] = useState(false); // State to check if filter is applied
+  const [isFiltering, setIsFiltering] = useState(false);
   const userData = localStorage.getItem("user");
   const [tab, setTab] = React.useState(0);
+  const [activeFilters, setActiveFilters] = useState([]);
   const [startDateHelium, setStartDateHelium] = useState(
     dayjs().subtract(7, "day")
   );
@@ -95,8 +92,8 @@ function ClientDashboardpage() {
   const [brandList, setBrandList] = useState([]);
   const [selectedBrand, setSelectedBrand] = useState([]);
   const [selectedBrandFilter, setSelectedBrandFilter] = useState([]);
-  const [brandLimit, setBrandLimit] = useState(1); // start with 11
-  const [skuLimit, setSkuLimit] = useState(1); // start with 11
+  const [brandLimit, setBrandLimit] = useState(1);
+  const [skuLimit, setSkuLimit] = useState(1);
   const [befePreset, setBefePreset] = useState("Today");
   const [inputValueManufactuer, setInputValueManufactuer] = useState("");
   const [inputValueSku, setInputValueSku] = useState("");
@@ -107,21 +104,17 @@ function ClientDashboardpage() {
   const [mergedProducts, setMergedProducts] = useState([]);
   const [mergedProductsFilter, setMergedProductsFilter] = useState([]);
   const [resetCounter, setResetCounter] = useState(0);
-
   let productuniqueById = [];
   const [isTyping, setIsTyping] = useState(false);
   const lastFilterParamsRef = useRef("");
   const lastInputRef = useRef("");
   const lastCategoryIdRef = useRef(null);
   const lastParamsRef = useRef("");
-
   let userIds = "";
-
   if (userData) {
     const data = JSON.parse(userData);
     userIds = data.id;
   }
-
   const presets = [
     "Today",
     "Yesterday",
@@ -139,38 +132,23 @@ function ClientDashboardpage() {
     "This Year",
     "Last Year",
   ];
-
-  // const [value, setValue] = useState([dayjs().subtract(7, 'day'), dayjs()]);
-
-  // const handleChange = (newValue) => {
-  //   setValue(newValue);
-  //   if (onChange) {
-  //     onChange(newValue);
-  //   }
-  // };
-
- 
-
- 
-
   const [value, setValue] = useState([dayjs().subtract(6, "day"), dayjs()]);
   const [selectedPreset, setSelectedPreset] = useState("Today");
-
-  const [hasMore, setHasMore] = React.useState(true); // Track if there are more items to load
-
+  const [hasMore, setHasMore] = React.useState(true);
   const handleChange = (newValue) => {
     setValue(newValue);
   };
-
   const handlePresetSelectHelium = (preset) => {
     setSelectedPreset(preset);
+    updateActiveFilters("preset", preset, preset, true);
+    if (befePreset && befePreset !== preset) {
+      updateActiveFilters("preset", befePreset, befePreset, false);
+    }
     localStorage.removeItem("selectedStartDate");
     localStorage.removeItem("selectedEndDate");
-
     const today = dayjs();
     let start, end;
     console.log("oppo", selectedPreset);
-    // setPresetValue(preset)
     switch (preset) {
       case "Today":
         start = today;
@@ -237,7 +215,6 @@ function ClientDashboardpage() {
       default:
         return;
     }
-
     setStartDateHelium(start);
     setEndDateHelium(end);
   };
@@ -247,33 +224,26 @@ function ClientDashboardpage() {
       setSelectedPreset("");
     }
   }, [startDate, endDate]);
-
-  // If befePreset is set, clear startDate and endDate
   useEffect(() => {
     if (befePreset || selectedPreset) {
       setStartDate(null);
       setEndDate(null);
     }
   }, [befePreset, selectedPreset]);
-
-  // Fetch marketplace list (Categories)
   useEffect(() => {
     fetchMarketplaceList();
   }, []);
-
   const fetchMarketplaceList = async () => {
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_IP}getMarketplaceList/?user_id=${userIds}`
       );
-
       const categoryData = response.data.data.map((item) => ({
         id: item.id,
         name: item.name,
         imageUrl: item.image_url,
         fulfillment_channel: item.fulfillment_channel,
       }));
-
       setCategories([
         {
           id: "all",
@@ -300,12 +270,56 @@ function ClientDashboardpage() {
       setIsLoading(false);
     }
   };
-
+  const handleRemoveFilter = (filter) => {
+    updateActiveFilters(filter.type, filter.value, filter.label, false);
+    switch (filter.type) {
+      case "brand":
+        setSelectedBrand((prev) => prev.filter((b) => b.id !== filter.value));
+        break;
+      case "sku":
+        setSelectedSku((prev) => prev.filter((s) => s.id !== filter.value));
+        break;
+      case "manufacturer":
+        setSelectedManufacturer((prev) =>
+          prev.filter((m) => m.id !== filter.value)
+        );
+        break;
+      case "channel":
+        if (filter.value === selectedCategory.id) {
+          setSelectedCategory({ id: "all", name: "All Channels" });
+        }
+        break;
+      case "preset":
+        setSelectedPreset("Today");
+        setBefePreset("Today");
+        break;
+      default:
+        break;
+    }
+  };
+  const updateActiveFilters = (type, value, label, isAdd = true) => {
+    setActiveFilters((prevFilters) => {
+      if (isAdd) {
+        if (
+          !prevFilters.some(
+            (filter) => filter.value === value && filter.type === type
+          )
+        ) {
+          return [...prevFilters, { type, value, label }];
+        }
+        return prevFilters;
+      } else {
+        return prevFilters.filter(
+          (filter) => !(filter.value === value && filter.type === type)
+        );
+      }
+    });
+  };
   const fetchAsinList = async (search = "") => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_IP}getproductIdlist/`, // <-- replace with your real endpoint
+        `${process.env.REACT_APP_IP}getproductIdlist/`,
         {
           marketplace_id: selectedCategory?.id,
           search_query: search,
@@ -322,7 +336,6 @@ function ClientDashboardpage() {
       setIsLoading(false);
     }
   };
-
   useEffect(() => {
     const trimmedInput = inputValueAsin.trim();
     const currentFilterParams = JSON.stringify({
@@ -330,29 +343,22 @@ function ClientDashboardpage() {
       brand: selectedBrand,
       manufacturer: selectedManufacturer,
     });
-
     let debounceTimer;
-
-    // Handle debounced input value
     if (trimmedInput !== lastInputRef.current) {
       debounceTimer = setTimeout(() => {
         lastInputRef.current = trimmedInput;
         fetchAsinList(trimmedInput);
       }, 300);
     }
-
-    // Handle filter param changes
     if (
       (selectedCategory?.id || selectedBrand || selectedManufacturer) &&
       currentFilterParams !== lastFilterParamsRef.current
     ) {
       lastFilterParamsRef.current = currentFilterParams;
-      fetchAsinList(""); // Send blank input to indicate filter-based fetch
+      fetchAsinList("");
     }
-
     return () => clearTimeout(debounceTimer);
   }, [selectedCategory, selectedBrand, selectedManufacturer, inputValueAsin]);
-
   const fetchManufacturerList = async (searchText) => {
     setIsLoading(true);
     try {
@@ -362,7 +368,7 @@ function ClientDashboardpage() {
           params: {
             marketplace_id: selectedCategory?.id,
             user_id: userIds,
-            search_query: searchText, // pass this if your API supports search
+            search_query: searchText,
           },
         }
       );
@@ -377,27 +383,23 @@ function ClientDashboardpage() {
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       if (inputValueManufactuer.trim() === "") {
-        fetchManufacturerList(""); // show all if empty
+        fetchManufacturerList("");
       } else {
         fetchManufacturerList(inputValueManufactuer);
       }
     }, 300);
-
     return () => clearTimeout(delayDebounceFn);
   }, [inputValueManufactuer]);
-
   useEffect(() => {
     fetchBrandList();
   }, [brandLimit, selectedCategory?.id, userIds]);
-
   const debouncedFetchBrandList = useCallback(
     debounce((search) => {
-      setBrandLimit(11); // Reset limit on new search
+      setBrandLimit(11);
       fetchBrandList(search);
     }, 300),
     []
   );
-
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       if (inputValueBrand.trim() === "") {
@@ -406,10 +408,8 @@ function ClientDashboardpage() {
         debouncedFetchBrandList(inputValueBrand);
       }
     }, 300);
-
     return () => clearTimeout(delayDebounceFn);
   }, [inputValueBrand, debouncedFetchBrandList]);
-
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       if (inputValueBrand.trim() === "") {
@@ -418,10 +418,8 @@ function ClientDashboardpage() {
         debouncedFetchBrandList(inputValueBrand);
       }
     }, 300);
-
     return () => clearTimeout(delayDebounceFn);
   }, [inputValueBrand, debouncedFetchBrandList]);
-
   const fetchBrandList = async (search = "") => {
     setIsLoading(true);
     try {
@@ -442,24 +440,18 @@ function ClientDashboardpage() {
     } catch (error) {
       console.error("Error fetching brand list:", error);
       setHasMore(false);
-    } finally {
+    } finally {>
       setIsLoading(false);
     }
   };
-
-  // Fetch all on category change or initial load
   useEffect(() => {
     const currentCategoryId = selectedCategory?.id;
-
-    // Only call if category ID exists and has changed
     if (currentCategoryId && currentCategoryId !== lastCategoryIdRef.current) {
       lastCategoryIdRef.current = currentCategoryId;
       fetchBrandList("");
       fetchManufacturerList("");
     }
   }, [selectedCategory]);
-
-  // Debounced API call on search input
   useEffect(() => {
     if (inputValueBrand.trim()) {
       setIsTyping(true);
@@ -471,12 +463,11 @@ function ClientDashboardpage() {
       setIsTyping(false);
     }
   }, [inputValueBrand]);
-
   const fetchSkuList = async (searchText = "") => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_IP}getSKUlist/`, // Update with your actual endpoint
+        `${process.env.REACT_APP_IP}getSKUlist/`,
         {
           marketplace_id: selectedCategory?.id,
           search_query: searchText,
@@ -493,7 +484,6 @@ function ClientDashboardpage() {
       setIsLoading(false);
     }
   };
-
   useEffect(() => {
     const currentParams = JSON.stringify({
       category_id: selectedCategory?.id,
@@ -501,7 +491,6 @@ function ClientDashboardpage() {
       manufacturer: selectedManufacturer,
       sku: selectedSku,
     });
-
     if (
       (selectedCategory?.id || selectedBrand || selectedManufacturer) &&
       currentParams !== lastParamsRef.current
@@ -510,8 +499,6 @@ function ClientDashboardpage() {
       fetchSkuList("");
     }
   }, [selectedCategory, selectedBrand, selectedManufacturer, selectedSku]);
-
-  // Fetch SKUs based on input
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (inputValueSku.trim() === "") {
@@ -520,65 +507,62 @@ function ClientDashboardpage() {
         fetchSkuList(inputValueSku);
       }
     }, 300);
-
     return () => clearTimeout(delayDebounce);
   }, [inputValueSku]);
-
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
-
   const handleMenuClose = () => {
     setAnchorEl(null);
     setExpandedCategories({});
   };
-
   const toggleExpandCategory = (categoryId) => {
     setExpandedCategories((prev) => ({
       ...prev,
       [categoryId]: !prev[categoryId],
     }));
   };
-
+  // const handleCategorySelect = (category) => {
+  //   if (category.id === "all" || category.id === "custom") {
+  //     setSelectedCategory(category);
+  //     handleMenuClose();
+  //   } else if (!category.fulfillment_channel) {
+  //     setSelectedCategory(category);
+  //     handleMenuClose();
+  //   } else {
+  //     setSelectedCategory(category);
+  //     handleMenuClose();
+  //   }
+  // };
   const handleCategorySelect = (category) => {
-    if (category.id === "all" || category.id === "custom") {
-      setSelectedCategory(category);
-      handleMenuClose();
-    } else if (!category.fulfillment_channel) {
-      setSelectedCategory(category);
-      handleMenuClose();
-    } else {
-      setSelectedCategory(category); // Set category but don't open subitems
-      handleMenuClose();
+    if (category.id === selectedCategory.id) return;
+    setSelectedCategory(category);
+    updateActiveFilters("channel", category.id, category.name, true);
+    if (selectedCategory.id !== "all") {
+      updateActiveFilters("channel", category.id, category.name, false);
     }
   };
-  // Add these state variables after your existing state declarations
-const [appliedStartDateHelium, setAppliedStartDateHelium] = useState(dayjs().subtract(7, "day"));
-const [appliedEndDateHelium, setAppliedEndDateHelium] = useState(dayjs());
-const [appliedPreset, setAppliedPreset] = useState("Today");
+  const [appliedStartDateHelium, setAppliedStartDateHelium] = useState(
+    dayjs().subtract(7, "day")
+  );
+  const [appliedEndDateHelium, setAppliedEndDateHelium] = useState(dayjs());
+  const [appliedPreset, setAppliedPreset] = useState("Today");
   const handleFulfillmentSelect = (category, fulfillment) => {
     const { label, value } = fulfillment;
     setselectFulfillment(value);
     setSelectedCategory({ ...category, fulfillment: label });
     handleMenuClose();
   };
-
   const toggleSelection = (option) => {
-    if (selectedBrand.some((b) => b.id === option.id)) {
+    const isSelected = selectedBrand.some((b) => b.id === option.id);
+    if (isSelected) {
       setSelectedBrand(selectedBrand.filter((b) => b.id !== option.id));
+      updateActiveFilters("brand", option.id, option.name, false);
     } else {
       setSelectedBrand([...selectedBrand, option]);
+      updateActiveFilters("brand", option.id, option.name, true);
     }
   };
-
-  //  const toggleSelection = (brand) => {
-  //   const alreadySelected = selectedBrand.find((b) => b.id === brand.id);
-  //   if (alreadySelected) {
-  //     handleRemove(brand.id);
-  //   } else {
-  //     setSelectedBrand([...selectedBrand, brand]);
-  //   }
-  // };
   const handleRemoveSKU = (id) => {
     setSelectedSku((prev) => {
       const updated = prev.filter((sku) => sku.id !== id);
@@ -586,19 +570,19 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
       return updated;
     });
   };
-
   const toggleSelectionSKU = (sku) => {
-    const alreadySelected = selectedSku.find((s) => s.id === sku.id);
-    if (alreadySelected) {
+    const isSelected = selectedSku.some((s) => s.id === sku.id);
+    if (isSelected) {
       handleRemoveSKU(sku.id);
+      updateActiveFilters("sku", sku.id, sku.sku, false);
     } else {
       setSelectedSku((prev) => {
         const alreadySelected = prev.find((s) => s.id === sku.id);
         const updated = alreadySelected
           ? prev.filter((s) => s.id !== sku.id)
           : [...prev, sku];
-
-        updateMergedProducts(selectedAsin, updated); // pass updated sku list
+        updateMergedProducts(selectedAsin, updated);
+        updateActiveFilters("sku", sku.id, sku.sku, true);
         return updated;
       });
     }
@@ -610,7 +594,6 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
       return updated;
     });
   };
-
   const toggleSelectionAsin = (asin) => {
     const alreadySelected = selectedAsin.find((a) => a.id === asin.id);
     if (alreadySelected) {
@@ -621,24 +604,23 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
         const updated = alreadySelected
           ? prev.filter((a) => a.id !== asin.id)
           : [...prev, asin];
-
-        updateMergedProducts(updated, selectedSku); // pass updated asin list
+        updateMergedProducts(updated, selectedSku);
         return updated;
       });
     }
   };
-
   const handleToggleManufacturer = (manufacturer) => {
     const isSelected = selectedManufacturer.includes(manufacturer);
     if (isSelected) {
       setSelectedManufacturer((prev) =>
         prev.filter((item) => item !== manufacturer)
       );
+      updateActiveFilters("manufacturer", manufacturer, manufacturer, false);
     } else {
       setSelectedManufacturer((prev) => [...prev, manufacturer]);
+      updateActiveFilters("manufacturer", manufacturer, manufacturer, true);
     }
   };
-
   const updateMergedProducts = (asinList, skuList) => {
     const merged = [...skuList, ...asinList];
     const uniqueById = Array.from(
@@ -656,53 +638,33 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
     const selectedCategoryObject = categories.find(
       (category) => category.name === selectedName
     );
-
     if (selectedCategoryObject) {
       setSelectedCategory(selectedCategoryObject);
-      // console.log('selectedCategory', selectedCategory.id);
     }
   };
-
   const handleStartDateChange = (newValue) => {
     setStartDate(newValue);
     if (endDate && newValue > endDate) {
-      setEndDate(null); // If start date is greater than end date, reset end date
+      setEndDate(null);
     }
   };
-
-  // Handle End Date change
   const handleEndDateChange = (newValue) => {
     setEndDate(newValue);
   };
-
-  // const handleStartDateChange = (newValue) => {
-  //   setStartDate(newValue);
-  //   if (endDate && newValue > endDate) {
-  //     setEndDate(null); // If start date is greater than end date, reset end date
-  //   }
-  // };
-
-  // const handleEndDateChange = (newValue) => {
-  //   setEndDate(newValue);
-  // };
-
   const handleApplyFilter = () => {
     setBefePreset(selectedPreset);
     setAppliedStartDateHelium(startDateHelium);
-  setAppliedEndDateHelium(endDateHelium);
-  setAppliedPreset(selectedPreset)
+    setAppliedEndDateHelium(endDateHelium);
+    setAppliedPreset(selectedPreset);
     console.log("index", befePreset);
-    // Check if selectedCategory exists (to apply filter without date)
     if (selectedCategory) {
-      // Apply filter using only selectedCategory if both dates are missing or valid
       setSelectedManufacturerFilter(selectedManufacturer);
       setMergedProductsFilter(mergedProducts);
       setSelectedBrandFilter(brand_id);
       if (!startDate || !endDate) {
-        setFilter(selectedCategory); // Apply filter using selectedCategory
-        setFilterFinal(selectedCategory); // Set selectedCategory in filterFinal
-        setIsFiltering(true); // Mark filter as applied
-
+        setFilter(selectedCategory);
+        setFilterFinal(selectedCategory);
+        setIsFiltering(true);
         toast.success("Filter applied successfully!", {
           position: "top-right",
           autoClose: 3000,
@@ -716,32 +678,24 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
         return;
       }
     }
-
-    // If both dates are selected
     if (startDate && endDate) {
       console.log("Raw:", startDate, endDate);
-
       const start = new Date(startDate);
       const end = new Date(endDate);
-
-      const formattedStartDate = start.toLocaleDateString("en-CA"); // Format: YYYY-MM-DD
+      const formattedStartDate = start.toLocaleDateString("en-CA");
       const formattedEndDate = end.toLocaleDateString("en-CA");
-
       console.log("Formatted:", formattedStartDate, formattedEndDate);
-
       setAppliedStartDate(formattedStartDate);
       setAppliedEndDate(formattedEndDate);
       console.log("Applied end date:", formattedEndDate);
-
       setFilter(selectedCategory);
       setFilterFinal(selectedCategory);
       setIsFiltering(true);
-      // Toaster success message
       toast.success(
         "Filter applied successfully with selected category and dates!",
         {
           position: "top-right",
-          autoClose: 3000, // 3 seconds close
+          autoClose: 3000,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
@@ -751,7 +705,6 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
         }
       );
     } else if (startDate && !endDate) {
-      // If only startDate is provided and endDate is missing, show error
       toast.error("Please select both start and end dates.", {
         position: "top-right",
         autoClose: 3000,
@@ -765,14 +718,11 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
     }
   };
   const handleClearFilter = () => {
-    // Reset all filter-related states
     setSelectedCategory({ id: "all", name: "All Channels" });
     setFilterFinal({ id: "all", name: "All Channels" });
     setFilter("all");
     setResetCounter((prev) => prev + 1);
     setAppliedPreset("Today");
-
-    // Clear brand, SKU, ASIN, manufacturer selections
     setSelectedBrand([]);
     setSelectedManufacturer([]);
     setSelectedSku([]);
@@ -781,30 +731,21 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
     setMergedProductsFilter([]);
     setSelectedBrandFilter([]);
     setSelectedManufacturerFilter([]);
-
-    // Reset date filters
     setStartDate(null);
     setEndDate(null);
     setAppliedStartDate(null);
     setAppliedEndDate(null);
-
-    // Reset search inputs
     setInputValueBrand("");
     setInputValueManufactuer("");
     setInputValueSku("");
     setInputValueAsin("");
     setStartDateHelium(dayjs().subtract(7, "day"));
-  setEndDateHelium(dayjs());
-  setAppliedStartDateHelium(dayjs().subtract(7, "day"));
-  setAppliedEndDateHelium(dayjs())
-    // Reset preset
+    setEndDateHelium(dayjs());
+    setAppliedStartDateHelium(dayjs().subtract(7, "day"));
+    setAppliedEndDateHelium(dayjs());
     setSelectedPreset("Today");
     setBefePreset("Today");
-
-    // Force a re-fetch with default filters
     setIsFiltering(false);
-
-    // Show success toast
     toast.success("Filters reset successfully!", {
       position: "top-right",
       autoClose: 2000,
@@ -813,7 +754,6 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
       pauseOnHover: true,
     });
   };
-
   return (
     <Box sx={{ marginTop: "5%" }}>
       <Grid
@@ -831,15 +771,13 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
           <Box
             sx={{
               width: "100%",
-
-              // borderBottom:'solid 1px #ddd',
               backgroundColor: "#ffff",
               height: "9%",
               marginLeft: "-8px",
               marginTop: "5%",
               position: "fixed",
               display: "flex",
-              flexDirection: "column", // To stack items vertically
+              flexDirection: "column",
               top: 0,
               zIndex: 1100,
               backgroundColor: "#fff",
@@ -849,7 +787,7 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
             <Grid container spacing={2} className="dashboard-filter">
               <Grid
                 item
-                xs={12} // Full width on all devices
+                xs={12}
                 className="category-select-container"
                 sx={{
                   paddingBottom: "10px",
@@ -857,7 +795,7 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                   display: "flex",
                   justifyContent: "flex-start",
                   alignItems: "center",
-                  px: 2, // Optional padding for spacing
+                  px: 2,
                 }}
               >
                 <Box
@@ -871,7 +809,6 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                 >
                   Welcome
                 </Box>
-
                 <Box
                   sx={{
                     position: "relative",
@@ -915,7 +852,7 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                           sx={{
                             backgroundColor: isSelected
                               ? "#b6d5f3 !important"
-                              : "transparent", // Slightly darker blue
+                              : "transparent",
                             fontSize: 13,
                             cursor: "pointer",
                           }}
@@ -1033,7 +970,7 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                     inputValue={inputValueSku}
                     onInputChange={(e, newInputValue) => {
                       setInputValueSku(newInputValue);
-                      setSkuLimit(11); // optional if using lazy load
+                      setSkuLimit(11);
                     }}
                     value={selectedSku}
                     onChange={(event, newValue) => {
@@ -1096,7 +1033,7 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                             !isLoading &&
                             hasMore
                           ) {
-                            setSkuLimit((prev) => prev + 10); // for lazy load
+                            setSkuLimit((prev) => prev + 10);
                           }
                         }}
                       >
@@ -1115,7 +1052,6 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                     }}
                   />
                 </Box>
-
                 <Box sx={{ width: 160, position: "relative" }}>
                   <Autocomplete
                     multiple
@@ -1133,8 +1069,8 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                     onInputChange={(e, newInputValue) => {
                       setInputValueManufactuer(newInputValue);
                     }}
-                    onChange={() => {}} // prevent default chip rendering
-                    renderTags={() => null} // prevent default tag display
+                    onChange={() => {}}
+                    renderTags={() => null}
                     renderOption={(props, option) => {
                       const isSelected = selectedManufacturer.includes(option);
                       return (
@@ -1232,7 +1168,6 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                     marginLeft: "19px",
                     position: "relative",
                     paddingRight: "10px",
-                    // width: "300px",
                   }}
                 >
                   <>
@@ -1257,7 +1192,6 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                         : "Select Category"}
                       <ArrowDropDownIcon />
                     </Button>
-
                     <Menu
                       anchorEl={anchorEl}
                       open={Boolean(anchorEl)}
@@ -1309,16 +1243,12 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                                       />
                                     ))}
                                 </ListItemIcon>
-                                <ListItemText
-                                  // sx={{ textTransform: "capitalize" }}
-                                  primary={category.name}
-                                />
+                                <ListItemText primary={category.name} />
                               </div>
-
                               {category.fulfillment_channel && (
                                 <IconButton
                                   onClick={(e) => {
-                                    e.stopPropagation(); // prevent parent click
+                                    e.stopPropagation();
                                     toggleExpandCategory(category.id);
                                   }}
                                   size="small"
@@ -1332,7 +1262,6 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                                 </IconButton>
                               )}
                             </MenuItem>
-
                             {category.fulfillment_channel && (
                               <Collapse
                                 in={expandedCategories[category.id]}
@@ -1369,7 +1298,6 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                 </Box>
               </Grid>
             </Grid>
-
             <Box
               sx={{
                 width: "86%",
@@ -1404,7 +1332,6 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                     <FilterAltIcon sx={{ color: "white", fontSize: "20px" }} />
                   </Button>
                 </Tooltip>
-
                 {/* Reset Button */}
                 <Tooltip title="Reset" arrow>
                   <Button
@@ -1451,7 +1378,7 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                     setInputValueAsin(newInputValue)
                   }
                   value={selectedAsin}
-                  onChange={() => {}} // prevent default tag update
+                  onChange={() => {}}
                   renderTags={() => null}
                   renderOption={(props, option) => {
                     const isSelected = selectedAsin.some(
@@ -1545,7 +1472,6 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                   }}
                 />
               </Box>
-
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 {/* Preset Dropdown */}
                 <Box sx={{ paddingTop: "5px" }}>
@@ -1555,9 +1481,7 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                       value={selectedPreset}
                       label="Preset"
                       onChange={(e) => {
-                        // setSelectedPreset(e.target.value);
                         setSelectedPreset(e.target.value);
-                        // setBefePreset(e.target.value)
                         handlePresetSelectHelium(e.target.value);
                       }}
                     >
@@ -1571,7 +1495,6 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                 </Box>
                 {/* Start Date Picker */}
                 {/* Start Date Picker */}
-
                 <Box sx={{ paddingRight: "8px", width: "130px" }}>
                   <DatePicker
                     label="Start Date"
@@ -1586,7 +1509,7 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                         size="small"
                         sx={{
                           minWidth: 90,
-                          pr: "5px", // Padding right applied here
+                          pr: "5px",
                           "& .MuiInputBase-root": {
                             height: 30,
                             fontSize: "12px",
@@ -1614,7 +1537,7 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                         size="small"
                         sx={{
                           minWidth: 90,
-                          pr: "5px", // Padding right applied here
+                          pr: "5px",
                           "& .MuiInputBase-root": {
                             height: 30,
                             fontSize: "12px",
@@ -1628,8 +1551,33 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
               </LocalizationProvider>
             </Box>
           </Box>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 2, ml: 2 }}>
+            {activeFilters.map((filter) => {
+              <Chip
+                key={`${filter.type}-${filter.value}`}
+                label={`${
+                  filter.type.charAt(0).toUpperCase() + filter.type.slice
+                }:${filter.label}`}
+                onDelete={() => handleRemoveFilter(filter)}
+                sx={{
+                  backgroundColor: "#e3f2fd",
+                  "& . MuiChip-deleteIcon": { color: "rgba(0,0,0,0.7)" },
+                }}
+              ></Chip>;
+            })}
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => {
+                setActiveFilters([]);
+                handleClearFilter();
+              }}
+              sx={{ ml: 2, mt: 2 }}
+            >
+              Clear All
+            </Button>
+          </Box>
         </Grid>
-
         {/* Display Cards and Components */}
         <Grid item xs={12} sm={12} sx={{ marginTop: "9%" }}>
           {/* <HeliumCard/> */}
@@ -1649,7 +1597,6 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
           />
           {/* <CardCount marketPlaceId={ selectedCategory == 'all' ? selectedCategory : filterFinal} DateStartDate={appliedStartDate} DateEndDate={appliedEndDate} /> */}
         </Grid>
-
         {/* <Grid item xs={12} sm={12} sx={{paddingLeft: '40px'}}
       >
           <CardComponent   widgetData={befePreset} marketPlaceId={selectedCategory == 'all' ? selectedCategory : filterFinal} DateStartDate={appliedStartDate} DateEndDate={appliedEndDate} brand_id={selectedBrandFilter} product_id={mergedProductsFilter} manufacturer_name={selectedManufacturerFilter} fulfillment_channel={selectedFulfillment}/>
@@ -1659,15 +1606,14 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
           {/* <Grid item xs={12} md={3}>
   <Box
     sx={{
-      borderRight: '1px solid lightgray', // Light grey vertical line
-      height: '90%', // Full height to cover the section
-      padding: '16px', // Padding for better spacing inside
+      borderRight: '1px solid lightgray', 
+      height: '90%', 
+      padding: '16px', 
     }}
   >
     <InsightCategory />
   </Box>
 </Grid> */}
-
           <Grid
             item
             xs={12}
@@ -1676,14 +1622,12 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
           >
             <Box
               sx={{
-                // height: '100%', // Full height to cover the section
-                padding: "16px", // Padding for better spacing inside
+                padding: "16px",
               }}
             >
               <InsightCategory />
             </Box>
           </Grid>
-
           {/* Right side - Tabs + Content */}
           {/* <Grid item xs={12} md={9}> */}
           <Grid
@@ -1697,8 +1641,7 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                 border: "1px solid #ddd",
                 boxShadow: "none",
                 borderRadius: "12px",
-                p: 1.2, // 🔽 Reduced padding
-                // backgroundColor: '#f4f7fc',
+                p: 1.2,
               }}
             >
               <Box
@@ -1707,8 +1650,8 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                   justifyContent: "center",
                   backgroundColor: "#dce3ec",
                   borderRadius: "30px",
-                  p: "2px", // 🔽 Reduced inner padding
-                  mb: 1.5, // 🔽 Slightly tighter margin
+                  p: "2px",
+                  mb: 1.5,
                 }}
               >
                 <Tabs
@@ -1760,7 +1703,6 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                         minHeight: 26,
                         px: 1.2,
                         mx: 0.4,
-
                         fontSize: "14px",
                         borderRadius: "16px",
                         color: "#2b2f3c",
@@ -1780,7 +1722,6 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                   ))}
                 </Tabs>
               </Box>
-
               <Box>
                 {tab === 0 && (
                   <CompareChart
@@ -1798,7 +1739,6 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                     DateEndDate={appliedEndDate}
                   />
                 )}
-
                 {/* {tab === 0 && (
   (befePreset === 'Today' || befePreset === 'Yesterday') ? (
          <RevenueTimeGraph
@@ -1812,7 +1752,6 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
         endDate={endDateHelium}
         widgetData={befePreset}  marketPlaceId={selectedCategory == 'all' ? selectedCategory : filterFinal} brand_id={selectedBrandFilter}   product_id={mergedProductsFilter} manufacturer_name={selectedManufacturerFilter} fulfillment_channel={selectedFulfillment}
     DateStartDate={appliedStartDate} DateEndDate={appliedEndDate}  />
-    
       )
 )} */}
                 {tab === 1 && (
@@ -1892,7 +1831,6 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
             DateEndDate={appliedEndDate}
           />
         </Grid>
-
         <Grid item xs={12} sm={12}>
           <Box sx={{ paddingBottom: "10px", width: "99%" }}>
             <SalesIncreasing
@@ -1920,7 +1858,6 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
               DateEndDate={appliedEndDate}
             />
           </Box>
-
           <Grid item xs={12} sm={12} sx={{ width: "99%" }}>
             <AllMarketplace
               widgetData={appliedPreset}
@@ -1952,7 +1889,6 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
           {/* <Grid item xs={12} sm={12} sx={{width:'99%'}}>
           <TestProfitLoss  widgetData={befePreset} marketPlaceId={selectedCategory == 'all' ? selectedCategory : filterFinal}/>
         </Grid> */}
-
           <Grid item xs={12} sm={12}>
             <MyProductList
               widgetData={appliedPreset}
@@ -1975,5 +1911,4 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
     </Box>
   );
 }
-
 export default ClientDashboardpage;
