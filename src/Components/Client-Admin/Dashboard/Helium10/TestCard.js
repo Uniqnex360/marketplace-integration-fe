@@ -229,13 +229,9 @@ const TestCard = ({
 
   const getDisplayDateText = (widgetData, DateStartDate, DateEndDate, displayDate, selectedDate) => {
     const today = dayjs().tz(TIMEZONE);
-     if (DateStartDate && DateEndDate) {
-    const start = dayjs(DateStartDate).tz(TIMEZONE);
-    const end = dayjs(DateEndDate).tz(TIMEZONE);
-    if (start.isValid() && end.isValid()) {
-      return `${start.format("MMM DD")} - ${end.format("MMM DD")}`;
+    if (DateStartDate && DateEndDate) {
+      return `${DateStartDate} - ${DateEndDate}`;
     }
-  }
 
     switch (widgetData) {
       case "Today":
@@ -279,16 +275,10 @@ const TestCard = ({
     
     // Handle custom date range - FIX: Use exact dates without startOf/endOf
     if (DateStartDate && DateEndDate) {
-    const startDate = dayjs(DateStartDate).tz(TIMEZONE);
-    const endDate = dayjs(DateEndDate).tz(TIMEZONE);
-    
-    // Ensure dates are valid before setting
-    if (startDate.isValid() && endDate.isValid()) {
-      setDisplayDate(startDate);
-      setSelectedDate(endDate);
+      setDisplayDate(dayjs(DateStartDate))
+      setSelectedDate(dayjs(DateEndDate))
+      return;
     }
-    return;
-  }
 
     // Handle preset date ranges
     switch (widgetData) {
@@ -423,33 +413,26 @@ const TestCard = ({
   const today = dayjs().tz(TIMEZONE);
 
   const handlePrevious = () => {
-  if (DateStartDate && DateEndDate) {
-    const rangeDays = dayjs(DateEndDate).diff(dayjs(DateStartDate), 'day') + 1;
-    const newStartDate = displayDate.subtract(rangeDays, 'day');
-    const newEndDate = selectedDate.subtract(rangeDays, 'day');
-    
-    // Don't allow dates before your data starts (if applicable)
-    setDisplayDate(newStartDate);
-    setSelectedDate(newEndDate);
-  } else {
-    setSelectedDate(prev => prev.subtract(1, "day"));
-  }
-};
+    if (DateStartDate && DateEndDate) {
+      const rangeDays = dayjs(DateEndDate).diff(dayjs(DateStartDate), 'day') + 1;
+      setDisplayDate(prev => prev.subtract(rangeDays, 'day'));
+      setSelectedDate(prev => prev.subtract(rangeDays, 'day'));
+    } else {
+      setSelectedDate(prev => prev.subtract(1, "day"));
+    }
+  };
 
-const handleNext = () => {
-  if (DateStartDate && DateEndDate) {
-    const rangeDays = dayjs(DateEndDate).diff(dayjs(DateStartDate), 'day') + 1;
-    const newEndDate = selectedDate.add(rangeDays, 'day');
-    
-    // Don't allow dates in the future
-    if (newEndDate.isAfter(dayjs().tz(TIMEZONE))) return;
-    
-    setDisplayDate(prev => prev.add(rangeDays, 'day'));
-    setSelectedDate(prev => prev.add(rangeDays, 'day'));
-  } else if (!selectedDate.isSame(today, "day")) {
-    setSelectedDate(prev => prev.add(1, "day"));
-  }
-};
+  const handleNext = () => {
+    if (DateStartDate && DateEndDate) {
+      const rangeDays = dayjs(DateEndDate).diff(dayjs(DateStartDate), 'day') + 1;
+      const newEndDate = dayjs(selectedDate).add(rangeDays, 'day');
+      if (newEndDate.isAfter(dayjs().tz(TIMEZONE))) return;
+      setDisplayDate(prev => prev.add(rangeDays, 'day'));
+      setSelectedDate(prev => prev.add(rangeDays, 'day'));
+    } else if (!selectedDate.isSame(today, "day")) {
+      setSelectedDate(prev => prev.add(1, "day"));
+    }
+  };
 
   const handleBackToToday = () => {
     setSelectedDate(today);
