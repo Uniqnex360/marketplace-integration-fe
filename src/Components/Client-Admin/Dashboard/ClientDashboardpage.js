@@ -733,6 +733,7 @@ function ClientDashboardpage() {
     setSelectedAsin([]);
     setMergedProducts([]);
     setMergedProductsFilter([]);
+    setActiveFilters([])
     setSelectedBrandFilter([]);
     setSelectedManufacturerFilter([]);
     setStartDate(null);
