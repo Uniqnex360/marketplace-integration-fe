@@ -63,13 +63,13 @@ function ClientDashboardpage() {
     name: "All Channels",
   });
   const [categories, setCategories] = useState([]);
-  const [appliedStartDateHelium,setAppliedStartDateHelium]=useState(dayjs().subtract(7,'day'))
-  const [appliedEndDateHelium,setAppliedEndDateHelium]=useState(dayjs())
   const [isLoading, setIsLoading] = useState(true);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [appliedStartDate, setAppliedStartDate] = useState(null);
   const [appliedEndDate, setAppliedEndDate] = useState(null);
+  const [tempStartDate,setTempStartDate]=useState(null)
+  const [tempEndDate,setTempEndDate]=useState(null)
   const [filter, setFilter] = useState("all"); // Default filter state
   const [filterFinal, setFilterFinal] = useState({
     id: "all",
@@ -159,7 +159,16 @@ function ClientDashboardpage() {
   const [selectedPreset, setSelectedPreset] = useState("Today");
 
   const [hasMore, setHasMore] = React.useState(true); // Track if there are more items to load
-
+  const handleTempStartDateChange=(newValue)=>{
+    setTempStartDate(newValue)
+    if(tempEndDate && newValue>tempEndDate)
+    {
+      setTempEndDate(null)
+    }
+  }
+  const handleTempEndDateChange=(newValue)=>{
+    setTempEndDate(newValue)
+  }
   const handleChange = (newValue) => {
     setValue(newValue);
   };
@@ -688,11 +697,7 @@ function ClientDashboardpage() {
   const handleApplyFilter = () => {
     setBefePreset(selectedPreset);
     console.log("index", befePreset);
-    if(startDateHelium && endDateHelium)
-    {
-        setAppliedEndDateHelium(endDateHelium)
-        setAppliedStartDateHelium(startDateHelium)
-    }
+    // Check if selectedCategory exists (to apply filter without date)
     if (selectedCategory) {
       // Apply filter using only selectedCategory if both dates are missing or valid
       setSelectedManufacturerFilter(selectedManufacturer);
@@ -718,11 +723,11 @@ function ClientDashboardpage() {
     }
 
     // If both dates are selected
-    if (startDate && endDate) {
+    if (tempStartDate && tempEndDate) {
       console.log("Raw:", startDate, endDate);
 
-      const start = new Date(startDate);
-      const end = new Date(endDate);
+      const start = new Date(tempStartDate);
+      const end = new Date(tempEndDate);
 
       const formattedStartDate = start.toLocaleDateString("en-CA"); // Format: YYYY-MM-DD
       const formattedEndDate = end.toLocaleDateString("en-CA");
@@ -1572,7 +1577,7 @@ function ClientDashboardpage() {
                   <DatePicker
                     label="Start Date"
                     value={startDate}
-                    onChange={handleStartDateChange}
+                    onChange={handleTempStartDateChange}
                     views={["year", "month", "day"]}
                     disableFuture
                     maxDate={endDate}
@@ -1598,7 +1603,7 @@ function ClientDashboardpage() {
                   <DatePicker
                     label="End Date"
                     value={endDate}
-                    onChange={handleEndDateChange}
+                    onChange={handleTempEndDateChange}
                     views={["year", "month", "day"]}
                     minDate={startDate}
                     shouldDisableDate={(date) =>
@@ -1633,8 +1638,8 @@ function ClientDashboardpage() {
             marketPlaceId={
               selectedCategory == "all" ? selectedCategory : filterFinal
             }
-            startDate={appliedStartDateHelium}
-            endDate={appliedEndDateHelium}
+            startDate={startDateHelium}
+            endDate={endDateHelium}
             widgetData={befePreset}
             brand_id={selectedBrandFilter}
             product_id={mergedProductsFilter}
@@ -1780,8 +1785,8 @@ function ClientDashboardpage() {
               <Box>
                 {tab === 0 && (
                   <CompareChart
-                    startDate={appliedStartDateHelium}
-                    endDate={appliedEndDateHelium}
+                    startDate={startDateHelium}
+                    endDate={endDateHelium}
                     widgetData={befePreset}
                     marketPlaceId={
                       selectedCategory == "all" ? selectedCategory : filterFinal
@@ -1813,8 +1818,8 @@ function ClientDashboardpage() {
 )} */}
                 {tab === 1 && (
                   <TopProducts
-                    startDate={appliedStartDateHelium}
-                    endDate={appliedEndDateHelium}
+                    startDate={startDateHelium}
+                    endDate={endDateHelium}
                     widgetData={befePreset}
                     marketPlaceId={
                       selectedCategory == "all" ? selectedCategory : filterFinal
@@ -1874,8 +1879,8 @@ function ClientDashboardpage() {
         </Grid>
         <Grid item xs={12} sm={12}>
           <MetricCard
-            startDate={appliedStartDateHelium}
-            endDate={appliedEndDateHelium}
+            startDate={startDateHelium}
+            endDate={endDateHelium}
             widgetData={befePreset}
             marketPlaceId={
               selectedCategory === "all" ? selectedCategory : filterFinal
