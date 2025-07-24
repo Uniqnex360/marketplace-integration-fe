@@ -186,7 +186,12 @@ const TestCard = ({
   // Fetch data when UI dates change
   useEffect(() => {
     fetchMetrics(uiDates.selectedDate, uiDates.displayDate);
-  }, [uiDates.selectedDate, uiDates.displayDate, widgetData]);
+  }, [uiDates.selectedDate, uiDates.displayDate,widgetData,
+  brand_id,
+  product_id,
+  manufacturer_name,
+  fulfillment_channel,
+  marketPlaceId?.id,]);
 
   const fetchMetrics = async (selectedDate, displayDate) => {
     setDataLoading(true);
@@ -288,7 +293,6 @@ const TestCard = ({
     return widgetData;
   };
 
-  // Fixed date initialization logic
   useEffect(() => {
     const today = dayjs().tz(TIMEZONE);
     let newDisplayDate, newSelectedDate;
