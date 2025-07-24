@@ -210,21 +210,15 @@ const TestCard = ({
       const selectedMetricKeys = Object.keys(data.targeted || {});
       setVisibleMetrics(selectedMetricKeys);
 
-      // Fixed graph data transformation to handle the date format properly
       const transformedGraphData = Object.entries(data.graph_data || {}).map(
-        ([rawDate, values]) => {
-          // Parse the date string properly - it comes as "july 15, 2025"
-          const parsedDate = dayjs(rawDate).tz(TIMEZONE);
-          return {
-            date: parsedDate.format("MMM DD"),
-            revenue: values.gross_revenue,
-            fullDate: parsedDate.toDate(),
-          };
-        }
+        ([rawDate, values]) => ({
+          date: dayjs(rawDate.charAt(0).toUpperCase() + rawDate.slice(1))
+            .tz(TIMEZONE)
+            .format("MMM DD"),
+          revenue: values.gross_revenue,
+          fullDate: dayjs(rawDate).toDate(),
+        })
       );
-      
-      // Sort by date to ensure proper order
-      transformedGraphData.sort((a, b) => new Date(a.fullDate) - new Date(b.fullDate));
       setBindGraph(transformedGraphData);
     } catch (error) {
       console.error("Error fetching metrics:", error);
@@ -233,16 +227,15 @@ const TestCard = ({
     }
   };
 
-  // Fixed display date text function
   const getDisplayDateText = (widgetData, DateStartDate, DateEndDate, displayDate, selectedDate) => {
     const today = dayjs().tz(TIMEZONE);
-    
-    // For custom date range, use the actual DateStartDate and DateEndDate
-    if (DateStartDate && DateEndDate) {
-      const start = dayjs(DateStartDate).tz(TIMEZONE);
-      const end = dayjs(DateEndDate).tz(TIMEZONE);
+     if (DateStartDate && DateEndDate) {
+    const start = dayjs(DateStartDate).tz(TIMEZONE);
+    const end = dayjs(DateEndDate).tz(TIMEZONE);
+    if (start.isValid() && end.isValid()) {
       return `${start.format("MMM DD")} - ${end.format("MMM DD")}`;
     }
+  }
 
     switch (widgetData) {
       case "Today":
@@ -284,12 +277,18 @@ const TestCard = ({
   useEffect(() => {
     const today = dayjs().tz(TIMEZONE);
     
-    // Handle custom date range - Use exact dates provided
+    // Handle custom date range - FIX: Use exact dates without startOf/endOf
     if (DateStartDate && DateEndDate) {
-      setDisplayDate(dayjs(DateStartDate).tz(TIMEZONE));
-      setSelectedDate(dayjs(DateEndDate).tz(TIMEZONE));
-      return;
+    const startDate = dayjs(DateStartDate).tz(TIMEZONE);
+    const endDate = dayjs(DateEndDate).tz(TIMEZONE);
+    
+    // Ensure dates are valid before setting
+    if (startDate.isValid() && endDate.isValid()) {
+      setDisplayDate(startDate);
+      setSelectedDate(endDate);
     }
+    return;
+  }
 
     // Handle preset date ranges
     switch (widgetData) {
@@ -423,35 +422,34 @@ const TestCard = ({
 
   const today = dayjs().tz(TIMEZONE);
 
-  // Fixed navigation handlers for custom date ranges
   const handlePrevious = () => {
-    if (DateStartDate && DateEndDate) {
-      const rangeDays = dayjs(DateEndDate).diff(dayjs(DateStartDate), 'day') + 1;
-      const newStartDate = dayjs(DateStartDate).subtract(rangeDays, 'day');
-      const newEndDate = dayjs(DateEndDate).subtract(rangeDays, 'day');
-      
-      // Update the dates by modifying the parent component's date props
-      // You might need to call a callback function here to update the parent
-      setDisplayDate(newStartDate);
-      setSelectedDate(newEndDate);
-    } else {
-      setSelectedDate(prev => prev.subtract(1, "day"));
-    }
-  };
+  if (DateStartDate && DateEndDate) {
+    const rangeDays = dayjs(DateEndDate).diff(dayjs(DateStartDate), 'day') + 1;
+    const newStartDate = displayDate.subtract(rangeDays, 'day');
+    const newEndDate = selectedDate.subtract(rangeDays, 'day');
+    
+    // Don't allow dates before your data starts (if applicable)
+    setDisplayDate(newStartDate);
+    setSelectedDate(newEndDate);
+  } else {
+    setSelectedDate(prev => prev.subtract(1, "day"));
+  }
+};
 
-  const handleNext = () => {
-    if (DateStartDate && DateEndDate) {
-      const rangeDays = dayjs(DateEndDate).diff(dayjs(DateStartDate), 'day') + 1;
-      const newEndDate = dayjs(DateEndDate).add(rangeDays, 'day');
-      if (newEndDate.isAfter(dayjs().tz(TIMEZONE))) return;
-      
-      const newStartDate = dayjs(DateStartDate).add(rangeDays, 'day');
-      setDisplayDate(newStartDate);
-      setSelectedDate(newEndDate);
-    } else if (!selectedDate.isSame(today, "day")) {
-      setSelectedDate(prev => prev.add(1, "day"));
-    }
-  };
+const handleNext = () => {
+  if (DateStartDate && DateEndDate) {
+    const rangeDays = dayjs(DateEndDate).diff(dayjs(DateStartDate), 'day') + 1;
+    const newEndDate = selectedDate.add(rangeDays, 'day');
+    
+    // Don't allow dates in the future
+    if (newEndDate.isAfter(dayjs().tz(TIMEZONE))) return;
+    
+    setDisplayDate(prev => prev.add(rangeDays, 'day'));
+    setSelectedDate(prev => prev.add(rangeDays, 'day'));
+  } else if (!selectedDate.isSame(today, "day")) {
+    setSelectedDate(prev => prev.add(1, "day"));
+  }
+};
 
   const handleBackToToday = () => {
     setSelectedDate(today);
@@ -462,7 +460,6 @@ const TestCard = ({
   };
 
   const getGraphPoints = () => {
-    if (bindGraph.length === 0) return "";
     const maxRevenue = Math.max(...bindGraph.map((d) => d.revenue), 1);
     return bindGraph
       .map((item, index) => {
@@ -474,7 +471,6 @@ const TestCard = ({
   };
 
   const getCirclePoints = () => {
-    if (bindGraph.length === 0) return [];
     const maxRevenue = Math.max(...bindGraph.map((d) => d.revenue), 1);
     return bindGraph.map((item, index) => ({
       ...item,
@@ -517,11 +513,7 @@ const TestCard = ({
                 <ChevronLeft fontSize="small" />
               </IconButton>
 
-              <Tooltip title={
-                DateStartDate && DateEndDate 
-                  ? `${dayjs(DateStartDate).format("DD/MM/YYYY")} - ${dayjs(DateEndDate).format("DD/MM/YYYY")}`
-                  : `${displayDate.format("DD/MM/YYYY")} - ${selectedDate.format("DD/MM/YYYY")}`
-              }>
+              <Tooltip title={`${displayDate.format("DD/MM/YYYY")} - ${selectedDate.format("DD/MM/YYYY")}`}>
                 <Box>
                   <Typography
                     fontWeight="bold"
@@ -571,16 +563,20 @@ const TestCard = ({
                   tooltip={
                     selectedDate.isSame(today, "day")
                       ? `Yesterday: ${formatCurrency(previous.gross_revenue)}`
-                      : `Previous Period: ${formatCurrency(previous.gross_revenue)}`
+                      : `${selectedDate
+                          .subtract(1, "day")
+                          .format("MMM DD")}: ${formatCurrency(
+                          previous.gross_revenue
+                        )}`
                   }
                   currencySymbol="$"
                 />
               )}
             </Box>
           )}
-
           {/* Chart */}
-          {visibleMetrics.includes("gross_revenue") && bindGraph.length > 0 && (
+
+          {visibleMetrics.includes("gross_revenue") && (
             <Box sx={{ borderRight: "1px solid #e0e0e0" }}>
               <Box
                 ref={graphContainerRef}
@@ -716,7 +712,6 @@ const TestCard = ({
               </Box>
             </Box>
           )}
-
           {/* Other Metric Cards */}
           {[
             "total_orders",
@@ -737,7 +732,7 @@ const TestCard = ({
                     value={metrics[id]}
                     change={difference[id]}
                     isNegative={String(difference[id]).startsWith("-")}
-                    tooltip={item.tooltip(selectedDate, today, previous[id])}
+                    tooltip={item.tooltip(selectedDate, today, previous[id])} // ✅ call the function
                     currencySymbol={item.currencySymbol}
                     percentSymbol={item.percentSymbol}
                   />
@@ -751,6 +746,7 @@ const TestCard = ({
             onClick={handleOpen}
             sx={{
               marginTop: "-1px",
+
               display: "flex",
               alignItems: "center",
               gap: 1,
