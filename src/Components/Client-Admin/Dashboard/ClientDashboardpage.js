@@ -770,6 +770,7 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
     setFilterFinal({ id: "all", name: "All Channels" });
     setFilter("all");
     setResetCounter((prev) => prev + 1);
+    setAppliedPreset("Today");
 
     // Clear brand, SKU, ASIN, manufacturer selections
     setSelectedBrand([]);
@@ -1638,7 +1639,7 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
             }
             startDate={appliedStartDateHelium}
             endDate={appliedEndDateHelium}
-            widgetData={befePreset}
+            widgetData={appliedPreset}
             brand_id={selectedBrandFilter}
             product_id={mergedProductsFilter}
             manufacturer_name={selectedManufacturerFilter}
@@ -1785,7 +1786,7 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                   <CompareChart
                     startDate={appliedStartDateHelium}
                     endDate={appliedEndDateHelium}
-                    widgetData={befePreset}
+                    widgetData={appliedPreset}
                     marketPlaceId={
                       selectedCategory == "all" ? selectedCategory : filterFinal
                     }
@@ -1818,7 +1819,7 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                   <TopProducts
                     startDate={appliedStartDateHelium}
                     endDate={appliedEndDateHelium}
-                    widgetData={befePreset}
+                    widgetData={appliedPreset}
                     marketPlaceId={
                       selectedCategory == "all" ? selectedCategory : filterFinal
                     }
@@ -1833,7 +1834,7 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
                 {tab === 2 && (
                   <TotalOrdersGraph
                     key={setResetCounter}
-                    widgetData={befePreset}
+                    widgetData={appliedPreset}
                     marketPlaceId={
                       selectedCategory === "all"
                         ? selectedCategory
@@ -1879,7 +1880,7 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
           <MetricCard
             startDate={appliedStartDateHelium}
             endDate={appliedEndDateHelium}
-            widgetData={befePreset}
+            widgetData={appliedPreset}
             marketPlaceId={
               selectedCategory === "all" ? selectedCategory : filterFinal
             }
@@ -1922,7 +1923,7 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
 
           <Grid item xs={12} sm={12} sx={{ width: "99%" }}>
             <AllMarketplace
-              widgetData={befePreset}
+              widgetData={appliedPreset}
               marketPlaceId={
                 selectedCategory === "all" ? selectedCategory : filterFinal
               }
@@ -1936,7 +1937,7 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
           </Grid>
           <Grid item xs={12} sm={12} sx={{ width: "99%" }}>
             <ProfitAndLoss
-              widgetData={befePreset}
+              widgetData={appliedPreset}
               marketPlaceId={
                 selectedCategory == "all" ? selectedCategory : filterFinal
               }
@@ -1954,7 +1955,7 @@ const [appliedPreset, setAppliedPreset] = useState("Today");
 
           <Grid item xs={12} sm={12}>
             <MyProductList
-              widgetData={befePreset}
+              widgetData={appliedPreset}
               marketPlaceId={
                 selectedCategory == "all" ? selectedCategory : filterFinal
               }
