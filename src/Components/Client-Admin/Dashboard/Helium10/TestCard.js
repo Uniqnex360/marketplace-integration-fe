@@ -11,7 +11,7 @@ import {
   DialogContent,
 } from "@mui/material";
 import "./Helium.css";
-import SettingsIcon from "@mui/icons-material/Settings";
+import SettingsIcon from "@mui/material/Settings";
 
 import {
   ArrowDownward,
@@ -44,6 +44,7 @@ const MetricItem = ({
   tooltip,
   currencySymbol,
   percentSymbol,
+  loading = false,
 }) => {
   const absValue = Math.abs(value ?? 0);
   const absChange = Math.abs(change ?? 0);
@@ -60,7 +61,7 @@ const MetricItem = ({
       : "";
 
   return (
-    <Card sx={{ borderRadius: 2, minWidth: 200, height: 60 }}>
+    <Card sx={{ borderRadius: 2, minWidth: 200, height: 60, opacity: loading ? 0.6 : 1 }}>
       <CardContent sx={{ py: 0.5 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography fontSize={14} color="text.secondary">
@@ -81,7 +82,7 @@ const MetricItem = ({
               sx={{ fontSize: "20px" }}
               fontWeight="bold"
             >
-              {displayValue}
+              {loading ? "..." : displayValue}
             </Typography>
           </Tooltip>
 
@@ -93,12 +94,12 @@ const MetricItem = ({
               alignItems="center"
               gap={0.5}
             >
-              {displayChange}
-              {isNegative ? (
+              {loading ? "..." : displayChange}
+              {!loading && (isNegative ? (
                 <ArrowDownward fontSize="inherit" />
               ) : (
                 <ArrowUpward fontSize="inherit" />
-              )}
+              ))}
             </Typography>
           )}
         </Box>
@@ -118,14 +119,26 @@ const TestCard = ({
   fulfillment_channel,
 }) => {
   const theme = useTheme();
-  const [selectedDate, setSelectedDate] = useState(dayjs().tz(TIMEZONE));
-  const [displayDate, setDisplayDate] = useState(dayjs().tz(TIMEZONE));
-  const [metrics, setMetrics] = useState({});
-  const [previous, setPrevious] = useState({});
-  const [difference, setDifference] = useState({});
-  const [bindGraph, setBindGraph] = useState([]);
+  
+  // Separate UI state from data state
+  const [uiDates, setUiDates] = useState({
+    selectedDate: dayjs().tz(TIMEZONE),
+    displayDate: dayjs().tz(TIMEZONE)
+  });
+  
+  // Data state - only updates when API call completes
+  const [dataState, setDataState] = useState({
+    selectedDate: dayjs().tz(TIMEZONE),
+    displayDate: dayjs().tz(TIMEZONE),
+    metrics: {},
+    previous: {},
+    difference: {},
+    bindGraph: [],
+  });
+  
   const [tooltipData, setTooltipData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(false); // Separate loading state for data
 
   const userData = JSON.parse(localStorage.getItem("user") || "{}");
   const userId = userData?.id || "";
@@ -149,7 +162,7 @@ const TestCard = ({
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
-    fetchMetrics(selectedDate);
+    fetchMetrics(uiDates.selectedDate, uiDates.displayDate);
   };
 
   const handleMetricToggle = (metric) => {
@@ -170,15 +183,16 @@ const TestCard = ({
     }
   }, []);
 
+  // Fetch data when UI dates change
   useEffect(() => {
-    fetchMetrics(selectedDate);
-  }, [selectedDate, widgetData]);
+    fetchMetrics(uiDates.selectedDate, uiDates.displayDate);
+  }, [uiDates.selectedDate, uiDates.displayDate, widgetData]);
 
-  const fetchMetrics = async (date) => {
-    setLoading(true);
+  const fetchMetrics = async (selectedDate, displayDate) => {
+    setDataLoading(true);
     try {
       const payload = {
-        target_date: date.format("DD/MM/YYYY"),
+        target_date: selectedDate.format("DD/MM/YYYY"),
         user_id: userId,
         preset: widgetData,
         marketplace_id: marketPlaceId.id,
@@ -203,27 +217,32 @@ const TestCard = ({
       );
 
       const data = response.data.data;
-      setMetrics(data.targeted || {});
-      setPrevious(data.previous || {});
-      setDifference(data.difference || {});
+      
+      // Update data state only after successful API call
+      setDataState({
+        selectedDate,
+        displayDate,
+        metrics: data.targeted || {},
+        previous: data.previous || {},
+        difference: data.difference || {},
+        bindGraph: Object.entries(data.graph_data || {}).map(
+          ([rawDate, values]) => ({
+            date: dayjs(rawDate.charAt(0).toUpperCase() + rawDate.slice(1))
+              .tz(TIMEZONE)
+              .format("MMM DD"),
+            revenue: values.gross_revenue,
+            fullDate: dayjs(rawDate).toDate(),
+          })
+        ),
+      });
 
       const selectedMetricKeys = Object.keys(data.targeted || {});
       setVisibleMetrics(selectedMetricKeys);
 
-      const transformedGraphData = Object.entries(data.graph_data || {}).map(
-        ([rawDate, values]) => ({
-          date: dayjs(rawDate.charAt(0).toUpperCase() + rawDate.slice(1))
-            .tz(TIMEZONE)
-            .format("MMM DD"),
-          revenue: values.gross_revenue,
-          fullDate: dayjs(rawDate).toDate(),
-        })
-      );
-      setBindGraph(transformedGraphData);
     } catch (error) {
       console.error("Error fetching metrics:", error);
     } finally {
-      setLoading(false);
+      setDataLoading(false);
     }
   };
 
@@ -231,7 +250,6 @@ const TestCard = ({
     const today = dayjs().tz(TIMEZONE);
     if (DateStartDate && DateEndDate) {
       return `${dayjs(DateStartDate).format("MMMM D, YYYY")} - ${dayjs(DateEndDate).format("MMMM D, YYYY")}`;
-
     }
 
     switch (widgetData) {
@@ -273,80 +291,85 @@ const TestCard = ({
   // Fixed date initialization logic
   useEffect(() => {
     const today = dayjs().tz(TIMEZONE);
+    let newDisplayDate, newSelectedDate;
     
-    // Handle custom date range - FIX: Use exact dates without startOf/endOf
+    // Handle custom date range
     if (DateStartDate && DateEndDate) {
-      setDisplayDate(dayjs(DateStartDate))
-      setSelectedDate(dayjs(DateEndDate))
-      return;
+      newDisplayDate = dayjs(DateStartDate);
+      newSelectedDate = dayjs(DateEndDate);
+    } else {
+      // Handle preset date ranges
+      switch (widgetData) {
+        case "Today":
+          newDisplayDate = today;
+          newSelectedDate = today;
+          break;
+        case "Yesterday":
+          newDisplayDate = today.subtract(1, "day");
+          newSelectedDate = today.subtract(1, "day");
+          break;
+        case "This Week":
+          newDisplayDate = today.startOf("week");
+          newSelectedDate = today.endOf("week");
+          break;
+        case "Last Week":
+          newDisplayDate = today.subtract(1, "week").startOf("week");
+          newSelectedDate = today.subtract(1, "week").endOf("week");
+          break;
+        case "Last 7 days":
+          newDisplayDate = today.subtract(6, "day");
+          newSelectedDate = today;
+          break;
+        case "Last 14 days":
+          newDisplayDate = today.subtract(13, "day");
+          newSelectedDate = today;
+          break;
+        case "Last 30 days":
+          newDisplayDate = today.subtract(29, "day");
+          newSelectedDate = today;
+          break;
+        case "Last 60 days":
+          newDisplayDate = today.subtract(59, "day");
+          newSelectedDate = today;
+          break;
+        case "Last 90 days":
+          newDisplayDate = today.subtract(89, "day");
+          newSelectedDate = today;
+          break;
+        case "This Month":
+          newDisplayDate = today.startOf("month");
+          newSelectedDate = today.endOf("month");
+          break;
+        case "Last Month":
+          newDisplayDate = today.subtract(1, "month").startOf("month");
+          newSelectedDate = today.subtract(1, "month").endOf("month");
+          break;
+        case "This Quarter":
+          newDisplayDate = today.startOf("quarter");
+          newSelectedDate = today.endOf("quarter");
+          break;
+        case "Last Quarter":
+          newDisplayDate = today.subtract(1, "quarter").startOf("quarter");
+          newSelectedDate = today.subtract(1, "quarter").endOf("quarter");
+          break;
+        case "This Year":
+          newDisplayDate = today.startOf("year");
+          newSelectedDate = today.endOf("year");
+          break;
+        case "Last Year":
+          newDisplayDate = today.subtract(1, "year").startOf("year");
+          newSelectedDate = today.subtract(1, "year").endOf("year");
+          break;
+        default:
+          newDisplayDate = today;
+          newSelectedDate = today;
+      }
     }
 
-    // Handle preset date ranges
-    switch (widgetData) {
-      case "Today":
-        setDisplayDate(today);
-        setSelectedDate(today);
-        break;
-      case "Yesterday":
-        setDisplayDate(today.subtract(1, "day"));
-        setSelectedDate(today.subtract(1, "day"));
-        break;
-      case "This Week":
-        setDisplayDate(today.startOf("week"));
-        setSelectedDate(today.endOf("week"));
-        break;
-      case "Last Week":
-        setDisplayDate(today.subtract(1, "week").startOf("week"));
-        setSelectedDate(today.subtract(1, "week").endOf("week"));
-        break;
-      case "Last 7 days":
-        setDisplayDate(today.subtract(6, "day")); // 6 days back + today = 7 days
-        setSelectedDate(today);
-        break;
-      case "Last 14 days":
-        setDisplayDate(today.subtract(13, "day")); // 13 days back + today = 14 days
-        setSelectedDate(today);
-        break;
-      case "Last 30 days":
-        setDisplayDate(today.subtract(29, "day")); // 29 days back + today = 30 days
-        setSelectedDate(today);
-        break;
-      case "Last 60 days":
-        setDisplayDate(today.subtract(59, "day")); // 59 days back + today = 60 days
-        setSelectedDate(today);
-        break;
-      case "Last 90 days":
-        setDisplayDate(today.subtract(89, "day")); // 89 days back + today = 90 days
-        setSelectedDate(today);
-        break;
-      case "This Month":
-        setDisplayDate(today.startOf("month"));
-        setSelectedDate(today.endOf("month"));
-        break;
-      case "Last Month":
-        setDisplayDate(today.subtract(1, "month").startOf("month"));
-        setSelectedDate(today.subtract(1, "month").endOf("month"));
-        break;
-      case "This Quarter":
-        setDisplayDate(today.startOf("quarter"));
-        setSelectedDate(today.endOf("quarter"));
-        break;
-      case "Last Quarter":
-        setDisplayDate(today.subtract(1, "quarter").startOf("quarter"));
-        setSelectedDate(today.subtract(1, "quarter").endOf("quarter"));
-        break;
-      case "This Year":
-        setDisplayDate(today.startOf("year"));
-        setSelectedDate(today.endOf("year"));
-        break;
-      case "Last Year":
-        setDisplayDate(today.subtract(1, "year").startOf("year"));
-        setSelectedDate(today.subtract(1, "year").endOf("year"));
-        break;
-      default:
-        setDisplayDate(today);
-        setSelectedDate(today);
-    }
+    setUiDates({
+      displayDate: newDisplayDate,
+      selectedDate: newSelectedDate
+    });
   }, [widgetData, DateStartDate, DateEndDate]);
 
   const formatCurrency = (value) =>
@@ -416,38 +439,55 @@ const TestCard = ({
   const handlePrevious = () => {
     if (DateStartDate && DateEndDate) {
       const rangeDays = dayjs(DateEndDate).diff(dayjs(DateStartDate), 'day') + 1;
-      setDisplayDate(prev => prev.subtract(rangeDays, 'day'));
-      setSelectedDate(prev => prev.subtract(rangeDays, 'day'));
+      setUiDates(prev => ({
+        displayDate: prev.displayDate.subtract(rangeDays, 'day'),
+        selectedDate: prev.selectedDate.subtract(rangeDays, 'day')
+      }));
     } else {
-      setSelectedDate(prev => prev.subtract(1, "day"));
+      setUiDates(prev => ({
+        ...prev,
+        selectedDate: prev.selectedDate.subtract(1, "day")
+      }));
     }
   };
 
   const handleNext = () => {
     if (DateStartDate && DateEndDate) {
       const rangeDays = dayjs(DateEndDate).diff(dayjs(DateStartDate), 'day') + 1;
-      const newEndDate = dayjs(selectedDate).add(rangeDays, 'day');
+      const newEndDate = dayjs(uiDates.selectedDate).add(rangeDays, 'day');
       if (newEndDate.isAfter(dayjs().tz(TIMEZONE))) return;
-      setDisplayDate(prev => prev.add(rangeDays, 'day'));
-      setSelectedDate(prev => prev.add(rangeDays, 'day'));
-    } else if (!selectedDate.isSame(today, "day")) {
-      setSelectedDate(prev => prev.add(1, "day"));
+      setUiDates(prev => ({
+        displayDate: prev.displayDate.add(rangeDays, 'day'),
+        selectedDate: prev.selectedDate.add(rangeDays, 'day')
+      }));
+    } else if (!uiDates.selectedDate.isSame(today, "day")) {
+      setUiDates(prev => ({
+        ...prev,
+        selectedDate: prev.selectedDate.add(1, "day")
+      }));
     }
   };
 
   const handleBackToToday = () => {
-    setSelectedDate(today);
     if (DateStartDate && DateEndDate) {
       const rangeDays = dayjs(DateEndDate).diff(dayjs(DateStartDate), 'day') + 1;
-      setDisplayDate(today.subtract(rangeDays - 1, 'day'));
+      setUiDates({
+        displayDate: today.subtract(rangeDays - 1, 'day'),
+        selectedDate: today
+      });
+    } else {
+      setUiDates(prev => ({
+        ...prev,
+        selectedDate: today
+      }));
     }
   };
 
   const getGraphPoints = () => {
-    const maxRevenue = Math.max(...bindGraph.map((d) => d.revenue), 1);
-    return bindGraph
+    const maxRevenue = Math.max(...dataState.bindGraph.map((d) => d.revenue), 1);
+    return dataState.bindGraph
       .map((item, index) => {
-        const x = (index / (bindGraph.length - 1)) * 280 + 10;
+        const x = (index / (dataState.bindGraph.length - 1)) * 280 + 10;
         const y = 50 - (item.revenue / maxRevenue) * 30;
         return `${x},${y}`;
       })
@@ -455,10 +495,10 @@ const TestCard = ({
   };
 
   const getCirclePoints = () => {
-    const maxRevenue = Math.max(...bindGraph.map((d) => d.revenue), 1);
-    return bindGraph.map((item, index) => ({
+    const maxRevenue = Math.max(...dataState.bindGraph.map((d) => d.revenue), 1);
+    return dataState.bindGraph.map((item, index) => ({
       ...item,
-      cx: (index / (bindGraph.length - 1)) * 280 + 10,
+      cx: (index / (dataState.bindGraph.length - 1)) * 280 + 10,
       cy: 50 - (item.revenue / maxRevenue) * 30
     }));
   };
@@ -472,6 +512,12 @@ const TestCard = ({
     py: 1,
     px: 2,
   };
+
+  // Use UI dates for display, data state for metrics
+  const displayDates = uiDates;
+  const isDataStale = dataLoading || 
+    !dataState.selectedDate.isSame(uiDates.selectedDate, 'day') ||
+    !dataState.displayDate.isSame(uiDates.displayDate, 'day');
 
   return (
     <Box
@@ -493,11 +539,11 @@ const TestCard = ({
           {/* Date Picker */}
           <Box sx={{ ...metricBlockStyle, borderRight: "1px solid #e0e0e0", borderLeft: "none" }}>
             <Box display="flex" alignItems="center" gap={1}>
-              <IconButton size="small" onClick={handlePrevious}>
+              <IconButton size="small" onClick={handlePrevious} disabled={dataLoading}>
                 <ChevronLeft fontSize="small" />
               </IconButton>
 
-              <Tooltip title={`${displayDate.format("DD/MM/YYYY")} - ${selectedDate.format("DD/MM/YYYY")}`}>
+              <Tooltip title={`${displayDates.displayDate.format("DD/MM/YYYY")} - ${displayDates.selectedDate.format("DD/MM/YYYY")}`}>
                 <Box>
                   <Typography
                     fontWeight="bold"
@@ -505,9 +551,11 @@ const TestCard = ({
                       color: "#485E75",
                       fontFamily: "'Nunito Sans', sans-serif",
                       fontSize: 14,
+                      opacity: isDataStale ? 0.7 : 1,
                     }}
                   >
-                    {getDisplayDateText(widgetData, DateStartDate, DateEndDate, displayDate, selectedDate)}
+                    {getDisplayDateText(widgetData, DateStartDate, DateEndDate, displayDates.displayDate, displayDates.selectedDate)}
+                    {dataLoading && <span style={{ marginLeft: 8 }}>...</span>}
                   </Typography>
                   <Box display="flex" justifyContent="center">
                     <Typography
@@ -521,14 +569,14 @@ const TestCard = ({
                         width: "100%",
                       }}
                     >
-                      {getSubtitleText(widgetData, DateStartDate, DateEndDate, displayDate, selectedDate)}
+                      {getSubtitleText(widgetData, DateStartDate, DateEndDate, displayDates.displayDate, displayDates.selectedDate)}
                     </Typography>
                   </Box>
                 </Box>
               </Tooltip>
 
-              {!selectedDate.isSame(today, "day") && (
-                <IconButton size="small" onClick={handleNext}>
+              {!displayDates.selectedDate.isSame(today, "day") && (
+                <IconButton size="small" onClick={handleNext} disabled={dataLoading}>
                   <ChevronRight fontSize="small" />
                 </IconButton>
               )}
@@ -538,28 +586,27 @@ const TestCard = ({
           {/* Gross Revenue */}
           {visibleMetrics.includes("gross_revenue") && (
             <Box sx={metricBlockStyle}>
-              {visibleMetrics.includes("gross_revenue") && (
-                <MetricItem
-                  title="Gross Revenue"
-                  value={metrics.gross_revenue}
-                  change={difference.gross_revenue}
-                  isNegative={String(difference.gross_revenue).startsWith("-")}
-                  tooltip={
-                    selectedDate.isSame(today, "day")
-                      ? `Yesterday: ${formatCurrency(previous.gross_revenue)}`
-                      : `${selectedDate
-                          .subtract(1, "day")
-                          .format("MMM DD")}: ${formatCurrency(
-                          previous.gross_revenue
-                        )}`
-                  }
-                  currencySymbol="$"
-                />
-              )}
+              <MetricItem
+                title="Gross Revenue"
+                value={dataState.metrics.gross_revenue}
+                change={dataState.difference.gross_revenue}
+                isNegative={String(dataState.difference.gross_revenue).startsWith("-")}
+                tooltip={
+                  dataState.selectedDate.isSame(today, "day")
+                    ? `Yesterday: ${formatCurrency(dataState.previous.gross_revenue)}`
+                    : `${dataState.selectedDate
+                        .subtract(1, "day")
+                        .format("MMM DD")}: ${formatCurrency(
+                        dataState.previous.gross_revenue
+                      )}`
+                }
+                currencySymbol="$"
+                loading={isDataStale}
+              />
             </Box>
           )}
-          {/* Chart */}
 
+          {/* Chart */}
           {visibleMetrics.includes("gross_revenue") && (
             <Box sx={{ borderRight: "1px solid #e0e0e0" }}>
               <Box
@@ -569,6 +616,7 @@ const TestCard = ({
                   position: "relative",
                   overflow: "visible",
                   flexDirection: "column",
+                  opacity: isDataStale ? 0.6 : 1,
                 }}
                 onMouseLeave={() => setTooltipData(null)}
               >
@@ -601,72 +649,93 @@ const TestCard = ({
                       strokeWidth="1"
                     />
 
-                    <polyline
-                      points={getGraphPoints()}
-                      style={{
-                        fill: "none",
-                        stroke: theme.palette.primary.main,
-                        strokeWidth: 2,
-                      }}
-                    />
-
-                    {getCirclePoints().map((point, index) => (
-                      <circle
-                        key={index}
-                        cx={point.cx}
-                        cy={point.cy}
-                        r="10"
-                        fill="transparent"
-                        style={{ pointerEvents: "all" }}
-                        onMouseEnter={() => setTooltipData(point)}
-                        onMouseLeave={() => setTooltipData(null)}
-                      />
-                    ))}
-
-                    {tooltipData && (
+                    {!isDataStale && (
                       <>
-                        <circle
-                          cx={tooltipData.cx}
-                          cy={tooltipData.cy}
-                          r="6"
-                          fill="white"
-                          stroke={theme.palette.primary.main}
-                          strokeWidth="2"
-                          style={{ pointerEvents: "none" }}
+                        <polyline
+                          points={getGraphPoints()}
+                          style={{
+                            fill: "none",
+                            stroke: theme.palette.primary.main,
+                            strokeWidth: 2,
+                          }}
                         />
-                        <circle
-                          cx={tooltipData.cx}
-                          cy={tooltipData.cy}
-                          r="3"
-                          fill={theme.palette.primary.main}
-                          style={{ pointerEvents: "none" }}
-                        />
+
+                        {getCirclePoints().map((point, index) => (
+                          <circle
+                            key={index}
+                            cx={point.cx}
+                            cy={point.cy}
+                            r="10"
+                            fill="transparent"
+                            style={{ pointerEvents: "all" }}
+                            onMouseEnter={() => setTooltipData(point)}
+                            onMouseLeave={() => setTooltipData(null)}
+                          />
+                        ))}
+
+                        {tooltipData && (
+                          <>
+                            <circle
+                              cx={tooltipData.cx}
+                              cy={tooltipData.cy}
+                              r="6"
+                              fill="white"
+                              stroke={theme.palette.primary.main}
+                              strokeWidth="2"
+                              style={{ pointerEvents: "none" }}
+                            />
+                            <circle
+                              cx={tooltipData.cx}
+                              cy={tooltipData.cy}
+                              r="3"
+                              fill={theme.palette.primary.main}
+                              style={{ pointerEvents: "none" }}
+                            />
+                          </>
+                        )}
                       </>
                     )}
                   </svg>
 
                   {/* Graph X-axis Dates */}
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      top: 52,
-                      left: 0,
-                      right: 0,
-                      display: "flex",
-                      justifyContent: "space-between",
-                      fontSize: 11,
-                      color: "#555",
-                      px: 1,
-                      marginTop: "3px",
-                    }}
-                  >
-                    <span>{bindGraph[0]?.date}</span>
-                    <span>{bindGraph[bindGraph.length - 1]?.date}</span>
-                  </Box>
+                  {!isDataStale && (
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 52,
+                        left: 0,
+                        right: 0,
+                        display: "flex",
+                        justifyContent: "space-between",
+                        fontSize: 11,
+                        color: "#555",
+                        px: 1,
+                        marginTop: "3px",
+                      }}
+                    >
+                      <span>{dataState.bindGraph[0]?.date}</span>
+                      <span>{dataState.bindGraph[dataState.bindGraph.length - 1]?.date}</span>
+                    </Box>
+                  )}
+
+                  {isDataStale && (
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        fontSize: 12,
+                        color: "#666",
+                      }}
+                    >
+                      Loading...
+                    </Box>
+                  )}
                 </Box>
 
                 {/* Tooltip */}
-                {tooltipData && (
+                {tooltipData && !isDataStale && (
                   <Box
                     sx={{
                       position: "fixed",
@@ -696,13 +765,13 @@ const TestCard = ({
               </Box>
             </Box>
           )}
+
           {/* Other Metric Cards */}
           {[
             "total_orders",
             "total_units",
             "refund",
             "total_cogs",
-            // 'net_profit',
             "margin",
             "business_value",
           ].map((id, idx) => {
@@ -713,12 +782,13 @@ const TestCard = ({
                 <Box key={idx} sx={metricBlockStyle}>
                   <MetricItem
                     title={item.title}
-                    value={metrics[id]}
-                    change={difference[id]}
-                    isNegative={String(difference[id]).startsWith("-")}
-                    tooltip={item.tooltip(selectedDate, today, previous[id])} // ✅ call the function
+                    value={dataState.metrics[id]}
+                    change={dataState.difference[id]}
+                    isNegative={String(dataState.difference[id]).startsWith("-")}
+                    tooltip={item.tooltip(dataState.selectedDate, today, dataState.previous[id])}
                     currencySymbol={item.currencySymbol}
                     percentSymbol={item.percentSymbol}
+                    loading={isDataStale}
                   />
                 </Box>
               )
@@ -730,7 +800,6 @@ const TestCard = ({
             onClick={handleOpen}
             sx={{
               marginTop: "-1px",
-
               display: "flex",
               alignItems: "center",
               gap: 1,
