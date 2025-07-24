@@ -303,15 +303,16 @@ function ClientDashboardpage() {
   const updateActiveFilters = (type, value, label, isAdd = true) => {
     setActiveFilters((prevFilters) => {
       if (isAdd) {
-        if (
-          !prevFilters.some(
-            (filter) => filter.value === value && filter.type === type
-          )
-        ) {
+        // Check if filter already exists to prevent duplicates
+        const exists = prevFilters.some(
+          (filter) => filter.value === value && filter.type === type
+        );
+        if (!exists) {
           return [...prevFilters, { type, value, label }];
         }
         return prevFilters;
       } else {
+        // Remove filter
         return prevFilters.filter(
           (filter) => !(filter.value === value && filter.type === type)
         );
@@ -539,11 +540,25 @@ function ClientDashboardpage() {
   // };
   const handleCategorySelect = (category) => {
     if (category.id === selectedCategory.id) return;
-    setSelectedCategory(category);
-    updateActiveFilters("channel", category.id, category.name, true);
+
+    // Remove previous category filter if not "all"
     if (selectedCategory.id !== "all") {
-      updateActiveFilters("channel", category.id, category.name, false);
+      updateActiveFilters(
+        "channel",
+        selectedCategory.id,
+        selectedCategory.name,
+        false
+      );
     }
+
+    setSelectedCategory(category);
+
+    // Add new category filter if not "all"
+    if (category.id !== "all") {
+      updateActiveFilters("channel", category.id, category.name, true);
+    }
+
+    handleMenuClose();
   };
   const [appliedStartDateHelium, setAppliedStartDateHelium] = useState(
     dayjs().subtract(7, "day")
@@ -576,18 +591,19 @@ function ClientDashboardpage() {
   const toggleSelectionSKU = (sku) => {
     const isSelected = selectedSku.some((s) => s.id === sku.id);
     if (isSelected) {
-      handleRemoveSKU(sku.id);
+      setSelectedSku((prev) => {
+        const updated = prev.filter((s) => s.id !== sku.id);
+        updateMergedProducts(selectedAsin, updated);
+        return updated;
+      });
       updateActiveFilters("sku", sku.id, sku.sku, false);
     } else {
       setSelectedSku((prev) => {
-        const alreadySelected = prev.find((s) => s.id === sku.id);
-        const updated = alreadySelected
-          ? prev.filter((s) => s.id !== sku.id)
-          : [...prev, sku];
+        const updated = [...prev, sku];
         updateMergedProducts(selectedAsin, updated);
-        updateActiveFilters("sku", sku.id, sku.sku, true);
         return updated;
       });
+      updateActiveFilters("sku", sku.id, sku.sku, true);
     }
   };
   const handleRemoveAsin = (id) => {
@@ -600,16 +616,19 @@ function ClientDashboardpage() {
   const toggleSelectionAsin = (asin) => {
     const isSelected = selectedAsin.some((a) => a.id === asin.id);
     if (isSelected) {
-      handleRemoveAsin(asin.id);
+      setSelectedAsin((prev) => {
+        const updated = prev.filter((a) => a.id !== asin.id);
+        updateMergedProducts(updated, selectedSku);
+        return updated;
+      });
       updateActiveFilters("asin", asin.id, asin.Asin, false);
     } else {
-      // Not selected, so add it
       setSelectedAsin((prev) => {
         const updated = [...prev, asin];
         updateMergedProducts(updated, selectedSku);
         return updated;
       });
-      updateActiveFilters("asin", asin.id, asin.Asin, true); // <-- ADD to active filters
+      updateActiveFilters("asin", asin.id, asin.Asin, true);
     }
   };
   const handleToggleManufacturer = (manufacturer) => {
@@ -1569,23 +1588,26 @@ function ClientDashboardpage() {
                   }}
                 >
                   <Typography variant="body2" sx={{ fontWeight: 500, mr: 1 }}>
-                    Active Filters:
+                    Active Filters ({activeFilters.length}):
                   </Typography>
-                  {activeFilters.map((filter) => (
+                  {activeFilters.map((filter, index) => (
                     <Chip
-                      key={`${filter.type}-${filter.value}`}
+                      key={`${filter.type}-${filter.value}-${index}`} // Added index for uniqueness
                       label={`${
                         filter.type.charAt(0).toUpperCase() +
                         filter.type.slice(1)
                       }: ${filter.label}`}
                       onDelete={() => handleRemoveFilter(filter)}
                       size="small"
+                      variant="outlined"
                       sx={{
                         backgroundColor: "#e3f2fd",
+                        borderColor: "#1976d2",
+                        color: "#1976d2",
                         "& .MuiChip-deleteIcon": {
-                          color: "rgba(0,0,0,0.7)",
+                          color: "#1976d2",
                           "&:hover": {
-                            color: "rgba(0,0,0,1)",
+                            color: "#d32f2f",
                           },
                         },
                       }}
@@ -1595,9 +1617,18 @@ function ClientDashboardpage() {
                     variant="outlined"
                     size="small"
                     onClick={handleClearFilter}
-                    sx={{ ml: 1, textTransform: "none" }}
+                    sx={{
+                      ml: 1,
+                      textTransform: "none",
+                      borderColor: "#d32f2f",
+                      color: "#d32f2f",
+                      "&:hover": {
+                        backgroundColor: "#ffebee",
+                        borderColor: "#d32f2f",
+                      },
+                    }}
                   >
-                    Clear All
+                    Clear All ({activeFilters.length})
                   </Button>
                 </Box>
               )}
