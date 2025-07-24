@@ -11,7 +11,7 @@ import {
   DialogContent,
 } from "@mui/material";
 import "./Helium.css";
-import SettingsIcon from "@mui/material/Settings";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 import {
   ArrowDownward,
