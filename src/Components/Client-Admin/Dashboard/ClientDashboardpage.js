@@ -1304,55 +1304,6 @@ function ClientDashboardpage() {
                   </>
                 </Box>
               </Grid>
-              <Grid item xs={12} sx={{ pt:0,px:2,borderTop:activeFilters.length>0 ? '1px solid #e0e0e0':"none",backgroundColor:"#f5f7fa"}}>
-  {activeFilters.length > 0 && (
-    <Box
-      sx={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        gap: 1,
-        p: 1,
-        borderRadius: "4px",
-        mb: 2
-      }}
-    >
-      <Typography variant="body2" sx={{ fontWeight: "bold", mr: 1,fontSize:'0.75rem' ,color:'#555' }}>
-        Active Filters:
-      </Typography>
-      {activeFilters.map((filter, index) => (
-        <Chip
-          key={`${filter.type}-${filter.value}-${index}`}
-          label={`${
-            filter.type.charAt(0).toUpperCase() + filter.type.slice(1)
-          }: ${filter.label}`}
-          onDelete={() => handleRemoveFilter(filter)}
-          size="small"
-          sx={{
-            fontWeight: 500,
-          }}
-        />
-      ))}
-      <Button
-        variant="text"
-        size="small"
-        onClick={handleClearFilter}
-        sx={{
-          ml: "auto",
-          textTransform: "none",
-          fontSize:'0.7rem',
-          color:"#666",
-          '& hover':{
-            backgroundColor:'transparent',
-            color:"#000"
-          }
-        }}
-      >
-        Clear All
-      </Button>
-    </Box>
-  )}
-</Grid>
             </Grid>
             <Box
               sx={{
