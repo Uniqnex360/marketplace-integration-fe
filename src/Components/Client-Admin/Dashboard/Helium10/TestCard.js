@@ -190,11 +190,11 @@ const TestCard = ({
       };
 
       if (DateStartDate && dayjs(DateStartDate).isValid()) {
-        payload.start_date = dayjs(DateStartDate, "YYYY-MM-DD").format("DD/MM/YYYY");
+        payload.start_date = dayjs(DateStartDate).format("DD/MM/YYYY");
       }
 
       if (DateEndDate && dayjs(DateEndDate).isValid()) {
-        payload.end_date = dayjs(DateEndDate, "YYYY-MM-DD").format("DD/MM/YYYY");
+        payload.end_date = dayjs(DateEndDate).format("DD/MM/YYYY");
       }
 
       const response = await axios.post(
@@ -210,15 +210,21 @@ const TestCard = ({
       const selectedMetricKeys = Object.keys(data.targeted || {});
       setVisibleMetrics(selectedMetricKeys);
 
+      // Fixed graph data transformation to handle the date format properly
       const transformedGraphData = Object.entries(data.graph_data || {}).map(
-        ([rawDate, values]) => ({
-          date: dayjs(rawDate.charAt(0).toUpperCase() + rawDate.slice(1))
-            .tz(TIMEZONE)
-            .format("MMM DD"),
-          revenue: values.gross_revenue,
-          fullDate: dayjs(rawDate).toDate(),
-        })
+        ([rawDate, values]) => {
+          // Parse the date string properly - it comes as "july 15, 2025"
+          const parsedDate = dayjs(rawDate).tz(TIMEZONE);
+          return {
+            date: parsedDate.format("MMM DD"),
+            revenue: values.gross_revenue,
+            fullDate: parsedDate.toDate(),
+          };
+        }
       );
+      
+      // Sort by date to ensure proper order
+      transformedGraphData.sort((a, b) => new Date(a.fullDate) - new Date(b.fullDate));
       setBindGraph(transformedGraphData);
     } catch (error) {
       console.error("Error fetching metrics:", error);
@@ -227,8 +233,11 @@ const TestCard = ({
     }
   };
 
+  // Fixed display date text function
   const getDisplayDateText = (widgetData, DateStartDate, DateEndDate, displayDate, selectedDate) => {
     const today = dayjs().tz(TIMEZONE);
+    
+    // For custom date range, use the actual DateStartDate and DateEndDate
     if (DateStartDate && DateEndDate) {
       const start = dayjs(DateStartDate).tz(TIMEZONE);
       const end = dayjs(DateEndDate).tz(TIMEZONE);
@@ -274,12 +283,11 @@ const TestCard = ({
   // Fixed date initialization logic
   useEffect(() => {
     const today = dayjs().tz(TIMEZONE);
-      console.log("DateStartDate:", DateStartDate, "DateEndDate:", DateEndDate);
-
-    // Handle custom date range - FIX: Use exact dates without startOf/endOf
+    
+    // Handle custom date range - Use exact dates provided
     if (DateStartDate && DateEndDate) {
-      setDisplayDate(dayjs(DateStartDate, "YYYY-MM-DD").tz(TIMEZONE));
-      setSelectedDate(dayjs(DateEndDate),"YYYY-MM-DD".tz(TIMEZONE));
+      setDisplayDate(dayjs(DateStartDate).tz(TIMEZONE));
+      setSelectedDate(dayjs(DateEndDate).tz(TIMEZONE));
       return;
     }
 
@@ -415,11 +423,17 @@ const TestCard = ({
 
   const today = dayjs().tz(TIMEZONE);
 
+  // Fixed navigation handlers for custom date ranges
   const handlePrevious = () => {
     if (DateStartDate && DateEndDate) {
       const rangeDays = dayjs(DateEndDate).diff(dayjs(DateStartDate), 'day') + 1;
-      setDisplayDate(prev => prev.subtract(rangeDays, 'day'));
-      setSelectedDate(prev => prev.subtract(rangeDays, 'day'));
+      const newStartDate = dayjs(DateStartDate).subtract(rangeDays, 'day');
+      const newEndDate = dayjs(DateEndDate).subtract(rangeDays, 'day');
+      
+      // Update the dates by modifying the parent component's date props
+      // You might need to call a callback function here to update the parent
+      setDisplayDate(newStartDate);
+      setSelectedDate(newEndDate);
     } else {
       setSelectedDate(prev => prev.subtract(1, "day"));
     }
@@ -428,10 +442,12 @@ const TestCard = ({
   const handleNext = () => {
     if (DateStartDate && DateEndDate) {
       const rangeDays = dayjs(DateEndDate).diff(dayjs(DateStartDate), 'day') + 1;
-      const newEndDate = dayjs(selectedDate).add(rangeDays, 'day');
+      const newEndDate = dayjs(DateEndDate).add(rangeDays, 'day');
       if (newEndDate.isAfter(dayjs().tz(TIMEZONE))) return;
-      setDisplayDate(prev => prev.add(rangeDays, 'day'));
-      setSelectedDate(prev => prev.add(rangeDays, 'day'));
+      
+      const newStartDate = dayjs(DateStartDate).add(rangeDays, 'day');
+      setDisplayDate(newStartDate);
+      setSelectedDate(newEndDate);
     } else if (!selectedDate.isSame(today, "day")) {
       setSelectedDate(prev => prev.add(1, "day"));
     }
@@ -446,6 +462,7 @@ const TestCard = ({
   };
 
   const getGraphPoints = () => {
+    if (bindGraph.length === 0) return "";
     const maxRevenue = Math.max(...bindGraph.map((d) => d.revenue), 1);
     return bindGraph
       .map((item, index) => {
@@ -457,6 +474,7 @@ const TestCard = ({
   };
 
   const getCirclePoints = () => {
+    if (bindGraph.length === 0) return [];
     const maxRevenue = Math.max(...bindGraph.map((d) => d.revenue), 1);
     return bindGraph.map((item, index) => ({
       ...item,
@@ -499,7 +517,11 @@ const TestCard = ({
                 <ChevronLeft fontSize="small" />
               </IconButton>
 
-              <Tooltip title={`${displayDate.format("DD/MM/YYYY")} - ${selectedDate.format("DD/MM/YYYY")}`}>
+              <Tooltip title={
+                DateStartDate && DateEndDate 
+                  ? `${dayjs(DateStartDate).format("DD/MM/YYYY")} - ${dayjs(DateEndDate).format("DD/MM/YYYY")}`
+                  : `${displayDate.format("DD/MM/YYYY")} - ${selectedDate.format("DD/MM/YYYY")}`
+              }>
                 <Box>
                   <Typography
                     fontWeight="bold"
@@ -549,20 +571,16 @@ const TestCard = ({
                   tooltip={
                     selectedDate.isSame(today, "day")
                       ? `Yesterday: ${formatCurrency(previous.gross_revenue)}`
-                      : `${selectedDate
-                          .subtract(1, "day")
-                          .format("MMM DD")}: ${formatCurrency(
-                          previous.gross_revenue
-                        )}`
+                      : `Previous Period: ${formatCurrency(previous.gross_revenue)}`
                   }
                   currencySymbol="$"
                 />
               )}
             </Box>
           )}
-          {/* Chart */}
 
-          {visibleMetrics.includes("gross_revenue") && (
+          {/* Chart */}
+          {visibleMetrics.includes("gross_revenue") && bindGraph.length > 0 && (
             <Box sx={{ borderRight: "1px solid #e0e0e0" }}>
               <Box
                 ref={graphContainerRef}
@@ -698,6 +716,7 @@ const TestCard = ({
               </Box>
             </Box>
           )}
+
           {/* Other Metric Cards */}
           {[
             "total_orders",
@@ -718,7 +737,7 @@ const TestCard = ({
                     value={metrics[id]}
                     change={difference[id]}
                     isNegative={String(difference[id]).startsWith("-")}
-                    tooltip={item.tooltip(selectedDate, today, previous[id])} // ✅ call the function
+                    tooltip={item.tooltip(selectedDate, today, previous[id])}
                     currencySymbol={item.currencySymbol}
                     percentSymbol={item.percentSymbol}
                   />
@@ -732,7 +751,6 @@ const TestCard = ({
             onClick={handleOpen}
             sx={{
               marginTop: "-1px",
-
               display: "flex",
               alignItems: "center",
               gap: 1,
