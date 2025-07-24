@@ -141,6 +141,7 @@ function ClientDashboardpage() {
   };
   const handlePresetSelectHelium = (preset) => {
     setSelectedPreset(preset);
+    updateActiveFilters('date','customDate',"",false)
     updateActiveFilters("preset", preset, preset, true);
     if (befePreset && befePreset !== preset) {
       updateActiveFilters("preset", befePreset, befePreset, false);
@@ -294,6 +295,12 @@ function ClientDashboardpage() {
       case "preset":
         setSelectedPreset("Today");
         setBefePreset("Today");
+        break;
+      case "date":
+        setStartDate(null)
+        setEndDate(null)
+        setAppliedEndDate(null)
+        setAppliedStartDate(null)
         break;
       default:
         break;
@@ -453,6 +460,18 @@ function ClientDashboardpage() {
       fetchManufacturerList("");
     }
   }, [selectedCategory]);
+  useEffect(()=>{
+    updateActiveFilters('date','customDate',"",false)
+    if(startDate && endDate)
+    {
+      const startLabel=dayjs(startDate).format("MMM D,YYYY")
+      const endLabel=dayjs(endDate).format("MMM D, YYYY")
+      const dateLabel=`${startLabel} - ${endLabel}`
+      updateActiveFilters('date','customDate',dateLabel,true)
+      updateActiveFilters('preset',selectedPreset,selectedPreset,false)
+      
+    }
+  },[startDate,endDate])
   useEffect(() => {
     if (inputValueBrand.trim()) {
       setIsTyping(true);
