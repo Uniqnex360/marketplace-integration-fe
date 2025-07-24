@@ -274,7 +274,8 @@ const TestCard = ({
   // Fixed date initialization logic
   useEffect(() => {
     const today = dayjs().tz(TIMEZONE);
-    
+      console.log("DateStartDate:", DateStartDate, "DateEndDate:", DateEndDate);
+
     // Handle custom date range - FIX: Use exact dates without startOf/endOf
     if (DateStartDate && DateEndDate) {
       setDisplayDate(dayjs(DateStartDate).tz(TIMEZONE));
