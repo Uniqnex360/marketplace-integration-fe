@@ -284,6 +284,9 @@ function ClientDashboardpage() {
           prev.filter((m) => m.id !== filter.value)
         );
         break;
+      case "asin":
+        setSelectedAsin((prev) => prev.filter((a) => a.id !== filter.value));
+        break;
       case "channel":
         if (filter.value === selectedCategory.id) {
           setSelectedCategory({ id: "all", name: "All Channels" });
@@ -595,18 +598,18 @@ function ClientDashboardpage() {
     });
   };
   const toggleSelectionAsin = (asin) => {
-    const alreadySelected = selectedAsin.find((a) => a.id === asin.id);
-    if (alreadySelected) {
+    const isSelected = selectedAsin.some((a) => a.id === asin.id);
+    if (isSelected) {
       handleRemoveAsin(asin.id);
+      updateActiveFilters("asin", asin.id, asin.Asin, false);
     } else {
+      // Not selected, so add it
       setSelectedAsin((prev) => {
-        const alreadySelected = prev.find((a) => a.id === asin.id);
-        const updated = alreadySelected
-          ? prev.filter((a) => a.id !== asin.id)
-          : [...prev, asin];
+        const updated = [...prev, asin];
         updateMergedProducts(updated, selectedSku);
         return updated;
       });
+      updateActiveFilters("asin", asin.id, asin.Asin, true); // <-- ADD to active filters
     }
   };
   const handleToggleManufacturer = (manufacturer) => {
@@ -755,34 +758,7 @@ function ClientDashboardpage() {
     });
   };
   return (
-    
     <Box sx={{ marginTop: "5%" }}>
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 2, ml: 2 }}>
-            {activeFilters.map((filter) => {
-              <Chip
-                key={`${filter.type}-${filter.value}`}
-                label={`${
-                  filter.type.charAt(0).toUpperCase() + filter.type.slice
-                }:${filter.label}`}
-                onDelete={() => handleRemoveFilter(filter)}
-                sx={{
-                  backgroundColor: "#e3f2fd",
-                  "& . MuiChip-deleteIcon": { color: "rgba(0,0,0,0.7)" },
-                }}
-              ></Chip>;
-            })}
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() => {
-                setActiveFilters([]);
-                handleClearFilter();
-              }}
-              sx={{ ml: 2, mt: 2 }}
-            >
-              Clear All
-            </Button>
-          </Box>
       <Grid
         container
         spacing={2}
@@ -1578,7 +1554,55 @@ function ClientDashboardpage() {
               </LocalizationProvider>
             </Box>
           </Box>
-          
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 2, ml: 2 }}>
+            <Grid item xs={12}>
+              {activeFilters.length > 0 && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    alignItems: "center",
+                    gap: 1,
+                    mt: 2,
+                    ml: 2,
+                    mb: 1,
+                  }}
+                >
+                  <Typography variant="body2" sx={{ fontWeight: 500, mr: 1 }}>
+                    Active Filters:
+                  </Typography>
+                  {activeFilters.map((filter) => (
+                    <Chip
+                      key={`${filter.type}-${filter.value}`}
+                      label={`${
+                        filter.type.charAt(0).toUpperCase() +
+                        filter.type.slice(1)
+                      }: ${filter.label}`}
+                      onDelete={() => handleRemoveFilter(filter)}
+                      size="small"
+                      sx={{
+                        backgroundColor: "#e3f2fd",
+                        "& .MuiChip-deleteIcon": {
+                          color: "rgba(0,0,0,0.7)",
+                          "&:hover": {
+                            color: "rgba(0,0,0,1)",
+                          },
+                        },
+                      }}
+                    />
+                  ))}
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={handleClearFilter}
+                    sx={{ ml: 1, textTransform: "none" }}
+                  >
+                    Clear All
+                  </Button>
+                </Box>
+              )}
+            </Grid>
+          </Box>
         </Grid>
         {/* Display Cards and Components */}
         <Grid item xs={12} sm={12} sx={{ marginTop: "9%" }}>
