@@ -190,11 +190,11 @@ const TestCard = ({
       };
 
       if (DateStartDate && dayjs(DateStartDate).isValid()) {
-        payload.start_date = dayjs(DateStartDate).format("DD/MM/YYYY");
+        payload.start_date = dayjs(DateStartDate, "YYYY-MM-DD").format("DD/MM/YYYY");
       }
 
       if (DateEndDate && dayjs(DateEndDate).isValid()) {
-        payload.end_date = dayjs(DateEndDate).format("DD/MM/YYYY");
+        payload.end_date = dayjs(DateEndDate, "YYYY-MM-DD").format("DD/MM/YYYY");
       }
 
       const response = await axios.post(
@@ -278,8 +278,8 @@ const TestCard = ({
 
     // Handle custom date range - FIX: Use exact dates without startOf/endOf
     if (DateStartDate && DateEndDate) {
-      setDisplayDate(dayjs(DateStartDate).tz(TIMEZONE));
-      setSelectedDate(dayjs(DateEndDate).tz(TIMEZONE));
+      setDisplayDate(dayjs(DateStartDate, "YYYY-MM-DD").tz(TIMEZONE));
+      setSelectedDate(dayjs(DateEndDate),"YYYY-MM-DD".tz(TIMEZONE));
       return;
     }
 
