@@ -230,7 +230,8 @@ const TestCard = ({
   const getDisplayDateText = (widgetData, DateStartDate, DateEndDate, displayDate, selectedDate) => {
     const today = dayjs().tz(TIMEZONE);
     if (DateStartDate && DateEndDate) {
-      return `${DateStartDate} - ${DateEndDate}`;
+      return `${dayjs(DateStartDate).format("MMMM D, YYYY")} - ${dayjs(DateEndDate).format("MMMM D, YYYY")}`;
+
     }
 
     switch (widgetData) {
