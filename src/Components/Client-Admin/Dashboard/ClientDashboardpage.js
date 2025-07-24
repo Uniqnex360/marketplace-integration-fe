@@ -132,6 +132,7 @@ function ClientDashboardpage() {
     "This Year",
     "Last Year",
   ];
+  console.log('activefilters',activeFilters)
   const [value, setValue] = useState([dayjs().subtract(6, "day"), dayjs()]);
   const [selectedPreset, setSelectedPreset] = useState("Today");
   const [hasMore, setHasMore] = React.useState(true);
