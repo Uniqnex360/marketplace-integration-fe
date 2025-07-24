@@ -440,7 +440,7 @@ function ClientDashboardpage() {
     } catch (error) {
       console.error("Error fetching brand list:", error);
       setHasMore(false);
-    } finally {>
+    } finally {
       setIsLoading(false);
     }
   };
