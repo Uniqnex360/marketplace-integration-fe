@@ -132,7 +132,7 @@ function ClientDashboardpage() {
     "This Year",
     "Last Year",
   ];
-  console.log('activefilters',activeFilters)
+  console.log("activefilters", activeFilters);
   const [value, setValue] = useState([dayjs().subtract(6, "day"), dayjs()]);
   const [selectedPreset, setSelectedPreset] = useState("Today");
   const [hasMore, setHasMore] = React.useState(true);
@@ -302,7 +302,6 @@ function ClientDashboardpage() {
   const updateActiveFilters = (type, value, label, isAdd = true) => {
     setActiveFilters((prevFilters) => {
       if (isAdd) {
-        // Check if filter already exists to prevent duplicates
         const exists = prevFilters.some(
           (filter) => filter.value === value && filter.type === type
         );
@@ -311,7 +310,6 @@ function ClientDashboardpage() {
         }
         return prevFilters;
       } else {
-        // Remove filter
         return prevFilters.filter(
           (filter) => !(filter.value === value && filter.type === type)
         );
@@ -525,22 +523,10 @@ function ClientDashboardpage() {
       [categoryId]: !prev[categoryId],
     }));
   };
-  // const handleCategorySelect = (category) => {
-  //   if (category.id === "all" || category.id === "custom") {
-  //     setSelectedCategory(category);
-  //     handleMenuClose();
-  //   } else if (!category.fulfillment_channel) {
-  //     setSelectedCategory(category);
-  //     handleMenuClose();
-  //   } else {
-  //     setSelectedCategory(category);
-  //     handleMenuClose();
-  //   }
-  // };
+
   const handleCategorySelect = (category) => {
     if (category.id === selectedCategory.id) return;
 
-    // Remove previous category filter if not "all"
     if (selectedCategory.id !== "all") {
       updateActiveFilters(
         "channel",
@@ -549,14 +535,11 @@ function ClientDashboardpage() {
         false
       );
     }
-
     setSelectedCategory(category);
 
-    // Add new category filter if not "all"
     if (category.id !== "all") {
       updateActiveFilters("channel", category.id, category.name, true);
     }
-
     handleMenuClose();
   };
   const [appliedStartDateHelium, setAppliedStartDateHelium] = useState(
@@ -1572,58 +1555,62 @@ function ClientDashboardpage() {
               </LocalizationProvider>
             </Box>
           </Box>
-          
         </Grid>
         <Grid
-            item
-            xs={12}
-            sx={{ pt: "16px !important", pl: "16px !important" }}
-          >
-            {activeFilters.length > 0 && (
-              <Box
+          item
+          xs={12}
+          sx={{
+            marginTop: "10%",
+            pt: "0 !important",
+            pl: "16px !important",
+            pr: "16px !important",
+          }}
+        >
+          {activeFilters.length > 0 && (
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                gap: 1,
+                p: 1.5,
+                border: "1px solid #e0e0e0",
+                borderRadius: "8px",
+                backgroundColor: "#f9f9f9",
+              }}
+            >
+              <Typography variant="body2" sx={{ fontWeight: "bold", mr: 1 }}>
+                Active Filters:
+              </Typography>
+              {activeFilters.map((filter, index) => (
+                <Chip
+                  key={`${filter.type}-${filter.value}-${index}`}
+                  label={`${
+                    filter.type.charAt(0).toUpperCase() + filter.type.slice(1)
+                  }: ${filter.label}`}
+                  onDelete={() => handleRemoveFilter(filter)}
+                  size="small"
+                  sx={{
+                    fontWeight: 500,
+                  }}
+                />
+              ))}
+              <Button
+                variant="text"
+                size="small"
+                onClick={handleClearFilter}
                 sx={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  alignItems: "center",
-                  gap: 1,
-                  p: 1.5,
-                  border: "1px solid #e0e0e0",
-                  borderRadius: "8px",
-                  backgroundColor: "#f9f9f9",
+                  ml: "auto",
+                  textTransform: "none",
                 }}
               >
-                <Typography variant="body2" sx={{ fontWeight: "bold", mr: 1 }}>
-                  Active Filters:
-                </Typography>
-                {activeFilters.map((filter, index) => (
-                  <Chip
-                    key={`${filter.type}-${filter.value}-${index}`}
-                    label={`${
-                      filter.type.charAt(0).toUpperCase() + filter.type.slice(1)
-                    }: ${filter.label}`}
-                    onDelete={() => handleRemoveFilter(filter)}
-                    size="small"
-                    sx={{
-                      fontWeight: 500,
-                    }}
-                  />
-                ))}
-                <Button
-                  variant="text"
-                  size="small"
-                  onClick={handleClearFilter}
-                  sx={{
-                    ml: "auto", // Pushes the button to the far right
-                    textTransform: "none",
-                  }}
-                >
-                  Clear All
-                </Button>
-              </Box>
-            )}
-          </Grid>
+                Clear All
+              </Button>
+            </Box>
+          )}
+        </Grid>
         {/* Display Cards and Components */}
-        <Grid item xs={12} sm={12} sx={{ marginTop: "9%" }}>
+        <Grid item xs={12} sm={12} sx={{ marginTop: "0%" }}>
           {/* <HeliumCard/> */}
           <TestCard
             marketPlaceId={
@@ -1952,6 +1939,52 @@ function ClientDashboardpage() {
           <ProductTableDashboard marketPlaceId={selectedCategory == 'all' ? selectedCategory : filterFinal} DateStartDate={appliedStartDate} DateEndDate={appliedEndDate} />
         </Grid>  */}
       </Grid>
+      {/* Move this outside the sticky header */}
+<Grid item xs={12} sx={{ mt: 2, px: 2 }}>
+  {activeFilters.length > 0 && (
+    <Box
+      sx={{
+        display: "flex",
+        flexWrap: "wrap",
+        alignItems: "center",
+        gap: 1,
+        p: 1.5,
+        border: "1px solid #e0e0e0",
+        borderRadius: "8px",
+        backgroundColor: "#f9f9f9",
+        mb: 2
+      }}
+    >
+      <Typography variant="body2" sx={{ fontWeight: "bold", mr: 1 }}>
+        Active Filters:
+      </Typography>
+      {activeFilters.map((filter, index) => (
+        <Chip
+          key={`${filter.type}-${filter.value}-${index}`}
+          label={`${
+            filter.type.charAt(0).toUpperCase() + filter.type.slice(1)
+          }: ${filter.label}`}
+          onDelete={() => handleRemoveFilter(filter)}
+          size="small"
+          sx={{
+            fontWeight: 500,
+          }}
+        />
+      ))}
+      <Button
+        variant="text"
+        size="small"
+        onClick={handleClearFilter}
+        sx={{
+          ml: "auto",
+          textTransform: "none",
+        }}
+      >
+        Clear All
+      </Button>
+    </Box>
+  )}
+</Grid>
     </Box>
   );
 }
