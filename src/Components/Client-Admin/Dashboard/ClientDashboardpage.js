@@ -755,7 +755,34 @@ function ClientDashboardpage() {
     });
   };
   return (
+    
     <Box sx={{ marginTop: "5%" }}>
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 2, ml: 2 }}>
+            {activeFilters.map((filter) => {
+              <Chip
+                key={`${filter.type}-${filter.value}`}
+                label={`${
+                  filter.type.charAt(0).toUpperCase() + filter.type.slice
+                }:${filter.label}`}
+                onDelete={() => handleRemoveFilter(filter)}
+                sx={{
+                  backgroundColor: "#e3f2fd",
+                  "& . MuiChip-deleteIcon": { color: "rgba(0,0,0,0.7)" },
+                }}
+              ></Chip>;
+            })}
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => {
+                setActiveFilters([]);
+                handleClearFilter();
+              }}
+              sx={{ ml: 2, mt: 2 }}
+            >
+              Clear All
+            </Button>
+          </Box>
       <Grid
         container
         spacing={2}
@@ -1551,32 +1578,7 @@ function ClientDashboardpage() {
               </LocalizationProvider>
             </Box>
           </Box>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 2, ml: 2 }}>
-            {activeFilters.map((filter) => {
-              <Chip
-                key={`${filter.type}-${filter.value}`}
-                label={`${
-                  filter.type.charAt(0).toUpperCase() + filter.type.slice
-                }:${filter.label}`}
-                onDelete={() => handleRemoveFilter(filter)}
-                sx={{
-                  backgroundColor: "#e3f2fd",
-                  "& . MuiChip-deleteIcon": { color: "rgba(0,0,0,0.7)" },
-                }}
-              ></Chip>;
-            })}
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() => {
-                setActiveFilters([]);
-                handleClearFilter();
-              }}
-              sx={{ ml: 2, mt: 2 }}
-            >
-              Clear All
-            </Button>
-          </Box>
+          
         </Grid>
         {/* Display Cards and Components */}
         <Grid item xs={12} sm={12} sx={{ marginTop: "9%" }}>
