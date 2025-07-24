@@ -1573,67 +1573,54 @@ function ClientDashboardpage() {
               </LocalizationProvider>
             </Box>
           </Box>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 2, ml: 2 }}>
-            <Grid item xs={12}>
-              {activeFilters.length > 0 && (
-                <Box
+          <Grid
+            item
+            xs={12}
+            sx={{ pt: "16px !important", pl: "16px !important" }}
+          >
+            {activeFilters.length > 0 && (
+              <Box
+                sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: 1,
+                  p: 1.5,
+                  border: "1px solid #e0e0e0",
+                  borderRadius: "8px",
+                  backgroundColor: "#f9f9f9",
+                }}
+              >
+                <Typography variant="body2" sx={{ fontWeight: "bold", mr: 1 }}>
+                  Active Filters:
+                </Typography>
+                {activeFilters.map((filter, index) => (
+                  <Chip
+                    key={`${filter.type}-${filter.value}-${index}`}
+                    label={`${
+                      filter.type.charAt(0).toUpperCase() + filter.type.slice(1)
+                    }: ${filter.label}`}
+                    onDelete={() => handleRemoveFilter(filter)}
+                    size="small"
+                    sx={{
+                      fontWeight: 500,
+                    }}
+                  />
+                ))}
+                <Button
+                  variant="text"
+                  size="small"
+                  onClick={handleClearFilter}
                   sx={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    alignItems: "center",
-                    gap: 1,
-                    mt: 2,
-                    ml: 2,
-                    mb: 1,
+                    ml: "auto", // Pushes the button to the far right
+                    textTransform: "none",
                   }}
                 >
-                  <Typography variant="body2" sx={{ fontWeight: 500, mr: 1 }}>
-                    Active Filters ({activeFilters.length}):
-                  </Typography>
-                  {activeFilters.map((filter, index) => (
-                    <Chip
-                      key={`${filter.type}-${filter.value}-${index}`} // Added index for uniqueness
-                      label={`${
-                        filter.type.charAt(0).toUpperCase() +
-                        filter.type.slice(1)
-                      }: ${filter.label}`}
-                      onDelete={() => handleRemoveFilter(filter)}
-                      size="small"
-                      variant="outlined"
-                      sx={{
-                        backgroundColor: "#e3f2fd",
-                        borderColor: "#1976d2",
-                        color: "#1976d2",
-                        "& .MuiChip-deleteIcon": {
-                          color: "#1976d2",
-                          "&:hover": {
-                            color: "#d32f2f",
-                          },
-                        },
-                      }}
-                    />
-                  ))}
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={handleClearFilter}
-                    sx={{
-                      ml: 1,
-                      textTransform: "none",
-                      borderColor: "#d32f2f",
-                      color: "#d32f2f",
-                      "&:hover": {
-                        backgroundColor: "#ffebee",
-                        borderColor: "#d32f2f",
-                      },
-                    }}
-                  >
-                    Clear All ({activeFilters.length})
-                  </Button>
-                </Box>
-              )}
-            </Grid>
-          </Box>
+                  Clear All
+                </Button>
+              </Box>
+            )}
+          </Grid>
         </Grid>
         {/* Display Cards and Components */}
         <Grid item xs={12} sm={12} sx={{ marginTop: "9%" }}>
