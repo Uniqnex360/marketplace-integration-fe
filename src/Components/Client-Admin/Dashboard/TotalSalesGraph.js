@@ -82,7 +82,6 @@ const TotalOrdersGraph = ({
   };
 
   const fetchData = async () => {
-    console.log("verA", marketPlaceId);
     try {
       setLoading(true);
 

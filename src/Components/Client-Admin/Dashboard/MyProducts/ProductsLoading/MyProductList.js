@@ -506,7 +506,6 @@ const MyProductList = ({
   }, [selectedColumns]);
   // This useEffect triggers data fetching when relevant parameters change
   useEffect(() => {
-    console.log("oppo", filterParent, filterSku);
     const currentParams = JSON.stringify({
       marketPlaceId,
       widgetData,
@@ -586,7 +585,6 @@ const MyProductList = ({
       const responseData = response.data;
       if (responseData && responseData.products) {
         const normalizedProducts = responseData.products.map((product) => {
-          console.log("oppovlaues", response.data.parent); // This console log seems to be for debugging backend response
           setTabType(response.data.tab_type); // Set tab type from response
           return {
             ...product,

@@ -22,7 +22,6 @@ function ProfitabilityTab({ productId, widgetData, startDate, endDate }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   useEffect(()=>{
-    console.log('oppo',widgetData)
   },[widgetData])
   useEffect(()=>{
 const fetchProfitabilityData = async () => {

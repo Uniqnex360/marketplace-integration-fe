@@ -458,7 +458,6 @@ const CompareChart = ({
           : `${formattedStart} - ${formattedEnd}, ${year}`;
 
       console.log(`📊 Widget (${widgetData}): ${displayRange}`);
-      console.log("oppo", displayRange);
       setCompareDateFilter(displayRange); // optional state update if you're showing it in UI
     }
   }, [chartData, widgetData]);
@@ -805,7 +804,6 @@ const CompareChart = ({
             }}
           >
             {metrics.map((metric, index) => {
-              console.log("oppo111", metric);
               const isSelected = visibleMetrics.includes(metric.id);
               const isProfitMargin = metric.id === "profitMargin"; // Assuming 'profitMargin' is the id for profit margin
 

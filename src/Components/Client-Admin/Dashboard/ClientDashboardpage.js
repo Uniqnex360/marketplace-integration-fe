@@ -149,7 +149,6 @@ function ClientDashboardpage() {
     localStorage.removeItem("selectedEndDate");
     const today = dayjs();
     let start, end;
-    console.log("oppo", selectedPreset);
     switch (preset) {
       case "Today":
         start = today;
@@ -264,7 +263,6 @@ function ClientDashboardpage() {
         ...categoryData,
       ]);
       setSelectedCategory({ id: "all", name: "All Channels" });
-      console.log("verA", selectedCategory);
     } catch (error) {
       console.error("Error fetching marketplace list:", error);
     } finally {
@@ -1574,7 +1572,9 @@ function ClientDashboardpage() {
               </LocalizationProvider>
             </Box>
           </Box>
-          <Grid
+          
+        </Grid>
+        <Grid
             item
             xs={12}
             sx={{ pt: "16px !important", pl: "16px !important" }}
@@ -1622,7 +1622,6 @@ function ClientDashboardpage() {
               </Box>
             )}
           </Grid>
-        </Grid>
         {/* Display Cards and Components */}
         <Grid item xs={12} sm={12} sx={{ marginTop: "9%" }}>
           {/* <HeliumCard/> */}

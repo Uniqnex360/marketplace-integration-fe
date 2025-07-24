@@ -995,7 +995,6 @@ const MetricCard = ({
 
       const data = response.data;
 
-      console.log("Fetched Data:", response.data); // log the data
       setMetricsData(response.data); // update state with data
     } catch (error) {
       console.error("Error fetching metrics:", error); // handle error

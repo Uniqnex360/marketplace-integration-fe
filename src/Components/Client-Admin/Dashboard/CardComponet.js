@@ -49,7 +49,6 @@ const CardComponent = ({widgetData, marketPlaceId, DateStartDate, DateEndDate, b
     };
 
     const fetchData = async () => {
-        console.log('verA',marketPlaceId)
         try {
             setLoading(true);
 
