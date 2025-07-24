@@ -140,9 +140,21 @@ function ClientDashboardpage() {
     "Last Year",
   ];
 
+  // const [value, setValue] = useState([dayjs().subtract(7, 'day'), dayjs()]);
+
+  // const handleChange = (newValue) => {
+  //   setValue(newValue);
+  //   if (onChange) {
+  //     onChange(newValue);
+  //   }
+  // };
+
+ 
+
+ 
+
   const [value, setValue] = useState([dayjs().subtract(6, "day"), dayjs()]);
   const [selectedPreset, setSelectedPreset] = useState("Today");
-  const [appliedPreset, setAppliedPreset] = useState("Today"); // New state for applied preset
 
   const [hasMore, setHasMore] = React.useState(true); // Track if there are more items to load
 
@@ -158,6 +170,7 @@ function ClientDashboardpage() {
     const today = dayjs();
     let start, end;
     console.log("oppo", selectedPreset);
+    // setPresetValue(preset)
     switch (preset) {
       case "Today":
         start = today;
@@ -228,21 +241,20 @@ function ClientDashboardpage() {
     setStartDateHelium(start);
     setEndDateHelium(end);
   };
+  useEffect(() => {
+    if (startDate || endDate) {
+      setBefePreset("");
+      setSelectedPreset("");
+    }
+  }, [startDate, endDate]);
 
-  // Remove useEffect hooks that update befePreset or selectedPreset on startDate/endDate changes
-  // useEffect(() => {
-  //   if (startDate || endDate) {
-  //     setBefePreset("");
-  //     setSelectedPreset("");
-  //   }
-  // }, [startDate, endDate]);
-
-  // useEffect(() => {
-  //   if (befePreset || selectedPreset) {
-  //     setStartDate(null);
-  //     setEndDate(null);
-  //   }
-  // }, [befePreset, selectedPreset]);
+  // If befePreset is set, clear startDate and endDate
+  useEffect(() => {
+    if (befePreset || selectedPreset) {
+      setStartDate(null);
+      setEndDate(null);
+    }
+  }, [befePreset, selectedPreset]);
 
   // Fetch marketplace list (Categories)
   useEffect(() => {
@@ -556,6 +568,14 @@ function ClientDashboardpage() {
     }
   };
 
+  //  const toggleSelection = (brand) => {
+  //   const alreadySelected = selectedBrand.find((b) => b.id === brand.id);
+  //   if (alreadySelected) {
+  //     handleRemove(brand.id);
+  //   } else {
+  //     setSelectedBrand([...selectedBrand, brand]);
+  //   }
+  // };
   const handleRemoveSKU = (id) => {
     setSelectedSku((prev) => {
       const updated = prev.filter((sku) => sku.id !== id);
@@ -636,6 +656,7 @@ function ClientDashboardpage() {
 
     if (selectedCategoryObject) {
       setSelectedCategory(selectedCategoryObject);
+      // console.log('selectedCategory', selectedCategory.id);
     }
   };
 
@@ -646,16 +667,25 @@ function ClientDashboardpage() {
     }
   };
 
+  // Handle End Date change
   const handleEndDateChange = (newValue) => {
     setEndDate(newValue);
   };
 
+  // const handleStartDateChange = (newValue) => {
+  //   setStartDate(newValue);
+  //   if (endDate && newValue > endDate) {
+  //     setEndDate(null); // If start date is greater than end date, reset end date
+  //   }
+  // };
+
+  // const handleEndDateChange = (newValue) => {
+  //   setEndDate(newValue);
+  // };
+
   const handleApplyFilter = () => {
-    // Update appliedPreset and befePreset only when Apply is clicked
-    setAppliedPreset(selectedPreset);
     setBefePreset(selectedPreset);
     console.log("index", befePreset);
-
     // Check if selectedCategory exists (to apply filter without date)
     if (selectedCategory) {
       // Apply filter using only selectedCategory if both dates are missing or valid
@@ -728,7 +758,6 @@ function ClientDashboardpage() {
       });
     }
   };
-
   const handleClearFilter = () => {
     // Reset all filter-related states
     setSelectedCategory({ id: "all", name: "All Channels" });
@@ -760,7 +789,6 @@ function ClientDashboardpage() {
 
     // Reset preset
     setSelectedPreset("Today");
-    setAppliedPreset("Today"); // Reset appliedPreset
     setBefePreset("Today");
 
     // Force a re-fetch with default filters
@@ -793,6 +821,8 @@ function ClientDashboardpage() {
           <Box
             sx={{
               width: "100%",
+
+              // borderBottom:'solid 1px #ddd',
               backgroundColor: "#ffff",
               height: "9%",
               marginLeft: "-8px",
@@ -922,7 +952,38 @@ function ClientDashboardpage() {
                           }
                         }}
                       >
+                        {/* {selectedBrand.length > 0 && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  overflowX: 'auto',
+                  whiteSpace: 'nowrap',
+                  gap: 1,
+                  px: 1,
+                  pt: 1,
+                }}
+              >
+                {selectedBrand.map((brand) => (
+                  <Chip
+                    key={brand.id}
+                    label={brand.name}
+                    size="small"
+                    onDelete={() => handleRemove(brand.id)}
+                    sx={{
+                      backgroundColor: '#007bff',
+                      color: '#fff',
+                      fontWeight: 500,
+                      fontSize: '0.75rem',
+                      '.MuiChip-deleteIcon': {
+                        color: '#fff',
+                      },
+                    }}
+                  />
+                ))}
+              </Box>
+            )} */}
                         {props.children}
+                        {/* {isLoading && <div style={{ padding: 8 }}>Loading more brands...</div>} */}
                       </Box>
                     )}
                     sx={{
@@ -1110,6 +1171,37 @@ function ClientDashboardpage() {
                           position: "absolute",
                         }}
                       >
+                        {/* Custom chip display inside dropdown */}
+                        {/* {selectedManufacturer.length > 0 && (
+          <Box
+            sx={{
+              display: 'flex',
+              overflowX: 'auto',
+              whiteSpace: 'nowrap',
+              gap: 1,
+              px: 1,
+              pt: 1,
+            }}
+          >
+            {selectedManufacturer.map((manufacturer) => (
+              <Chip
+                key={manufacturer}
+                label={manufacturer}
+                size="small"
+                onDelete={() => handleRemoveManufacturer(manufacturer)}
+                sx={{
+                  backgroundColor: '#007bff',
+                  color: '#fff',
+                  fontWeight: 500,
+                  fontSize: '0.75rem',
+                  '.MuiChip-deleteIcon': {
+                    color: '#fff',
+                  },
+                }}
+              />
+            ))}
+          </Box>
+        )} */}
                         {props.children}
                       </Box>
                     )}
@@ -1130,6 +1222,7 @@ function ClientDashboardpage() {
                     marginLeft: "19px",
                     position: "relative",
                     paddingRight: "10px",
+                    // width: "300px",
                   }}
                 >
                   <>
@@ -1207,6 +1300,7 @@ function ClientDashboardpage() {
                                     ))}
                                 </ListItemIcon>
                                 <ListItemText
+                                  // sx={{ textTransform: "capitalize" }}
                                   primary={category.name}
                                 />
                               </div>
@@ -1396,6 +1490,36 @@ function ClientDashboardpage() {
                         position: "absolute",
                       }}
                     >
+                      {/* {selectedAsin.length > 0 && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  overflowX: 'auto',
+                  whiteSpace: 'nowrap',
+                  gap: 1,
+                  px: 1,
+                  pt: 1,
+                }}
+              >
+                {selectedAsin.map((asin) => (
+                  <Chip
+                    key={asin.id}
+                    label={asin.Asin}
+                    size="small"
+                    onDelete={() => handleRemoveAsin(asin.id)}
+                    sx={{
+                      backgroundColor: '#007bff',
+                      color: '#fff',
+                      fontWeight: 500,
+                      fontSize: '0.75rem',
+                      '.MuiChip-deleteIcon': {
+                        color: '#fff',
+                      },
+                    }}
+                  />
+                ))}
+              </Box>
+            )} */}
                       {props.children}
                     </Box>
                   )}
@@ -1421,7 +1545,9 @@ function ClientDashboardpage() {
                       value={selectedPreset}
                       label="Preset"
                       onChange={(e) => {
+                        // setSelectedPreset(e.target.value);
                         setSelectedPreset(e.target.value);
+                        // setBefePreset(e.target.value)
                         handlePresetSelectHelium(e.target.value);
                       }}
                     >
@@ -1434,6 +1560,8 @@ function ClientDashboardpage() {
                   </FormControl>
                 </Box>
                 {/* Start Date Picker */}
+                {/* Start Date Picker */}
+
                 <Box sx={{ paddingRight: "8px", width: "130px" }}>
                   <DatePicker
                     label="Start Date"
@@ -1494,13 +1622,14 @@ function ClientDashboardpage() {
 
         {/* Display Cards and Components */}
         <Grid item xs={12} sm={12} sx={{ marginTop: "9%" }}>
+          {/* <HeliumCard/> */}
           <TestCard
             marketPlaceId={
               selectedCategory == "all" ? selectedCategory : filterFinal
             }
             startDate={startDateHelium}
             endDate={endDateHelium}
-            widgetData={appliedPreset} // Use appliedPreset instead of befePreset
+            widgetData={befePreset}
             brand_id={selectedBrandFilter}
             product_id={mergedProductsFilter}
             manufacturer_name={selectedManufacturerFilter}
@@ -1508,9 +1637,27 @@ function ClientDashboardpage() {
             DateStartDate={appliedStartDate}
             DateEndDate={appliedEndDate}
           />
+          {/* <CardCount marketPlaceId={ selectedCategory == 'all' ? selectedCategory : filterFinal} DateStartDate={appliedStartDate} DateEndDate={appliedEndDate} /> */}
         </Grid>
 
+        {/* <Grid item xs={12} sm={12} sx={{paddingLeft: '40px'}}
+      >
+          <CardComponent   widgetData={befePreset} marketPlaceId={selectedCategory == 'all' ? selectedCategory : filterFinal} DateStartDate={appliedStartDate} DateEndDate={appliedEndDate} brand_id={selectedBrandFilter} product_id={mergedProductsFilter} manufacturer_name={selectedManufacturerFilter} fulfillment_channel={selectedFulfillment}/>
+        </Grid> */}
         <Grid container spacing={2}>
+          {/* Left side - Insight */}
+          {/* <Grid item xs={12} md={3}>
+  <Box
+    sx={{
+      borderRight: '1px solid lightgray', // Light grey vertical line
+      height: '90%', // Full height to cover the section
+      padding: '16px', // Padding for better spacing inside
+    }}
+  >
+    <InsightCategory />
+  </Box>
+</Grid> */}
+
           <Grid
             item
             xs={12}
@@ -1519,6 +1666,7 @@ function ClientDashboardpage() {
           >
             <Box
               sx={{
+                // height: '100%', // Full height to cover the section
                 padding: "16px", // Padding for better spacing inside
               }}
             >
@@ -1526,6 +1674,8 @@ function ClientDashboardpage() {
             </Box>
           </Grid>
 
+          {/* Right side - Tabs + Content */}
+          {/* <Grid item xs={12} md={9}> */}
           <Grid
             item
             xs={12}
@@ -1538,6 +1688,7 @@ function ClientDashboardpage() {
                 boxShadow: "none",
                 borderRadius: "12px",
                 p: 1.2, // 🔽 Reduced padding
+                // backgroundColor: '#f4f7fc',
               }}
             >
               <Box
@@ -1625,7 +1776,7 @@ function ClientDashboardpage() {
                   <CompareChart
                     startDate={startDateHelium}
                     endDate={endDateHelium}
-                    widgetData={appliedPreset} // Use appliedPreset instead of befePreset
+                    widgetData={befePreset}
                     marketPlaceId={
                       selectedCategory == "all" ? selectedCategory : filterFinal
                     }
@@ -1638,11 +1789,27 @@ function ClientDashboardpage() {
                   />
                 )}
 
+                {/* {tab === 0 && (
+  (befePreset === 'Today' || befePreset === 'Yesterday') ? (
+         <RevenueTimeGraph
+        startDate={startDateHelium}
+        endDate={endDateHelium}
+        widgetData={befePreset}  marketPlaceId={selectedCategory == 'all' ? selectedCategory : filterFinal} brand_id={selectedBrandFilter}   product_id={mergedProductsFilter} manufacturer_name={selectedManufacturerFilter} fulfillment_channel={selectedFulfillment}
+    DateStartDate={appliedStartDate} DateEndDate={appliedEndDate}  />
+     ) : (
+        <RevenueWidget
+        startDate={startDateHelium}
+        endDate={endDateHelium}
+        widgetData={befePreset}  marketPlaceId={selectedCategory == 'all' ? selectedCategory : filterFinal} brand_id={selectedBrandFilter}   product_id={mergedProductsFilter} manufacturer_name={selectedManufacturerFilter} fulfillment_channel={selectedFulfillment}
+    DateStartDate={appliedStartDate} DateEndDate={appliedEndDate}  />
+    
+      )
+)} */}
                 {tab === 1 && (
                   <TopProducts
                     startDate={startDateHelium}
                     endDate={endDateHelium}
-                    widgetData={appliedPreset} // Use appliedPreset instead of befePreset
+                    widgetData={befePreset}
                     marketPlaceId={
                       selectedCategory == "all" ? selectedCategory : filterFinal
                     }
@@ -1657,7 +1824,7 @@ function ClientDashboardpage() {
                 {tab === 2 && (
                   <TotalOrdersGraph
                     key={setResetCounter}
-                    widgetData={appliedPreset} // Use appliedPreset instead of befePreset
+                    widgetData={befePreset}
                     marketPlaceId={
                       selectedCategory === "all"
                         ? selectedCategory
@@ -1703,7 +1870,7 @@ function ClientDashboardpage() {
           <MetricCard
             startDate={startDateHelium}
             endDate={endDateHelium}
-            widgetData={appliedPreset} // Use appliedPreset instead of befePreset
+            widgetData={befePreset}
             marketPlaceId={
               selectedCategory === "all" ? selectedCategory : filterFinal
             }
@@ -1746,7 +1913,7 @@ function ClientDashboardpage() {
 
           <Grid item xs={12} sm={12} sx={{ width: "99%" }}>
             <AllMarketplace
-              widgetData={appliedPreset} // Use appliedPreset instead of befePreset
+              widgetData={befePreset}
               marketPlaceId={
                 selectedCategory === "all" ? selectedCategory : filterFinal
               }
@@ -1760,7 +1927,7 @@ function ClientDashboardpage() {
           </Grid>
           <Grid item xs={12} sm={12} sx={{ width: "99%" }}>
             <ProfitAndLoss
-              widgetData={appliedPreset} // Use appliedPreset instead of befePreset
+              widgetData={befePreset}
               marketPlaceId={
                 selectedCategory == "all" ? selectedCategory : filterFinal
               }
@@ -1772,10 +1939,13 @@ function ClientDashboardpage() {
               DateEndDate={appliedEndDate}
             />
           </Grid>
+          {/* <Grid item xs={12} sm={12} sx={{width:'99%'}}>
+          <TestProfitLoss  widgetData={befePreset} marketPlaceId={selectedCategory == 'all' ? selectedCategory : filterFinal}/>
+        </Grid> */}
 
           <Grid item xs={12} sm={12}>
             <MyProductList
-              widgetData={appliedPreset} // Use appliedPreset instead of befePreset
+              widgetData={befePreset}
               marketPlaceId={
                 selectedCategory == "all" ? selectedCategory : filterFinal
               }
@@ -1788,6 +1958,9 @@ function ClientDashboardpage() {
             />
           </Grid>
         </Grid>
+        {/* <Grid item xs={12} sm={12}>
+          <ProductTableDashboard marketPlaceId={selectedCategory == 'all' ? selectedCategory : filterFinal} DateStartDate={appliedStartDate} DateEndDate={appliedEndDate} />
+        </Grid>  */}
       </Grid>
     </Box>
   );
