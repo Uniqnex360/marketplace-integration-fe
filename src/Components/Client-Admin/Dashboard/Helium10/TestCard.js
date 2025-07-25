@@ -49,14 +49,16 @@ const MetricItem = ({
 }) => {
   const absValue = Math.abs(value ?? 0);
   const absChange = Math.abs(change ?? 0);
-
-  const displayValue = `${(value ?? 0) < 0 ? "-" : ""}${currencySymbol ?? ""
-    }${absValue}${percentSymbol ?? ""}`;
+  
+  const displayValue = `${(value ?? 0) < 0 ? "-" : ""}${
+    currencySymbol ?? ""
+  }${absValue}${percentSymbol ?? ""}`;
 
   const displayChange =
     change !== undefined
-      ? `${change < 0 ? "-" : ""}${currencySymbol ?? ""}${absChange}${percentSymbol ?? ""
-      }`
+      ? `${change < 0 ? "-" : ""}${currencySymbol ?? ""}${absChange}${
+          percentSymbol ?? ""
+        }`
       : "";
 
   return (
@@ -118,15 +120,15 @@ const TestCard = ({
   fulfillment_channel,
 }) => {
   const theme = useTheme();
-
+  
   // Combined state for dates and preset
   const [currentDates, setCurrentDates] = useState({
     selectedDate: dayjs().tz(TIMEZONE),
     displayDate: dayjs().tz(TIMEZONE)
   });
-
+  
   const [currentPreset, setCurrentPreset] = useState(widgetData);
-
+  
   // Data state
   const [dataState, setDataState] = useState({
     metrics: {},
@@ -134,7 +136,7 @@ const TestCard = ({
     difference: {},
     bindGraph: [],
   });
-
+  
   const [tooltipData, setTooltipData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
@@ -185,7 +187,7 @@ const TestCard = ({
   useEffect(() => {
     fetchMetrics(currentDates.selectedDate, currentDates.displayDate);
   }, [
-    currentDates.selectedDate,
+    currentDates.selectedDate, 
     currentDates.displayDate,
     currentPreset,
     brand_id,
@@ -226,7 +228,7 @@ const TestCard = ({
       );
 
       const data = response.data.data;
-
+      
       setDataState({
         metrics: data.targeted || {},
         previous: data.previous || {},
@@ -273,7 +275,7 @@ const TestCard = ({
   const getSubtitleText = (widgetData, DateStartDate, DateEndDate, displayDate, selectedDate) => {
     const today = dayjs().tz(TIMEZONE);
     if (DateStartDate && DateEndDate) return "Custom Date Range";
-
+    
     if (widgetData === "Today" || widgetData === "Yesterday") {
       return selectedDate.isSame(today, "day") ? "Today" : (
         <span
@@ -298,7 +300,7 @@ const TestCard = ({
   useEffect(() => {
     const today = dayjs().tz(TIMEZONE);
     let newDisplayDate, newSelectedDate;
-
+    
     // Handle custom date range
     if (DateStartDate && DateEndDate) {
       newDisplayDate = dayjs(DateStartDate);
@@ -376,7 +378,7 @@ const TestCard = ({
       displayDate: newDisplayDate,
       selectedDate: newSelectedDate
     });
-
+    
     setCurrentPreset(widgetData);
   }, [widgetData, DateStartDate, DateEndDate]);
 
@@ -442,7 +444,7 @@ const TestCard = ({
 
   const handlePrevious = () => {
     const today = dayjs().tz(TIMEZONE);
-
+    
     if (DateStartDate && DateEndDate) {
       const rangeDays = dayjs(DateEndDate).diff(dayjs(DateStartDate), 'day') + 1;
       setCurrentDates(prev => ({
@@ -451,10 +453,10 @@ const TestCard = ({
       }));
     } else {
       const newSelectedDate = currentDates.selectedDate.subtract(1, "day");
-
+      
       // Determine what preset this date represents
       let newPreset = "Custom"; // Default fallback
-
+      
       if (newSelectedDate.isSame(today, "day")) {
         newPreset = "Today";
       } else if (newSelectedDate.isSame(today.subtract(1, "day"), "day")) {
@@ -463,19 +465,19 @@ const TestCard = ({
         // For other dates, we'll use a custom approach - keep original preset but with different target_date
         newPreset = widgetData;
       }
-
+      
       setCurrentDates(prev => ({
         ...prev,
         selectedDate: newSelectedDate
       }));
-
+      
       setCurrentPreset(newPreset);
     }
   };
 
   const handleNext = () => {
     const today = dayjs().tz(TIMEZONE);
-
+    
     if (DateStartDate && DateEndDate) {
       const rangeDays = dayjs(DateEndDate).diff(dayjs(DateStartDate), 'day') + 1;
       const newEndDate = dayjs(currentDates.selectedDate).add(rangeDays, 'day');
@@ -486,10 +488,10 @@ const TestCard = ({
       }));
     } else if (!currentDates.selectedDate.isSame(today, "day")) {
       const newSelectedDate = currentDates.selectedDate.add(1, "day");
-
+      
       // Determine what preset this date represents
       let newPreset = "Custom"; // Default fallback
-
+      
       if (newSelectedDate.isSame(today, "day")) {
         newPreset = "Today";
       } else if (newSelectedDate.isSame(today.subtract(1, "day"), "day")) {
@@ -498,12 +500,12 @@ const TestCard = ({
         // For other dates, we'll use a custom approach - keep original preset but with different target_date
         newPreset = widgetData;
       }
-
+      
       setCurrentDates(prev => ({
         ...prev,
         selectedDate: newSelectedDate
       }));
-
+      
       setCurrentPreset(newPreset);
     }
   };
@@ -631,8 +633,8 @@ const TestCard = ({
                   currentDates.selectedDate.isSame(today, "day")
                     ? `Yesterday: ${formatCurrency(dataState.previous.gross_revenue)}`
                     : `${currentDates.selectedDate
-                      .subtract(1, "day")
-                      .format("MMM DD")}: ${formatCurrency(
+                        .subtract(1, "day")
+                        .format("MMM DD")}: ${formatCurrency(
                         dataState.previous.gross_revenue
                       )}`
                 }
@@ -817,27 +819,27 @@ const TestCard = ({
               visibleMetrics.includes(id) && (
                 <Box key={idx} sx={metricBlockStyle}>
                   <MetricItem
-                    title={item.title}
-                    value={
-                      item.currencySymbol
-                        ? formatCurrency(dataState.metrics[id])
-                        : item.percentSymbol
-                          ? `${Number(dataState.metrics[id] ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
-                          : Number(dataState.metrics[id] ?? 0).toLocaleString("en-US")
-                    }
-                    change={
-                      item.currencySymbol
-                        ? formatCurrency(dataState.difference[id])
-                        : item.percentSymbol
-                          ? `${Number(dataState.difference[id] ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
-                          : Number(dataState.difference[id] ?? 0).toLocaleString("en-US")
-                    }
-                    isNegative={String(dataState.difference[id]).startsWith("-")}
-                    tooltip={item.tooltip(currentDates.selectedDate, today, dataState.previous[id])}
-                    currencySymbol={item.currencySymbol}
-                    percentSymbol={item.percentSymbol}
-                    loading={dataLoading}
-                  />
+  title={item.title}
+  value={
+    item.currencySymbol
+      ? formatCurrency(dataState.metrics[id])
+      : item.percentSymbol
+        ? `${Number(dataState.metrics[id] ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
+        : Number(dataState.metrics[id] ?? 0).toLocaleString("en-US")
+  }
+  change={
+    item.currencySymbol
+      ? formatCurrency(dataState.difference[id])
+      : item.percentSymbol
+        ? `${Number(dataState.difference[id] ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
+        : Number(dataState.difference[id] ?? 0).toLocaleString("en-US")
+  }
+  isNegative={String(dataState.difference[id]).startsWith("-")}
+  tooltip={item.tooltip(currentDates.selectedDate, today, dataState.previous[id])}
+  currencySymbol={item.currencySymbol}
+  percentSymbol={item.percentSymbol}
+  loading={dataLoading}
+/>
                 </Box>
               )
             );
@@ -874,7 +876,7 @@ const TestCard = ({
                 onApply={handleApply}
               />
             </DialogContent>
-          </Dialog>
+          </Dialog> 
         </Box>
       )}
     </Box>
