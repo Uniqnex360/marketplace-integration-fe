@@ -28,7 +28,6 @@ import axios from "axios";
 import ChooseMetrics from "./ChooseMetrics";
 import DottedCircleLoading from "../../../Loading/DotLoading";
 import SkeletonLoadingUI from "./SummaryCardLoading";
-import { formatCurrency } from "../../../../utils/currencyFormatter";
 
 dayjs.extend(weekOfYear);
 dayjs.extend(utc);
@@ -382,7 +381,11 @@ const TestCard = ({
     setCurrentPreset(widgetData);
   }, [widgetData, DateStartDate, DateEndDate]);
 
-
+  const formatCurrency = (value) =>
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(value ?? 0);
 
   const METRICS_CONFIG = {
     total_orders: {
@@ -626,8 +629,8 @@ const TestCard = ({
             <Box sx={metricBlockStyle}>
               <MetricItem
                 title="Gross Revenue"
-                value={formatCurrency(dataState.metrics.gross_revenue)}
-                change={formatCurrency(dataState.difference.gross_revenue)}
+                value={dataState.metrics.gross_revenue}
+                change={dataState.difference.gross_revenue}
                 isNegative={String(dataState.difference.gross_revenue).startsWith("-")}
                 tooltip={
                   currentDates.selectedDate.isSame(today, "day")
@@ -819,27 +822,15 @@ const TestCard = ({
               visibleMetrics.includes(id) && (
                 <Box key={idx} sx={metricBlockStyle}>
                   <MetricItem
-  title={item.title}
-  value={
-    item.currencySymbol
-      ? formatCurrency(dataState.metrics[id])
-      : item.percentSymbol
-        ? `${Number(dataState.metrics[id] ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
-        : Number(dataState.metrics[id] ?? 0).toLocaleString("en-US")
-  }
-  change={
-    item.currencySymbol
-      ? formatCurrency(dataState.difference[id])
-      : item.percentSymbol
-        ? `${Number(dataState.difference[id] ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
-        : Number(dataState.difference[id] ?? 0).toLocaleString("en-US")
-  }
-  isNegative={String(dataState.difference[id]).startsWith("-")}
-  tooltip={item.tooltip(currentDates.selectedDate, today, dataState.previous[id])}
-  currencySymbol={item.currencySymbol}
-  percentSymbol={item.percentSymbol}
-  loading={dataLoading}
-/>
+                    title={item.title}
+                    value={dataState.metrics[id]}
+                    change={dataState.difference[id]}
+                    isNegative={String(dataState.difference[id]).startsWith("-")}
+                    tooltip={item.tooltip(currentDates.selectedDate, today, dataState.previous[id])}
+                    currencySymbol={item.currencySymbol}
+                    percentSymbol={item.percentSymbol}
+                    loading={dataLoading}
+                  />
                 </Box>
               )
             );
