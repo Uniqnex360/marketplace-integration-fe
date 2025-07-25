@@ -120,11 +120,13 @@ const TestCard = ({
 }) => {
   const theme = useTheme();
   
-  // Combined state for dates
+  // Combined state for dates and preset
   const [currentDates, setCurrentDates] = useState({
     selectedDate: dayjs().tz(TIMEZONE),
     displayDate: dayjs().tz(TIMEZONE)
   });
+  
+  const [currentPreset, setCurrentPreset] = useState(widgetData);
   
   // Data state
   const [dataState, setDataState] = useState({
@@ -186,7 +188,7 @@ const TestCard = ({
   }, [
     currentDates.selectedDate, 
     currentDates.displayDate,
-    widgetData,
+    currentPreset,
     brand_id,
     product_id,
     manufacturer_name,
@@ -200,7 +202,7 @@ const TestCard = ({
       const payload = {
         target_date: selectedDate.format("DD/MM/YYYY"),
         user_id: userId,
-        preset: widgetData,
+        preset: currentPreset,
         marketplace_id: marketPlaceId.id,
         brand_id: brand_id,
         product_id: product_id,
@@ -375,6 +377,8 @@ const TestCard = ({
       displayDate: newDisplayDate,
       selectedDate: newSelectedDate
     });
+    
+    setCurrentPreset(widgetData);
   }, [widgetData, DateStartDate, DateEndDate]);
 
   const formatCurrency = (value) =>
@@ -442,6 +446,8 @@ const TestCard = ({
   const today = dayjs().tz(TIMEZONE);
 
   const handlePrevious = () => {
+    const today = dayjs().tz(TIMEZONE);
+    
     if (DateStartDate && DateEndDate) {
       const rangeDays = dayjs(DateEndDate).diff(dayjs(DateStartDate), 'day') + 1;
       setCurrentDates(prev => ({
@@ -449,27 +455,61 @@ const TestCard = ({
         selectedDate: prev.selectedDate.subtract(rangeDays, 'day')
       }));
     } else {
+      const newSelectedDate = currentDates.selectedDate.subtract(1, "day");
+      
+      // Determine what preset this date represents
+      let newPreset = "Custom"; // Default fallback
+      
+      if (newSelectedDate.isSame(today, "day")) {
+        newPreset = "Today";
+      } else if (newSelectedDate.isSame(today.subtract(1, "day"), "day")) {
+        newPreset = "Yesterday";
+      } else {
+        // For other dates, we'll use a custom approach - keep original preset but with different target_date
+        newPreset = widgetData;
+      }
+      
       setCurrentDates(prev => ({
         ...prev,
-        selectedDate: prev.selectedDate.subtract(1, "day")
+        selectedDate: newSelectedDate
       }));
+      
+      setCurrentPreset(newPreset);
     }
   };
 
   const handleNext = () => {
+    const today = dayjs().tz(TIMEZONE);
+    
     if (DateStartDate && DateEndDate) {
       const rangeDays = dayjs(DateEndDate).diff(dayjs(DateStartDate), 'day') + 1;
       const newEndDate = dayjs(currentDates.selectedDate).add(rangeDays, 'day');
-      if (newEndDate.isAfter(dayjs().tz(TIMEZONE))) return;
+      if (newEndDate.isAfter(today)) return;
       setCurrentDates(prev => ({
         displayDate: prev.displayDate.add(rangeDays, 'day'),
         selectedDate: prev.selectedDate.add(rangeDays, 'day')
       }));
     } else if (!currentDates.selectedDate.isSame(today, "day")) {
+      const newSelectedDate = currentDates.selectedDate.add(1, "day");
+      
+      // Determine what preset this date represents
+      let newPreset = "Custom"; // Default fallback
+      
+      if (newSelectedDate.isSame(today, "day")) {
+        newPreset = "Today";
+      } else if (newSelectedDate.isSame(today.subtract(1, "day"), "day")) {
+        newPreset = "Yesterday";
+      } else {
+        // For other dates, we'll use a custom approach - keep original preset but with different target_date
+        newPreset = widgetData;
+      }
+      
       setCurrentDates(prev => ({
         ...prev,
-        selectedDate: prev.selectedDate.add(1, "day")
+        selectedDate: newSelectedDate
       }));
+      
+      setCurrentPreset(newPreset);
     }
   };
 
@@ -486,6 +526,7 @@ const TestCard = ({
         ...prev,
         selectedDate: today
       }));
+      setCurrentPreset("Today");
     }
   };
 
@@ -554,7 +595,7 @@ const TestCard = ({
                       opacity: dataLoading ? 0.7 : 1,
                     }}
                   >
-                    {getDisplayDateText(widgetData, DateStartDate, DateEndDate, currentDates.displayDate, currentDates.selectedDate)}
+                    {getDisplayDateText(currentPreset, DateStartDate, DateEndDate, currentDates.displayDate, currentDates.selectedDate)}
                     {dataLoading && <span style={{ marginLeft: 8 }}>...</span>}
                   </Typography>
                   <Box display="flex" justifyContent="center">
@@ -569,7 +610,7 @@ const TestCard = ({
                         width: "100%",
                       }}
                     >
-                      {getSubtitleText(widgetData, DateStartDate, DateEndDate, currentDates.displayDate, currentDates.selectedDate)}
+                      {getSubtitleText(currentPreset, DateStartDate, DateEndDate, currentDates.displayDate, currentDates.selectedDate)}
                     </Typography>
                   </Box>
                 </Box>

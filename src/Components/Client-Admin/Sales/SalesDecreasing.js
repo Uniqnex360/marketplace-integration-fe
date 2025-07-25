@@ -95,7 +95,7 @@ const SalesDecreasing = ({ userId, marketPlaceId, brand_id, product_id, manufact
                 fulfillment_channel: fulfillment_channel,
                 start_date: DateStartDate,
                 end_date: DateEndDate,
-                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, 
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             },
                 {
                     responseType: 'blob',
@@ -153,42 +153,42 @@ const SalesDecreasing = ({ userId, marketPlaceId, brand_id, product_id, manufact
 
 
 
-  const handleTooltipOpen = (value) => {
-    const isNumberOnly = /^\d+$/.test(value);
-    const label = isNumberOnly ? 'WPID' : 'ASIN';
-    setTooltipText(`Copy ${label}`);
-  };
+    const handleTooltipOpen = (value) => {
+        const isNumberOnly = /^\d+$/.test(value);
+        const label = isNumberOnly ? 'WPID' : 'ASIN';
+        setTooltipText(`Copy ${label}`);
+    };
 
-  const handleCopy = async (value) => {
-    if (!value) return;
+    const handleCopy = async (value) => {
+        if (!value) return;
 
-    const isNumberOnly = /^\d+$/.test(value);
-    const label = isNumberOnly ? 'WPID' : 'ASIN';
+        const isNumberOnly = /^\d+$/.test(value);
+        const label = isNumberOnly ? 'WPID' : 'ASIN';
 
-    try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(value);
-      } else {
-        const textarea = document.createElement("textarea");
-        textarea.value = value;
-        textarea.style.position = "fixed";
-        document.body.appendChild(textarea);
-        textarea.focus();
-        textarea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textarea);
-      }
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(value);
+            } else {
+                const textarea = document.createElement("textarea");
+                textarea.value = value;
+                textarea.style.position = "fixed";
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+                document.execCommand("copy");
+                document.body.removeChild(textarea);
+            }
 
-      setTooltipText(`${label} Copied!`);
-    } catch (err) {
-      console.error('Copy failed', err);
-      setTooltipText('Copy Failed');
-    }
+            setTooltipText(`${label} Copied!`);
+        } catch (err) {
+            console.error('Copy failed', err);
+            setTooltipText('Copy Failed');
+        }
 
-    setTimeout(() => {
-      setTooltipText(`Copy ${label}`);
-    }, 1500);
-  };
+        setTimeout(() => {
+            setTooltipText(`Copy ${label}`);
+        }, 1500);
+    };
 
     return (
         <Box sx={{ borderRadius: 3, border: '1px solid #E0E0E0' }}>
@@ -366,15 +366,15 @@ const SalesDecreasing = ({ userId, marketPlaceId, brand_id, product_id, manufact
                                             padding: '12px 16px',
                                         }}
                                     >
-                                        <Box display="flex" alignItems="center" sx={{width:'600px'}} gap={2}>
+                                        <Box display="flex" alignItems="center" sx={{ width: '600px' }} gap={2}>
                                             <Avatar src={item.images || ''} variant="square" sx={{ width: 40, height: 40 }} />
                                             <Box>
-                                                                                                                                     <a
-          href={`/Home/sales-detail/${item.id}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ textDecoration: "none", width: '40px', height: '40px' }}
-        >   <CustomizeTooltip title={item.product_name}>  <Typography
+                                                <a
+                                                    href={`/Home/sales-detail/${item.id}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{ textDecoration: "none", width: '40px', height: '40px' }}
+                                                >   <CustomizeTooltip title={item.product_name}>  <Typography
                                                     sx={{
                                                         fontSize: '14px',
                                                         color: '#0A6FE8',
@@ -396,7 +396,8 @@ const SalesDecreasing = ({ userId, marketPlaceId, brand_id, product_id, manufact
                                                         style={{ marginRight: 6 }}
                                                     />
                                                     <Typography
-                                                        sx={{ paddingRight:'7px',
+                                                        sx={{
+                                                            paddingRight: '7px',
                                                             fontSize: '14px',
                                                             color: '#121212',
                                                             fontFamily: "'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif'",
@@ -425,15 +426,15 @@ const SalesDecreasing = ({ userId, marketPlaceId, brand_id, product_id, manufact
                                                         {item?.asin}
                                                     </Typography>
 
-                                                                   <Tooltip
-        title={tooltipText}
-        onOpen={() => handleTooltipOpen(item.asin)}
-        arrow
-      >
-      <IconButton onClick={() => handleCopy(item.asin)} size="small" sx={{ mr: 0.5, }}>
-        <ContentCopyIcon sx={{ fontSize: '14px', color: '#757575' }} />
-      </IconButton>
-    </Tooltip>
+                                                    <Tooltip
+                                                        title={tooltipText}
+                                                        onOpen={() => handleTooltipOpen(item.asin)}
+                                                        arrow
+                                                    >
+                                                        <IconButton onClick={() => handleCopy(item.asin)} size="small" sx={{ mr: 0.5, }}>
+                                                            <ContentCopyIcon sx={{ fontSize: '14px', color: '#757575' }} />
+                                                        </IconButton>
+                                                    </Tooltip>
                                                     <Typography
                                                         sx={{
                                                             fontSize: '14px',
@@ -459,33 +460,29 @@ const SalesDecreasing = ({ userId, marketPlaceId, brand_id, product_id, manufact
                                             </Box>
                                         </Box>
                                     </TableCell>
-                                   <TableCell
-    sx={{
-        borderBottom: '1px solid #E0E0E0',
-        fontSize: '14px',
-        fontFamily:
-            "'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif",
-        color: '#485E75',
-    }}
->
-    {item.grossRevenue < 0
-        ? `-$${Math.abs(item.grossRevenue).toFixed(2)}`
-        : `$${item.grossRevenue.toFixed(2)}`}
-</TableCell>
+                                    <TableCell
+                                        sx={{
+                                            borderBottom: '1px solid #E0E0E0',
+                                            fontSize: '14px',
+                                            fontFamily:
+                                                "'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif",
+                                            color: '#485E75',
+                                        }}
+                                    >
+                                        {formatCurrency(item.grossRevenue)}
+                                    </TableCell>
 
-<TableCell
-    sx={{
-        borderBottom: '1px solid #E0E0E0',
-        fontSize: '14px',
-        fontFamily:
-            "'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif",
-        color: '#485E75',
-    }}
->
-    {item.netProfit < 0
-        ? `-$${Math.abs(item.netProfit).toFixed(2)}`
-        : `$${item.netProfit.toFixed(2)}`}
-</TableCell>
+                                    <TableCell
+                                        sx={{
+                                            borderBottom: '1px solid #E0E0E0',
+                                            fontSize: '14px',
+                                            fontFamily:
+                                                "'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif",
+                                            color: '#485E75',
+                                        }}
+                                    >
+                                        {formatCurrency(item.netProfit)}
+                                    </TableCell>
 
                                     <TableCell
                                         sx={{
@@ -502,7 +499,8 @@ const SalesDecreasing = ({ userId, marketPlaceId, brand_id, product_id, manufact
                                                     color: '#485E75',
                                                 }}
                                             >
-                                                {item.unitsSold}
+                                                {item.unitsSold?.toLocaleString("en-US")}
+
                                             </Typography>
 
                                             <ArrowDownwardIcon sx={{ color: 'red', fontSize: 14 }} />
