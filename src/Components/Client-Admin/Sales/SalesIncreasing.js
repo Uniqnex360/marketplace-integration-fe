@@ -29,6 +29,7 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { saveAs } from 'file-saver';
 import CustomizeTooltip from '../CustomTooltip/CustomTooltip';
+import { formatCurrency } from '../../../utils/currencyFormatter';
 
 const SalesIncreasing = ({
   userId,
@@ -461,18 +462,14 @@ const SalesIncreasing = ({
                     fontFamily: "'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif",
                     color: '#485E75'
                   }}>
-                    {item.grossRevenue < 0
-                      ? `-$${Math.abs(item.grossRevenue).toFixed(2)}`
-                      : `$${item.grossRevenue.toFixed(2)}`}
+                    {formatCurrency(item.grossRevenue)}
                   </TableCell>
                   <TableCell sx={{
                     fontSize: '14px',
                     fontFamily: "'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif",
                     color: '#485E75'
                   }}>
-                    {item.netProfit < 0
-                      ? `-$${Math.abs(item.netProfit).toFixed(2)}`
-                      : `$${item.netProfit.toFixed(2)}`}
+                     {formatCurrency(item.netProfit)}
                   </TableCell>
                   <TableCell>
                     <Box display="flex" alignItems="center" gap={1}>
@@ -481,7 +478,7 @@ const SalesIncreasing = ({
                         fontFamily: "'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif",
                         color: '#485E75'
                       }}>
-                        {item.unitsSold}
+                        {item.unitsSold?.toLocaleString("en-US")}
                       </Typography>
                       <ArrowUpwardIcon sx={{ color: 'rgb(51, 204, 153)', fontSize: 14 }} />
                     </Box>
