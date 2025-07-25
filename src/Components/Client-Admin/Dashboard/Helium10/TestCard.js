@@ -28,7 +28,8 @@ import axios from "axios";
 import ChooseMetrics from "./ChooseMetrics";
 import DottedCircleLoading from "../../../Loading/DotLoading";
 import SkeletonLoadingUI from "./SummaryCardLoading";
-
+import customParseFormat from "dayjs/plugin/customParseFormat";
+dayjs.extend(customParseFormat);
 dayjs.extend(weekOfYear);
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -145,7 +146,7 @@ const TestCard = ({
   const graphContainerRef = useRef(null);
   const svgRef = useRef(null);
   const [svgOffset, setSvgOffset] = useState({ left: 0, top: 0 });
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);get_metrics_by_date_range
 
   const [visibleMetrics, setVisibleMetrics] = useState([
     "gross_revenue",
@@ -233,14 +234,12 @@ const TestCard = ({
         previous: data.previous || {},
         difference: data.difference || {},
         bindGraph: Object.entries(data.graph_data || {}).map(
-          ([rawDate, values]) => ({
-            date: dayjs(rawDate.charAt(0).toUpperCase() + rawDate.slice(1))
-              .tz(TIMEZONE)
-              .format("MMM DD"),
-            revenue: values.gross_revenue,
-            fullDate: dayjs(rawDate).toDate(),
-          })
-        ),
+  ([rawDate, values]) => ({
+    date: rawDate,
+    dateObj: dayjs(rawDate, "MMMM DD, YYYY"), // Parse with explicit format
+    revenue: values.gross_revenue,
+  })
+).sort((a, b) => a.dateObj - b.dateObj)
       });
 
       const selectedMetricKeys = Object.keys(data.targeted || {});
