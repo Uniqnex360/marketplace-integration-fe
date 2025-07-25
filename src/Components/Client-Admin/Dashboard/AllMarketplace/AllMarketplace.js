@@ -36,6 +36,7 @@ import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import DottedCircleLoading from "../../../Loading/DotLoading";
 import CardComponent from "../CardComponet";
+import { formatCurrency } from "../../../../utils/currencyFormatter";
 dayjs.extend(utc);
 
 const fontStyles = {
@@ -55,16 +56,6 @@ function MarketplaceRow({ row, index }) {
     fontSize: "14px",
   };
 
-  const formatCurrency = (value) => {
-    if (value == null || isNaN(value)) return "-";
-    const number = Number(value);
-    const formatted = number.toLocaleString("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-    });
-    return formatted;
-  };
 
   return (
     <>
@@ -515,15 +506,16 @@ export default function AllMarketplace({
                 {[
                   {
                     title: "Gross Revenue",
-                    value: `$${
-                      allMarketplaceData?.grossRevenue?.current?.toFixed(2) ||
-                      "0.00"
-                    }`,
-                    change: `${
-                      allMarketplaceData?.grossRevenue?.delta < 0 ? "-" : ""
-                    }$${Math.abs(
-                      allMarketplaceData?.grossRevenue?.delta || 0
-                    ).toFixed(2)}`,
+                    value: formatCurrency(
+                      allMarketplaceData?.grossRevenue?.current
+                    ),
+                    change:
+                      (allMarketplaceData?.grossRevenue?.delta >= 0
+                        ? "+"
+                        : "-") +
+                      formatCurrency(
+                        Math.abs(allMarketplaceData?.grossRevenue?.delta || 0)
+                      ),
                     changeType:
                       allMarketplaceData?.grossRevenue?.delta >= 0
                         ? "up"
@@ -531,36 +523,41 @@ export default function AllMarketplace({
                   },
                   {
                     title: "Expenses",
-                    value: `-$${
-                      allMarketplaceData?.expenses?.current?.toFixed(2) ||
-                      "0.00"
-                    }`,
-                    change: `${
-                      allMarketplaceData?.expenses?.delta < 0 ? "-" : ""
-                    }$${Math.abs(
-                      allMarketplaceData?.expenses?.delta || 0
-                    ).toFixed(2)}`,
+                    value:
+                      "-" +
+                      formatCurrency(allMarketplaceData?.expenses?.current),
+                    change:
+                      (allMarketplaceData?.expenses?.delta >= 0 ? "+" : "-") +
+                      formatCurrency(
+                        Math.abs(allMarketplaceData?.expenses?.delta || 0)
+                      ),
                     changeType:
                       allMarketplaceData?.expenses?.delta >= 0 ? "up" : "down",
                   },
                   {
                     title: "Net Profit",
-                    value: `$${
-                      allMarketplaceData?.netProfit?.current?.toFixed(2) ||
-                      "0.00"
-                    }`,
-                    change: `${
-                      allMarketplaceData?.netProfit?.delta < 0 ? "-" : ""
-                    }$${Math.abs(
-                      allMarketplaceData?.netProfit?.delta || 0
-                    ).toFixed(2)}`,
+                    value: formatCurrency(
+                      allMarketplaceData?.netProfit?.current
+                    ),
+                    change:
+                      (allMarketplaceData?.netProfit?.delta >= 0 ? "+" : "-") +
+                      formatCurrency(
+                        Math.abs(allMarketplaceData?.netProfit?.delta || 0)
+                      ),
                     changeType:
                       allMarketplaceData?.netProfit?.delta >= 0 ? "up" : "down",
                   },
                   {
                     title: "Units Sold",
-                    value: `${allMarketplaceData?.unitsSold?.current || "0"}`,
-                    change: `${allMarketplaceData?.unitsSold?.delta || "0"}`,
+                    value:
+                      allMarketplaceData?.unitsSold?.current?.toLocaleString(
+                        "en-US"
+                      ) || "0",
+                    change:
+                      (allMarketplaceData?.unitsSold?.delta >= 0 ? "+" : "-") +
+                      Math.abs(
+                        allMarketplaceData?.unitsSold?.delta || 0
+                      ).toLocaleString("en-US"),
                     changeType:
                       allMarketplaceData?.unitsSold?.delta >= 0 ? "up" : "down",
                   },
