@@ -50,16 +50,38 @@ const MetricItem = ({
   const absValue = Math.abs(value ?? 0);
   const absChange = Math.abs(change ?? 0);
 
-  const displayValue = `${(value ?? 0) < 0 ? "-" : ""}${
-    currencySymbol ?? ""
-  }${absValue}${percentSymbol ?? ""}`;
-
-  const displayChange =
-    change !== undefined
-      ? `${change < 0 ? "-" : ""}${currencySymbol ?? ""}${absChange}${
-          percentSymbol ?? ""
-        }`
-      : "";
+const displayValue = `${(value ?? 0) < 0 ? "-" : ""}${
+  currencySymbol 
+    ? new Intl.NumberFormat("en-US", {
+        style: "currency", 
+        currency: "USD",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(Math.abs(value ?? 0))
+    : percentSymbol 
+      ? `${Math.abs(value ?? 0)}%`
+      : new Intl.NumberFormat("en-US", {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        }).format(Math.abs(value ?? 0))
+}`;
+const displayChange = change !== undefined
+  ? `${change < 0 ? "-" : ""}${
+      currencySymbol 
+        ? new Intl.NumberFormat("en-US", {
+            style: "currency", 
+            currency: "USD",
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }).format(Math.abs(change ?? 0))
+        : percentSymbol 
+          ? `${Math.abs(change ?? 0)}%`
+          : new Intl.NumberFormat("en-US", {
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0,
+            }).format(Math.abs(change ?? 0))
+    }`
+  : "";
 
   return (
     <Card
@@ -134,7 +156,8 @@ const TestCard = ({
     selectedDate: dayjs().tz(TIMEZONE),
     displayDate: dayjs().tz(TIMEZONE),
   });
-
+  const formatNumber = (value) =>
+  (value ?? 0).toLocaleString("en-US");
   const [currentPreset, setCurrentPreset] = useState(widgetData);
 
   // Data state
@@ -411,10 +434,13 @@ const TestCard = ({
   }, [widgetData, DateStartDate, DateEndDate]);
 
   const formatCurrency = (value) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(value ?? 0);
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value ?? 0);
+
 
   const METRICS_CONFIG = {
     total_orders: {
