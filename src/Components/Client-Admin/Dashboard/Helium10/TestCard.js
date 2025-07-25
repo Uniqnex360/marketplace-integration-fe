@@ -382,15 +382,15 @@ const TestCard = ({
     setCurrentPreset(widgetData);
   }, [widgetData, DateStartDate, DateEndDate]);
 
- const formatCurrency = (value) =>
-  typeof value === "number"
-    ? new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        minimumFractionDigits: 2
-      }).format(value)
-    : "$0.00";
-
+const formatCurrency = (value) => {
+  const num = Number(value);
+  if (isNaN(num)) return "$0.00";
+  return num.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+  });
+};
 
   const METRICS_CONFIG = {
     total_orders: {
@@ -832,14 +832,14 @@ const TestCard = ({
           title={item.title}
           value={
             isCurrency
-              ? formatCurrency(dataState.metrics[id])
+              ? dataState.metrics[id]
               : isPercent
                 ? `${Number(dataState.metrics[id] ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
                 : Number(dataState.metrics[id] ?? 0).toLocaleString("en-US")
           }
           change={
             isCurrency
-              ? formatCurrency(dataState.difference[id])
+              ? dataState.difference[id]
               : isPercent
                 ? `${Number(dataState.difference[id] ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
                 : Number(dataState.difference[id] ?? 0).toLocaleString("en-US")
