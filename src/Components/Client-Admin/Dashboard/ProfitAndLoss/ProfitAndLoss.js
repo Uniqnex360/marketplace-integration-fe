@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
+import formatCurrency from '../../../../utils/currencyFormatter'
 import { format, parseISO } from "date-fns";
 import {
   ResponsiveContainer,
