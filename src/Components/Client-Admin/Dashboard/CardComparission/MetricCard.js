@@ -1040,91 +1040,73 @@ const MetricCard = ({
           range?.[key] || range?.[fallbackKey];
 
         const cardData = {
-          title:
-            period === "last7Days"
-              ? "Last 7 Days"
-              : period.charAt(0).toUpperCase() + period.slice(1),
+  title:
+    period === "last7Days"
+      ? "Last 7 Days"
+      : period.charAt(0).toUpperCase() + period.slice(1),
 
-          // Use from_local / to_local with fallback to from / to
-          dateRange: periodData.dateRanges?.current
-            ? `${safeFormatDate(
-                getLocal(periodData.dateRanges.current, "from_local", "from"),
-                formatterLong
-              )} - ${safeFormatDate(
-                getLocal(periodData.dateRanges.current, "to_local", "to"),
-                formatterLong
-              )}`
-            : "",
+  // Date Ranges
+  dateRange: periodData.dateRanges?.current
+    ? `${safeFormatDate(
+        getLocal(periodData.dateRanges.current, "from_local", "from"),
+        formatterLong
+      )} - ${safeFormatDate(
+        getLocal(periodData.dateRanges.current, "to_local", "to"),
+        formatterLong
+      )}`
+    : "",
 
-          dateRangePrev: periodData.dateRanges?.previous
-            ? `${safeFormatDate(
-                getLocal(periodData.dateRanges.previous, "from_local", "from"),
-                formatterLong
-              )} - ${safeFormatDate(
-                getLocal(periodData.dateRanges.previous, "to_local", "to"),
-                formatterLong
-              )}`
-            : "",
+  dateRangePrev: periodData.dateRanges?.previous
+    ? `${safeFormatDate(
+        getLocal(periodData.dateRanges.previous, "from_local", "from"),
+        formatterLong
+      )} - ${safeFormatDate(
+        getLocal(periodData.dateRanges.previous, "to_local", "to"),
+        formatterLong
+      )}`
+    : "",
 
-          dateRangeFormat: periodData.dateRanges?.current
-            ? `${safeFormatDate(
-                getLocal(periodData.dateRanges.current, "from_local", "from"),
-                formatterShort
-              )} - ${safeFormatDate(
-                getLocal(periodData.dateRanges.current, "to_local", "to"),
-                formatterShort
-              )}`
-            : "",
+  dateRangeFormat: periodData.dateRanges?.current
+    ? `${safeFormatDate(
+        getLocal(periodData.dateRanges.current, "from_local", "from"),
+        formatterShort
+      )} - ${safeFormatDate(
+        getLocal(periodData.dateRanges.current, "to_local", "to"),
+        formatterShort
+      )}`
+    : "",
 
-          dateRangePrevFormat: periodData.dateRanges?.previous
-            ? `${safeFormatDate(
-                getLocal(periodData.dateRanges.previous, "from_local", "from"),
-                formatterShort
-              )} - ${safeFormatDate(
-                getLocal(periodData.dateRanges.previous, "to_local", "to"),
-                formatterShort
-              )}`
-            : "",
+  dateRangePrevFormat: periodData.dateRanges?.previous
+    ? `${safeFormatDate(
+        getLocal(periodData.dateRanges.previous, "from_local", "from"),
+        formatterShort
+      )} - ${safeFormatDate(
+        getLocal(periodData.dateRanges.previous, "to_local", "to"),
+        formatterShort
+      )}`
+    : "",
 
-          grossRevenue: `$${safeGet(
-            periodData,
-            "summary.grossRevenue.current",
-            0
-          ).toFixed(2)}`,
+  // Currency values
+  grossRevenue: formatCurrency(safeGet(periodData, "summary.grossRevenue.current", 0)),
+  expenses: "-" + formatCurrency(safeGet(periodData, "summary.expenses.current", 0)),
+  netProfit: formatCurrency(safeGet(periodData, "summary.netProfit.current", 0)),
+  netPrevious: formatCurrency(safeGet(periodData, "summary.netProfit.previous", 0)),
+  previous: formatCurrency(safeGet(periodData, "summary.grossRevenue.previous", 0)),
 
-          expenses: `-$${safeGet(
-            periodData,
-            "summary.expenses.current",
-            0
-          ).toFixed(2)}`,
+  // Percentages
+  margin: `${Number(safeGet(periodData, "summary.margin.current", 0)).toFixed(2)}%`,
 
-          netProfit: `$${safeGet(
-            periodData,
-            "summary.netProfit.current",
-            0
-          ).toFixed(2)}`,
+  // Plain numbers with commas
+  orders: Number(safeGet(periodData, "summary.orders.current", 0)).toLocaleString("en-US"),
+  unitsSold: Number(safeGet(periodData, "summary.unitsSold.current", 0)).toLocaleString("en-US"),
+  refunds: Number(safeGet(periodData, "summary.refunds.current", 0)).toLocaleString("en-US"),
 
-          netPrevious: `$${safeGet(
-            periodData,
-            "summary.netProfit.previous",
-            0
-          ).toFixed(2)}`,
+  // Revenue change (currency, with sign)
+  revenueChange: `${safeGet(periodData, "summary.grossRevenue.delta", 0) >= 0 ? "+" : "-"}${formatCurrency(Math.abs(safeGet(periodData, "summary.grossRevenue.delta", 0)))}`,
 
-          margin: `${safeGet(periodData, "summary.margin.current", 0).toFixed(
-            2
-          )}%`,
-
-          orders: safeGet(periodData, "summary.orders.current", 0),
-          unitsSold: safeGet(periodData, "summary.unitsSold.current", 0),
-          refunds: safeGet(periodData, "summary.refunds.current", 0),
-          previous: safeGet(periodData, "summary.grossRevenue.previous", 0),
-
-          revenueChange: `${
-            safeGet(periodData, "summary.grossRevenue.delta", 0) >= 0 ? "+" : ""
-          }$${safeGet(periodData, "summary.grossRevenue.delta", 0).toFixed(2)}`,
-
-          netProfitCalculation: periodData.netProfitCalculation || {},
-        };
+  // Net profit calculation (if you use it)
+  netProfitCalculation: periodData.netProfitCalculation || {},
+};
 
         acc.push(cardData);
       } catch (error) {
