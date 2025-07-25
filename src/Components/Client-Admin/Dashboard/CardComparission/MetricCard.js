@@ -1103,7 +1103,7 @@ const MetricCard = ({
   refunds: Number(safeGet(periodData, "summary.refunds.current", 0)).toLocaleString("en-US"),
 
   // Revenue change (currency, with sign)
-  revenueChange: `${safeGet(periodData, "summary.grossRevenue.delta", 0) >= 0 ? "+" : "-"}${formatCurrency(Math.abs(safeGet(periodData, "summary.grossRevenue.delta", 0)))}`,
+  revenueChange: `${ safeGet(periodData, "summary.grossRevenue.delta", 0) >= 0 ? "+" : "" }$${safeGet(periodData, "summary.grossRevenue.delta", 0).toFixed(2)}`,
 
   // Net profit calculation (if you use it)
   netProfitCalculation: periodData.netProfitCalculation || {},
