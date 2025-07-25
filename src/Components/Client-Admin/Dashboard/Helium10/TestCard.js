@@ -227,6 +227,7 @@ const TestCard = ({
       );
 
       const data = response.data.data;
+      console.log('data',data)
       
       setDataState({
         metrics: data.targeted || {},
