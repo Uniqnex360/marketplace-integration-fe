@@ -48,6 +48,10 @@ const formatterShort = new Intl.DateTimeFormat("en-US", {
   day: "2-digit",
   timeZone: "UTC",
 });
+export function formatPercentage(value) {
+  if (value === undefined || value === null || isNaN(value)) return "0.00%";
+  return `${value.toFixed(2)}%`;
+}
 
 function OrderInfoPopover({
   open,
