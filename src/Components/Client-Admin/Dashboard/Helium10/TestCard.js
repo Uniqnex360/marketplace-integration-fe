@@ -627,6 +627,7 @@ const TestCard = ({
     borderBottom: "1px solid #e0e0e0",
     py: 1,
     px: 2,
+    gap:2
   };
 
   return (
@@ -750,14 +751,10 @@ const TestCard = ({
                 ).startsWith("-")}
                 tooltip={
                   currentDates.selectedDate.isSame(today, "day")
-                    ? `Current: ${formatCurrency(
-                        dataState.metrics.gross_revenue
-                      )} | Yesterday: ${formatCurrency(
+                    ? `Yesterday: ${formatCurrency(
                         dataState.previous.gross_revenue
                       )}`
-                    : `Current: ${formatCurrency(
-                        dataState.metrics.gross_revenue
-                      )} | ${currentDates.selectedDate
+                    : `${currentDates.selectedDate
                         .subtract(1, "day")
                         .format("MMM DD")}: ${formatCurrency(
                         dataState.previous.gross_revenue
