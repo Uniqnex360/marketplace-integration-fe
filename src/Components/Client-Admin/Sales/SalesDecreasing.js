@@ -25,6 +25,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy'; // Import Copy Ic
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import CustomizeTooltip from '../CustomTooltip/CustomTooltip';
+import { formatCurrency } from '../../../utils/currencyFormatter';
 const SalesDecreasing = ({ userId, marketPlaceId, brand_id, product_id, manufacturer_name, fulfillment_channel, DateStartDate, DateEndDate }) => {
     const [products, setProducts] = useState([]);
     const [tooltipText, setTooltipText] = useState('Copy ASIN');
