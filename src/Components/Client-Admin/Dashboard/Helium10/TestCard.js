@@ -28,6 +28,7 @@ import axios from "axios";
 import ChooseMetrics from "./ChooseMetrics";
 import DottedCircleLoading from "../../../Loading/DotLoading";
 import SkeletonLoadingUI from "./SummaryCardLoading";
+import { formatCurrency } from "../../../../utils/currencyFormatter";
 
 dayjs.extend(weekOfYear);
 dayjs.extend(utc);
@@ -381,11 +382,7 @@ const TestCard = ({
     setCurrentPreset(widgetData);
   }, [widgetData, DateStartDate, DateEndDate]);
 
-  const formatCurrency = (value) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(value ?? 0);
+
 
   const METRICS_CONFIG = {
     total_orders: {
