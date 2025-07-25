@@ -22,6 +22,7 @@ import NotificationTooltip from "./NotificationTooltip";
 
 import { Delete } from "@mui/icons-material";
 import DottedCircleLoading from "../../../Loading/DotLoading";
+import { formatCurrency } from "../../../../utils/currencyFormatter";
 const CustomPopover = styled(Popover)(({ theme }) => ({
   "& .MuiPopover-paper": {
     backgroundColor: "white",
