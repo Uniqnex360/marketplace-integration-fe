@@ -6,6 +6,7 @@ import CustomBarChart from "./CustomBarChart";
 import DottedCircleLoading from "../../Loading/DotLoading";
 import { format } from 'date-fns';
 import DonutChart from "./DonutChart";
+import { formatCurrency } from "../../../utils/currencyFormatter";
 
 const CardComponent = ({widgetData, marketPlaceId, DateStartDate, DateEndDate, brand_id, product_id,manufacturer_name }) => {
     const [loading, setLoading] = useState(true);
@@ -255,7 +256,7 @@ const CardComponent = ({widgetData, marketPlaceId, DateStartDate, DateEndDate, b
                                             const orderValue = marketplaceData.orderValue || 0;
                                             additionalInfo = `
                                                 Order Count: ${marketplaceData.value} |
-                                                Order Value: $${orderValue.toFixed(2)}
+                                                Order Value: $${formatCurrency(orderValue.toFixed(2))}
                                             `;
                                         }
                                     }
