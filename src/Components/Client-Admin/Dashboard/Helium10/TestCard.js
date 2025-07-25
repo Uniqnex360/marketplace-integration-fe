@@ -181,15 +181,25 @@ const TestCard = ({
 
   // Fetch data when dates change
   useEffect(() => {
-    fetchMetrics(currentDates.selectedDate, currentDates.displayDate);
-  }, [currentDates.selectedDate, currentDates.displayDate, widgetData,
-  brand_id,
-  product_id,
-  manufacturer_name,
-  fulfillment_channel,
-  marketPlaceId?.id,]);
+    // Only fetch if we have valid dates and marketPlaceId
+    if (currentDates.selectedDate && currentDates.displayDate && marketPlaceId?.id) {
+      fetchMetrics(currentDates.selectedDate, currentDates.displayDate);
+    }
+  }, [
+    currentDates.selectedDate.format('YYYY-MM-DD'), // Convert to string to ensure proper comparison
+    currentDates.displayDate.format('YYYY-MM-DD'),
+    widgetData,
+    brand_id,
+    product_id,
+    manufacturer_name,
+    fulfillment_channel,
+    marketPlaceId?.id,
+  ]);
 
   const fetchMetrics = async (selectedDate, displayDate) => {
+    // Prevent multiple simultaneous calls
+    if (dataLoading) return;
+    
     setDataLoading(true);
     try {
       const payload = {
@@ -212,12 +222,15 @@ const TestCard = ({
         payload.end_date = dayjs(DateEndDate).format("DD/MM/YYYY");
       }
 
+      console.log('Fetching metrics with payload:', payload); // Debug log
+
       const response = await axios.post(
         `${process.env.REACT_APP_IP}get_metrics_by_date_range/`,
         payload
       );
 
       const data = response.data.data;
+      console.log('Received data:', data); // Debug log
       
       setDataState({
         metrics: data.targeted || {},
@@ -249,23 +262,26 @@ const TestCard = ({
       return `${dayjs(DateStartDate).format("MMMM D, YYYY")} - ${dayjs(DateEndDate).format("MMMM D, YYYY")}`;
     }
 
-    switch (widgetData) {
-      case "Today":
-      case "Yesterday":
-        return selectedDate.format("ddd, MMM DD");
-      default:
-        if (displayDate && selectedDate && !displayDate.isSame(selectedDate, "day")) {
-          return `${displayDate.format("MMM DD")} - ${selectedDate.format("MMM DD")}`;
-        }
-        return selectedDate.format("ddd, MMM DD");
+    // For single day selections (Today/Yesterday), always show the selected date
+    if (widgetData === "Today" || widgetData === "Yesterday") {
+      return selectedDate.format("ddd, MMM DD");
     }
+    
+    // For date ranges, show the range
+    if (displayDate && selectedDate && !displayDate.isSame(selectedDate, "day")) {
+      return `${displayDate.format("MMM DD")} - ${selectedDate.format("MMM DD")}`;
+    }
+    
+    // Default to selected date
+    return selectedDate.format("ddd, MMM DD");
   };
 
   const getSubtitleText = (widgetData, DateStartDate, DateEndDate, displayDate, selectedDate) => {
     const today = dayjs().tz(TIMEZONE);
     if (DateStartDate && DateEndDate) return "Custom Date Range";
     
-    if (widgetData === "Today" || widgetData === "Yesterday") {
+    // For Today/Yesterday presets, show actual status based on selected date
+    if (widgetData === "Today") {
       return selectedDate.isSame(today, "day") ? "Today" : (
         <span
           style={{
@@ -282,6 +298,26 @@ const TestCard = ({
         </span>
       );
     }
+    
+    if (widgetData === "Yesterday") {
+      const yesterday = today.subtract(1, "day");
+      return selectedDate.isSame(yesterday, "day") ? "Yesterday" : (
+        <span
+          style={{
+            color: "#0A6FE8",
+            fontWeight: "bold",
+            fontFamily: "'Nunito Sans', sans-serif",
+            fontSize: 14,
+            cursor: "pointer",
+            textDecoration: "none",
+          }}
+          onClick={handleBackToToday}
+        >
+          Back to Today
+        </span>
+      );
+    }
+    
     return widgetData;
   };
 
@@ -433,62 +469,91 @@ const TestCard = ({
 
   const today = dayjs().tz(TIMEZONE);
 
-  // Fixed navigation functions
+  // Fixed navigation functions with immediate data loading
   const handlePrevious = () => {
+    let newDates;
+    
     if (DateStartDate && DateEndDate) {
       const rangeDays = dayjs(DateEndDate).diff(dayjs(DateStartDate), 'day') + 1;
-      setCurrentDates(prev => ({
-        displayDate: prev.displayDate.subtract(rangeDays, 'day'),
-        selectedDate: prev.selectedDate.subtract(rangeDays, 'day')
-      }));
+      newDates = {
+        displayDate: currentDates.displayDate.subtract(rangeDays, 'day'),
+        selectedDate: currentDates.selectedDate.subtract(rangeDays, 'day')
+      };
     } else {
       // For single day navigation, move both dates
-      setCurrentDates(prev => {
-        const newDate = prev.selectedDate.subtract(1, "day");
-        return {
-          displayDate: newDate,
-          selectedDate: newDate
-        };
-      });
+      const newDate = currentDates.selectedDate.subtract(1, "day");
+      newDates = {
+        displayDate: newDate,
+        selectedDate: newDate
+      };
     }
+    
+    setCurrentDates(newDates);
+    // Force immediate data fetch with new dates
+    fetchMetrics(newDates.selectedDate, newDates.displayDate);
   };
 
   const handleNext = () => {
     const today = dayjs().tz(TIMEZONE);
+    let newDates;
     
     if (DateStartDate && DateEndDate) {
       const rangeDays = dayjs(DateEndDate).diff(dayjs(DateStartDate), 'day') + 1;
       const newEndDate = currentDates.selectedDate.add(rangeDays, 'day');
       if (newEndDate.isAfter(today)) return;
-      setCurrentDates(prev => ({
-        displayDate: prev.displayDate.add(rangeDays, 'day'),
-        selectedDate: prev.selectedDate.add(rangeDays, 'day')
-      }));
+      newDates = {
+        displayDate: currentDates.displayDate.add(rangeDays, 'day'),
+        selectedDate: currentDates.selectedDate.add(rangeDays, 'day')
+      };
     } else {
       // For single day navigation, check if we can move forward
       const newDate = currentDates.selectedDate.add(1, "day");
       if (newDate.isAfter(today)) return;
-      setCurrentDates({
+      newDates = {
         displayDate: newDate,
         selectedDate: newDate
-      });
+      };
     }
+    
+    setCurrentDates(newDates);
+    // Force immediate data fetch with new dates
+    fetchMetrics(newDates.selectedDate, newDates.displayDate);
   };
 
   const handleBackToToday = () => {
     const today = dayjs().tz(TIMEZONE);
+    let newDates;
+    
     if (DateStartDate && DateEndDate) {
       const rangeDays = dayjs(DateEndDate).diff(dayjs(DateStartDate), 'day') + 1;
-      setCurrentDates({
+      newDates = {
         displayDate: today.subtract(rangeDays - 1, 'day'),
         selectedDate: today
-      });
-    } else {
-      setCurrentDates({
+      };
+    } else if (widgetData === "Today") {
+      // For Today preset, go back to actual today
+      newDates = {
         displayDate: today,
         selectedDate: today
-      });
+      };
+    } else if (widgetData === "Yesterday") {
+      // For Yesterday preset, go back to yesterday
+      const yesterday = today.subtract(1, "day");
+      newDates = {
+        displayDate: yesterday,
+        selectedDate: yesterday
+      };
+    } else {
+      // For other presets, go to today
+      newDates = {
+        displayDate: today,
+        selectedDate: today
+      };
     }
+    
+    setCurrentDates(newDates);
+    // Force immediate data fetch with new dates
+    fetchMetrics(newDates.selectedDate, newDates.displayDate);
   };
 
   const getGraphPoints = () => {
