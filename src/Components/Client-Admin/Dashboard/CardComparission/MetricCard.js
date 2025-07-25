@@ -22,6 +22,7 @@ import NotificationTooltip from "./NotificationTooltip";
 
 import { Delete } from "@mui/icons-material";
 import DottedCircleLoading from "../../../Loading/DotLoading";
+import { formatCurrency } from "../../../../utils/currencyFormatter";
 const CustomPopover = styled(Popover)(({ theme }) => ({
   "& .MuiPopover-paper": {
     backgroundColor: "white",
@@ -1086,29 +1087,18 @@ const MetricCard = ({
               )}`
             : "",
 
-          grossRevenue: `$${safeGet(
-            periodData,
-            "summary.grossRevenue.current",
-            0
-          ).toFixed(2)}`,
-
-          expenses: `-$${safeGet(
-            periodData,
-            "summary.expenses.current",
-            0
-          ).toFixed(2)}`,
-
-          netProfit: `$${safeGet(
-            periodData,
-            "summary.netProfit.current",
-            0
-          ).toFixed(2)}`,
-
-          netPrevious: `$${safeGet(
-            periodData,
-            "summary.netProfit.previous",
-            0
-          ).toFixed(2)}`,
+          grossRevenue: formatCurrency(
+            safeGet(periodData, "summary.grossRevenue.current", 0)
+          ),
+          expenses: `-${formatCurrency(
+            safeGet(periodData, "summary.expenses.current", 0)
+          )}`,
+          netProfit: formatCurrency(
+            safeGet(periodData, "summary.netProfit.current", 0)
+          ),
+          netPrevious: formatCurrency(
+            safeGet(periodData, "summary.netProfit.previous", 0)
+          ),
 
           margin: `${safeGet(periodData, "summary.margin.current", 0).toFixed(
             2
@@ -1117,11 +1107,26 @@ const MetricCard = ({
           orders: safeGet(periodData, "summary.orders.current", 0),
           unitsSold: safeGet(periodData, "summary.unitsSold.current", 0),
           refunds: safeGet(periodData, "summary.refunds.current", 0),
-          previous: safeGet(periodData, "summary.grossRevenue.previous", 0),
-
-          revenueChange: `${
-            safeGet(periodData, "summary.grossRevenue.delta", 0) >= 0 ? "+" : ""
-          }$${safeGet(periodData, "summary.grossRevenue.delta", 0).toFixed(2)}`,
+          previous: formatCurrency(
+            safeGet(periodData, "summary.grossRevenue.previous", 0)
+          ),
+          revenueChange: (() => {
+            const current = safeGet(
+              periodData,
+              "summary.grossRevenue.current",
+              0
+            );
+            const previous = safeGet(
+              periodData,
+              "summary.grossRevenue.previous",
+              0
+            );
+            if (previous === 0) return "N/A";
+            const change = ((current - previous) / previous) * 100;
+            return `${change >= 0 ? "+" : "-"}${formatPercentage(
+              Math.abs(change)
+            )}`;
+          })(),
 
           netProfitCalculation: periodData.netProfitCalculation || {},
         };
