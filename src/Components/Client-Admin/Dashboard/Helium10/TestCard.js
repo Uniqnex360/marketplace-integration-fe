@@ -499,6 +499,7 @@ const TestCard = ({
   };
 
   const handleBackToToday = () => {
+    const today=dayjs().tz(timezone)
     if (DateStartDate && DateEndDate) {
       const rangeDays =
         dayjs(DateEndDate).diff(dayjs(DateStartDate), "day") + 1;
