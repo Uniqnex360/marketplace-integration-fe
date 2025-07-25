@@ -633,8 +633,8 @@ const formatCurrency = (value) => {
             <Box sx={metricBlockStyle}>
               <MetricItem
                 title="Gross Revenue"
-                value={dataState.metrics.gross_revenue}
-                change={dataState.difference.gross_revenue}
+                value={formatCurrency(dataState.metrics.gross_revenue)}
+                change={formatCurrency(dataState.difference.gross_revenue)}
                 isNegative={String(dataState.difference.gross_revenue).startsWith("-")}
                 tooltip={
                   currentDates.selectedDate.isSame(today, "day")
