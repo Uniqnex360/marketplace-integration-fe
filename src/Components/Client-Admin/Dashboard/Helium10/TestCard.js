@@ -49,7 +49,7 @@ const MetricItem = ({
 }) => {
   const absValue = Math.abs(value ?? 0);
   const absChange = Math.abs(change ?? 0);
-  
+
   const displayValue = `${(value ?? 0) < 0 ? "-" : ""}${
     currencySymbol ?? ""
   }${absValue}${percentSymbol ?? ""}`;
@@ -62,7 +62,14 @@ const MetricItem = ({
       : "";
 
   return (
-    <Card sx={{ borderRadius: 2, minWidth: 200, height: 60, opacity: loading ? 0.6 : 1 }}>
+    <Card
+      sx={{
+        borderRadius: 2,
+        minWidth: 200,
+        height: 60,
+        opacity: loading ? 0.6 : 1,
+      }}
+    >
       <CardContent sx={{ py: 0.5 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography fontSize={14} color="text.secondary">
@@ -96,11 +103,12 @@ const MetricItem = ({
               gap={0.5}
             >
               {loading ? "..." : displayChange}
-              {!loading && (isNegative ? (
-                <ArrowDownward fontSize="inherit" />
-              ) : (
-                <ArrowUpward fontSize="inherit" />
-              ))}
+              {!loading &&
+                (isNegative ? (
+                  <ArrowDownward fontSize="inherit" />
+                ) : (
+                  <ArrowUpward fontSize="inherit" />
+                ))}
             </Typography>
           )}
         </Box>
@@ -120,15 +128,15 @@ const TestCard = ({
   fulfillment_channel,
 }) => {
   const theme = useTheme();
-  
+
   // Combined state for dates and preset
   const [currentDates, setCurrentDates] = useState({
     selectedDate: dayjs().tz(TIMEZONE),
-    displayDate: dayjs().tz(TIMEZONE)
+    displayDate: dayjs().tz(TIMEZONE),
   });
-  
+
   const [currentPreset, setCurrentPreset] = useState(widgetData);
-  
+
   // Data state
   const [dataState, setDataState] = useState({
     metrics: {},
@@ -136,7 +144,7 @@ const TestCard = ({
     difference: {},
     bindGraph: [],
   });
-  
+
   const [tooltipData, setTooltipData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
@@ -146,7 +154,8 @@ const TestCard = ({
   const graphContainerRef = useRef(null);
   const svgRef = useRef(null);
   const [svgOffset, setSvgOffset] = useState({ left: 0, top: 0 });
-  const [open, setOpen] = useState(false);get_metrics_by_date_range
+  const [open, setOpen] = useState(false);
+  get_metrics_by_date_range;
 
   const [visibleMetrics, setVisibleMetrics] = useState([
     "gross_revenue",
@@ -187,7 +196,7 @@ const TestCard = ({
   useEffect(() => {
     fetchMetrics(currentDates.selectedDate, currentDates.displayDate);
   }, [
-    currentDates.selectedDate, 
+    currentDates.selectedDate,
     currentDates.displayDate,
     currentPreset,
     brand_id,
@@ -220,7 +229,7 @@ const TestCard = ({
         payload.end_date = dayjs(DateEndDate).format("DD/MM/YYYY");
       }
 
-      console.log('API Payload:', payload); // Debug log
+      console.log("API Payload:", payload); // Debug log
 
       const response = await axios.post(
         `${process.env.REACT_APP_IP}get_metrics_by_date_range/`,
@@ -228,23 +237,23 @@ const TestCard = ({
       );
 
       const data = response.data.data;
-      
+
       setDataState({
         metrics: data.targeted || {},
         previous: data.previous || {},
         difference: data.difference || {},
-        bindGraph: Object.entries(data.graph_data || {}).map(
-  ([rawDate, values]) => ({
-    date: rawDate,
-    dateObj: dayjs(rawDate, "MMMM DD, YYYY"), // Parse with explicit format
-    revenue: values.gross_revenue,
-  })
-).sort((a, b) => a.dateObj - b.dateObj)
+        bindGraph: Object.entries(data.graph_data || {})
+          .map(([rawDate, values]) => ({
+            date: rawDate,
+            fullDate: rawDate,
+            dateObj: dayjs(rawDate, "MMMM DD, YYYY"), // Parse with explicit format
+            revenue: values.gross_revenue,
+          }))
+          .sort((a, b) => a.dateObj - b.dateObj),
       });
 
       const selectedMetricKeys = Object.keys(data.targeted || {});
       setVisibleMetrics(selectedMetricKeys);
-
     } catch (error) {
       console.error("Error fetching metrics:", error);
     } finally {
@@ -252,10 +261,18 @@ const TestCard = ({
     }
   };
 
-  const getDisplayDateText = (widgetData, DateStartDate, DateEndDate, displayDate, selectedDate) => {
+  const getDisplayDateText = (
+    widgetData,
+    DateStartDate,
+    DateEndDate,
+    displayDate,
+    selectedDate
+  ) => {
     const today = dayjs().tz(TIMEZONE);
     if (DateStartDate && DateEndDate) {
-      return `${dayjs(DateStartDate).format("MMMM D, YYYY")} - ${dayjs(DateEndDate).format("MMMM D, YYYY")}`;
+      return `${dayjs(DateStartDate).format("MMMM D, YYYY")} - ${dayjs(
+        DateEndDate
+      ).format("MMMM D, YYYY")}`;
     }
 
     switch (widgetData) {
@@ -263,19 +280,33 @@ const TestCard = ({
       case "Yesterday":
         return selectedDate.format("ddd, MMM DD");
       default:
-        if (displayDate && selectedDate && !displayDate.isSame(selectedDate, "day")) {
-          return `${displayDate.format("MMM DD")} - ${selectedDate.format("MMM DD")}`;
+        if (
+          displayDate &&
+          selectedDate &&
+          !displayDate.isSame(selectedDate, "day")
+        ) {
+          return `${displayDate.format("MMM DD")} - ${selectedDate.format(
+            "MMM DD"
+          )}`;
         }
         return selectedDate.format("ddd, MMM DD");
     }
   };
 
-  const getSubtitleText = (widgetData, DateStartDate, DateEndDate, displayDate, selectedDate) => {
+  const getSubtitleText = (
+    widgetData,
+    DateStartDate,
+    DateEndDate,
+    displayDate,
+    selectedDate
+  ) => {
     const today = dayjs().tz(TIMEZONE);
     if (DateStartDate && DateEndDate) return "Custom Date Range";
-    
+
     if (widgetData === "Today" || widgetData === "Yesterday") {
-      return selectedDate.isSame(today, "day") ? "Today" : (
+      return selectedDate.isSame(today, "day") ? (
+        "Today"
+      ) : (
         <span
           style={{
             color: "#0A6FE8",
@@ -298,7 +329,7 @@ const TestCard = ({
   useEffect(() => {
     const today = dayjs().tz(TIMEZONE);
     let newDisplayDate, newSelectedDate;
-    
+
     // Handle custom date range
     if (DateStartDate && DateEndDate) {
       newDisplayDate = dayjs(DateStartDate);
@@ -374,9 +405,9 @@ const TestCard = ({
 
     setCurrentDates({
       displayDate: newDisplayDate,
-      selectedDate: newSelectedDate
+      selectedDate: newSelectedDate,
     });
-    
+
     setCurrentPreset(widgetData);
   }, [widgetData, DateStartDate, DateEndDate]);
 
@@ -413,7 +444,9 @@ const TestCard = ({
       tooltip: (date, today, prev) =>
         date.isSame(today, "day")
           ? `Yesterday: ${formatCurrency(prev)}`
-          : `${date.subtract(1, "day").format("MMM DD")}: ${formatCurrency(prev)}`,
+          : `${date.subtract(1, "day").format("MMM DD")}: ${formatCurrency(
+              prev
+            )}`,
       currencySymbol: "$",
     },
     net_profit: {
@@ -421,7 +454,9 @@ const TestCard = ({
       tooltip: (date, today, prev) =>
         date.isSame(today, "day")
           ? `Yesterday: ${formatCurrency(prev)}`
-          : `${date.subtract(1, "day").format("MMM DD")}: ${formatCurrency(prev)}`,
+          : `${date.subtract(1, "day").format("MMM DD")}: ${formatCurrency(
+              prev
+            )}`,
       currencySymbol: "$",
     },
     margin: {
@@ -437,7 +472,9 @@ const TestCard = ({
       tooltip: (date, today, prev) =>
         date.isSame(today, "day")
           ? `Yesterday: ${formatCurrency(prev)}`
-          : `${date.subtract(1, "day").format("MMM DD")}: ${formatCurrency(prev)}`,
+          : `${date.subtract(1, "day").format("MMM DD")}: ${formatCurrency(
+              prev
+            )}`,
       currencySymbol: "$",
     },
   };
@@ -446,19 +483,20 @@ const TestCard = ({
 
   const handlePrevious = () => {
     const today = dayjs().tz(TIMEZONE);
-    
+
     if (DateStartDate && DateEndDate) {
-      const rangeDays = dayjs(DateEndDate).diff(dayjs(DateStartDate), 'day') + 1;
-      setCurrentDates(prev => ({
-        displayDate: prev.displayDate.subtract(rangeDays, 'day'),
-        selectedDate: prev.selectedDate.subtract(rangeDays, 'day')
+      const rangeDays =
+        dayjs(DateEndDate).diff(dayjs(DateStartDate), "day") + 1;
+      setCurrentDates((prev) => ({
+        displayDate: prev.displayDate.subtract(rangeDays, "day"),
+        selectedDate: prev.selectedDate.subtract(rangeDays, "day"),
       }));
     } else {
       const newSelectedDate = currentDates.selectedDate.subtract(1, "day");
-      
+
       // Determine what preset this date represents
       let newPreset = "Custom"; // Default fallback
-      
+
       if (newSelectedDate.isSame(today, "day")) {
         newPreset = "Today";
       } else if (newSelectedDate.isSame(today.subtract(1, "day"), "day")) {
@@ -467,33 +505,34 @@ const TestCard = ({
         // For other dates, we'll use a custom approach - keep original preset but with different target_date
         newPreset = widgetData;
       }
-      
-      setCurrentDates(prev => ({
+
+      setCurrentDates((prev) => ({
         ...prev,
-        selectedDate: newSelectedDate
+        selectedDate: newSelectedDate,
       }));
-      
+
       setCurrentPreset(newPreset);
     }
   };
 
   const handleNext = () => {
     const today = dayjs().tz(TIMEZONE);
-    
+
     if (DateStartDate && DateEndDate) {
-      const rangeDays = dayjs(DateEndDate).diff(dayjs(DateStartDate), 'day') + 1;
-      const newEndDate = dayjs(currentDates.selectedDate).add(rangeDays, 'day');
+      const rangeDays =
+        dayjs(DateEndDate).diff(dayjs(DateStartDate), "day") + 1;
+      const newEndDate = dayjs(currentDates.selectedDate).add(rangeDays, "day");
       if (newEndDate.isAfter(today)) return;
-      setCurrentDates(prev => ({
-        displayDate: prev.displayDate.add(rangeDays, 'day'),
-        selectedDate: prev.selectedDate.add(rangeDays, 'day')
+      setCurrentDates((prev) => ({
+        displayDate: prev.displayDate.add(rangeDays, "day"),
+        selectedDate: prev.selectedDate.add(rangeDays, "day"),
       }));
     } else if (!currentDates.selectedDate.isSame(today, "day")) {
       const newSelectedDate = currentDates.selectedDate.add(1, "day");
-      
+
       // Determine what preset this date represents
       let newPreset = "Custom"; // Default fallback
-      
+
       if (newSelectedDate.isSame(today, "day")) {
         newPreset = "Today";
       } else if (newSelectedDate.isSame(today.subtract(1, "day"), "day")) {
@@ -502,12 +541,12 @@ const TestCard = ({
         // For other dates, we'll use a custom approach - keep original preset but with different target_date
         newPreset = widgetData;
       }
-      
-      setCurrentDates(prev => ({
+
+      setCurrentDates((prev) => ({
         ...prev,
-        selectedDate: newSelectedDate
+        selectedDate: newSelectedDate,
       }));
-      
+
       setCurrentPreset(newPreset);
     }
   };
@@ -515,22 +554,26 @@ const TestCard = ({
   const handleBackToToday = () => {
     const today = dayjs().tz(TIMEZONE);
     if (DateStartDate && DateEndDate) {
-      const rangeDays = dayjs(DateEndDate).diff(dayjs(DateStartDate), 'day') + 1;
+      const rangeDays =
+        dayjs(DateEndDate).diff(dayjs(DateStartDate), "day") + 1;
       setCurrentDates({
-        displayDate: today.subtract(rangeDays - 1, 'day'),
-        selectedDate: today
+        displayDate: today.subtract(rangeDays - 1, "day"),
+        selectedDate: today,
       });
     } else {
-      setCurrentDates(prev => ({
+      setCurrentDates((prev) => ({
         ...prev,
-        selectedDate: today
+        selectedDate: today,
       }));
       setCurrentPreset("Today");
     }
   };
 
   const getGraphPoints = () => {
-    const maxRevenue = Math.max(...dataState.bindGraph.map((d) => d.revenue), 1);
+    const maxRevenue = Math.max(
+      ...dataState.bindGraph.map((d) => d.revenue),
+      1
+    );
     return dataState.bindGraph
       .map((item, index) => {
         const x = (index / (dataState.bindGraph.length - 1)) * 280 + 10;
@@ -541,11 +584,14 @@ const TestCard = ({
   };
 
   const getCirclePoints = () => {
-    const maxRevenue = Math.max(...dataState.bindGraph.map((d) => d.revenue), 1);
+    const maxRevenue = Math.max(
+      ...dataState.bindGraph.map((d) => d.revenue),
+      1
+    );
     return dataState.bindGraph.map((item, index) => ({
       ...item,
       cx: (index / (dataState.bindGraph.length - 1)) * 280 + 10,
-      cy: 50 - (item.revenue / maxRevenue) * 30
+      cy: 50 - (item.revenue / maxRevenue) * 30,
     }));
   };
 
@@ -571,19 +617,48 @@ const TestCard = ({
       }}
     >
       {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%" }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+          }}
+        >
           <SkeletonLoadingUI />
         </Box>
       ) : (
-        <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "flex-start", width: "100%", px: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "flex-start",
+            width: "100%",
+            px: 2,
+          }}
+        >
           {/* Date Picker */}
-          <Box sx={{ ...metricBlockStyle, borderRight: "1px solid #e0e0e0", borderLeft: "none" }}>
+          <Box
+            sx={{
+              ...metricBlockStyle,
+              borderRight: "1px solid #e0e0e0",
+              borderLeft: "none",
+            }}
+          >
             <Box display="flex" alignItems="center" gap={1}>
-              <IconButton size="small" onClick={handlePrevious} disabled={dataLoading}>
+              <IconButton
+                size="small"
+                onClick={handlePrevious}
+                disabled={dataLoading}
+              >
                 <ChevronLeft fontSize="small" />
               </IconButton>
 
-              <Tooltip title={`${currentDates.displayDate.format("DD/MM/YYYY")} - ${currentDates.selectedDate.format("DD/MM/YYYY")}`}>
+              <Tooltip
+                title={`${currentDates.displayDate.format(
+                  "DD/MM/YYYY"
+                )} - ${currentDates.selectedDate.format("DD/MM/YYYY")}`}
+              >
                 <Box>
                   <Typography
                     fontWeight="bold"
@@ -594,7 +669,13 @@ const TestCard = ({
                       opacity: dataLoading ? 0.7 : 1,
                     }}
                   >
-                    {getDisplayDateText(currentPreset, DateStartDate, DateEndDate, currentDates.displayDate, currentDates.selectedDate)}
+                    {getDisplayDateText(
+                      currentPreset,
+                      DateStartDate,
+                      DateEndDate,
+                      currentDates.displayDate,
+                      currentDates.selectedDate
+                    )}
                     {dataLoading && <span style={{ marginLeft: 8 }}>...</span>}
                   </Typography>
                   <Box display="flex" justifyContent="center">
@@ -609,14 +690,24 @@ const TestCard = ({
                         width: "100%",
                       }}
                     >
-                      {getSubtitleText(currentPreset, DateStartDate, DateEndDate, currentDates.displayDate, currentDates.selectedDate)}
+                      {getSubtitleText(
+                        currentPreset,
+                        DateStartDate,
+                        DateEndDate,
+                        currentDates.displayDate,
+                        currentDates.selectedDate
+                      )}
                     </Typography>
                   </Box>
                 </Box>
               </Tooltip>
 
               {!currentDates.selectedDate.isSame(today, "day") && (
-                <IconButton size="small" onClick={handleNext} disabled={dataLoading}>
+                <IconButton
+                  size="small"
+                  onClick={handleNext}
+                  disabled={dataLoading}
+                >
                   <ChevronRight fontSize="small" />
                 </IconButton>
               )}
@@ -630,10 +721,14 @@ const TestCard = ({
                 title="Gross Revenue"
                 value={dataState.metrics.gross_revenue}
                 change={dataState.difference.gross_revenue}
-                isNegative={String(dataState.difference.gross_revenue).startsWith("-")}
+                isNegative={String(
+                  dataState.difference.gross_revenue
+                ).startsWith("-")}
                 tooltip={
                   currentDates.selectedDate.isSame(today, "day")
-                    ? `Yesterday: ${formatCurrency(dataState.previous.gross_revenue)}`
+                    ? `Yesterday: ${formatCurrency(
+                        dataState.previous.gross_revenue
+                      )}`
                     : `${currentDates.selectedDate
                         .subtract(1, "day")
                         .format("MMM DD")}: ${formatCurrency(
@@ -658,7 +753,21 @@ const TestCard = ({
                   flexDirection: "column",
                   opacity: dataLoading ? 0.6 : 1,
                 }}
-                onMouseLeave={() => setTooltipData(null)}
+                onMouseLeave={(e) => {
+                  // Only clear tooltip if really leaving the container
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const x = e.clientX;
+                  const y = e.clientY;
+
+                  if (
+                    x < rect.left ||
+                    x > rect.right ||
+                    y < rect.top ||
+                    y > rect.bottom
+                  ) {
+                    setTimeout(() => setTooltipData(null), 100);
+                  }
+                }}
               >
                 <Box
                   sx={{
@@ -705,11 +814,22 @@ const TestCard = ({
                             key={index}
                             cx={point.cx}
                             cy={point.cy}
-                            r="10"
+                            r="8" // Slightly smaller for better UX
                             fill="transparent"
-                            style={{ pointerEvents: "all" }}
-                            onMouseEnter={() => setTooltipData(point)}
-                            onMouseLeave={() => setTooltipData(null)}
+                            stroke="transparent"
+                            style={{
+                              pointerEvents: "all",
+                              cursor: "pointer",
+                            }}
+                            onMouseEnter={(e) => {
+                              e.stopPropagation();
+                              setTooltipData({ ...point, index });
+                            }}
+                            onMouseLeave={(e) => {
+                              e.stopPropagation();
+                              // Small delay to prevent flickering
+                              setTimeout(() => setTooltipData(null), 50);
+                            }}
                           />
                         ))}
 
@@ -754,7 +874,12 @@ const TestCard = ({
                       }}
                     >
                       <span>{dataState.bindGraph[0]?.date}</span>
-                      <span>{dataState.bindGraph[dataState.bindGraph.length - 1]?.date}</span>
+                      <span>
+                        {
+                          dataState.bindGraph[dataState.bindGraph.length - 1]
+                            ?.date
+                        }
+                      </span>
                     </Box>
                   )}
 
@@ -779,17 +904,24 @@ const TestCard = ({
                   <Box
                     sx={{
                       position: "fixed",
-                      left: svgOffset.left + tooltipData.cx - 80,
-                      top: svgOffset.top + tooltipData.cy - 70,
+                      left: Math.max(
+                        10,
+                        Math.min(
+                          window.innerWidth - 160,
+                          svgOffset.left + tooltipData.cx - 80
+                        )
+                      ), // Prevent tooltip from going off-screen
+                      top: Math.max(10, svgOffset.top + tooltipData.cy - 70),
                       backgroundColor: "white",
                       border: "1px solid #d0d7de",
                       borderRadius: 2,
                       padding: "8px 12px",
                       fontSize: 12,
-                      pointerEvents: "none",
+                      pointerEvents: "none", // This is crucial - prevents tooltip from interfering with mouse events
                       zIndex: 1000,
                       boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
                       whiteSpace: "nowrap",
+                      maxWidth: 200,
                     }}
                   >
                     <Typography fontWeight="bold" fontSize={14} color="#485E75">
@@ -824,8 +956,14 @@ const TestCard = ({
                     title={item.title}
                     value={dataState.metrics[id]}
                     change={dataState.difference[id]}
-                    isNegative={String(dataState.difference[id]).startsWith("-")}
-                    tooltip={item.tooltip(currentDates.selectedDate, today, dataState.previous[id])}
+                    isNegative={String(dataState.difference[id]).startsWith(
+                      "-"
+                    )}
+                    tooltip={item.tooltip(
+                      currentDates.selectedDate,
+                      today,
+                      dataState.previous[id]
+                    )}
                     currencySymbol={item.currencySymbol}
                     percentSymbol={item.percentSymbol}
                     loading={dataLoading}
@@ -866,7 +1004,7 @@ const TestCard = ({
                 onApply={handleApply}
               />
             </DialogContent>
-          </Dialog> 
+          </Dialog>
         </Box>
       )}
     </Box>
