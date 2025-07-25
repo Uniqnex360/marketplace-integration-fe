@@ -925,7 +925,6 @@ const TestCard = ({
                   >
                     <Typography fontWeight="bold" fontSize={14} color="#485E75">
                       {dayjs(tooltipData.fullDate)
-                        .tz(TIMEZONE)
                         .format("MMM DD, YYYY")}
                     </Typography>
                     <Typography fontSize={14} color="#000" fontWeight="bold">
