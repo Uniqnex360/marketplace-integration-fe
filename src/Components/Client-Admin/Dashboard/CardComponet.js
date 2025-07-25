@@ -256,7 +256,7 @@ const CardComponent = ({widgetData, marketPlaceId, DateStartDate, DateEndDate, b
                                             const orderValue = marketplaceData.orderValue || 0;
                                             additionalInfo = `
                                                 Order Count: ${marketplaceData.value} |
-                                                Order Value: $${formatCurrency(orderValue.toFixed(2))}
+                                                Order Value: $${formatCurrency(orderValue)}
                                             `;
                                         }
                                     }
