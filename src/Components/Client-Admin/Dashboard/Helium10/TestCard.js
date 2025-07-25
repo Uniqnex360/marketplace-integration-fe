@@ -155,7 +155,6 @@ const TestCard = ({
   const svgRef = useRef(null);
   const [svgOffset, setSvgOffset] = useState({ left: 0, top: 0 });
   const [open, setOpen] = useState(false);
-  get_metrics_by_date_range;
 
   const [visibleMetrics, setVisibleMetrics] = useState([
     "gross_revenue",
