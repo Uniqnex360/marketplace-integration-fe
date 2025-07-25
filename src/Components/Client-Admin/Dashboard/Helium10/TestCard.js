@@ -381,11 +381,15 @@ const TestCard = ({
     setCurrentPreset(widgetData);
   }, [widgetData, DateStartDate, DateEndDate]);
 
-  const formatCurrency = (value) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(value ?? 0);
+const formatCurrency = (value) => {
+  const num = Number(value);
+  if (isNaN(num)) return "$0.00";
+  return num.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+  });
+};
 
   const METRICS_CONFIG = {
     total_orders: {
