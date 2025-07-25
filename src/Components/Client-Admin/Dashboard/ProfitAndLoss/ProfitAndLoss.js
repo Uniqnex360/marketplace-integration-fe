@@ -538,7 +538,7 @@ const ProfitAndLoss = ({
   const summaryData = [
     {
       label: "Base Price",
-      value: `$${summaryOther?.current?.base_price?.toFixed(2) ?? "0.00"}`,
+      value: formatCurrency(summaryOther?.current?.base_price),
       delta: (
         summaryOther?.current?.base_price - summaryOther?.previous?.base_price
       )?.toFixed(2),
@@ -546,14 +546,16 @@ const ProfitAndLoss = ({
     // { label: "Giftwrap Price", value: `$${summaryOther?.current?.giftwrapPrice?.toFixed(2) ?? '0.00'}`, delta: (summaryOther?.current?.giftwrapPrice - summaryOther?.previous?.giftwrapPrice)?.toFixed(2) },
     {
       label: "Total Tax",
-      value: `$${summaryOther?.current?.totalTax?.toFixed(2) ?? "0.00"}`,
+      
+      value:formatCurrency(summaryOther?.current?.totalTax),
       delta: (
         summaryOther?.current?.totalTax - summaryOther?.previous?.totalTax
       )?.toFixed(2),
     },
     {
       label: "Shipping",
-      value: `$${summaryOther?.current?.shipping_cost?.toFixed(2) ?? "0.00"}`,
+      
+      value: formatCurrency(summaryOther?.current?.shipping_cost),
       delta: (
         summaryOther?.current?.shipping_cost -
         summaryOther?.previous?.shipping_cost
@@ -563,20 +565,23 @@ const ProfitAndLoss = ({
     // { label: "Giftwrap Chargeback", value: `$${summaryOther?.current?.giftwrapChargeback?.toFixed(2) ?? '0.00'}`, delta: (summaryOther?.current?.giftwrapChargeback - summaryOther?.previous?.giftwrapChargeback)?.toFixed(2) },
     {
       label: "Gross Revenue",
-      value: `$${summary?.grossRevenue?.current?.toFixed(2) ?? "0.00"}`,
+      
+      value: formatCurrency(summaryOther?.grossRevenue?.current),
       delta: summary?.grossRevenue?.delta?.toFixed(2),
     },
     // { label: "Reimbursements", value: `$${summaryOther?.current?.reimbursements?.toFixed(2) ?? '0.00'}`, delta: (summaryOther?.current?.reimbursements - summaryOther?.previous?.reimbursements)?.toFixed(2) },
     {
       label: "Channel Fees",
-      value: `$${summaryOther?.current?.channel_fee?.toFixed(2) ?? "0.00"}`,
+      
+      value: formatCurrency(summaryOther?.current?.channel_fee),
       delta: (
         summaryOther?.current?.channel_fee - summaryOther?.previous?.channel_fee
       )?.toFixed(2),
     },
     {
       label: "Refunds",
-      value: `$${summaryOther?.current?.productRefunds?.toFixed(2) ?? "0.00"}`,
+      
+      value:formatCurrency(summaryOther?.current?.productRefunds),
       delta: (
         summaryOther?.current?.productRefunds -
         summaryOther?.previous?.productRefunds
@@ -586,7 +591,8 @@ const ProfitAndLoss = ({
     // { label: "Estimated Payout", value: `$${summary?.netProfit?.current?.estimatedPayout?.toFixed(2) ?? '0.00'}` },
     {
       label: "COGS",
-      value: `$${summaryOther?.current?.cogs?.toFixed(2) ?? "0.00"}`,
+     
+      value:  formatCurrency(summaryOther?.current?.cogs),
       delta: (
         summaryOther?.current?.cogs - summaryOther?.previous?.cogs
       )?.toFixed(2),
@@ -594,7 +600,8 @@ const ProfitAndLoss = ({
     // { label: "PPC Costs", value: `$${(summaryOther?.current?.ppcProductCost + summaryOther?.current?.ppcBrandsCost + summaryOther?.current?.ppcDisplayCost + summaryOther?.current?.ppcStCost)?.toFixed(2) ?? '0.00'}`, delta: ((summaryOther?.current?.ppcProductCost + summaryOther?.current?.ppcBrandsCost + summaryOther?.current?.ppcDisplayCost + summaryOther?.current?.ppcStCost) - (summaryOther?.previous?.ppcProductCost + summaryOther?.previous?.ppcBrandsCost + summaryOther?.previous?.ppcDisplayCost + summaryOther?.previous?.ppcStCost))?.toFixed(2) },
     {
       label: "Total Tax (Cost)",
-      value: `$${summaryOther?.current?.totalCosts?.toFixed(2) ?? "0.00"}`,
+      
+      value: formatCurrency(summaryOther?.current?.totalCosts),
       delta: (
         summaryOther?.current?.totalCosts -
         summaryOther?.previous?.totalTaxWithheld
@@ -602,12 +609,14 @@ const ProfitAndLoss = ({
     },
     {
       label: "Expenses",
-      value: `$${summary?.expenses?.current?.toFixed(2) ?? "0.00"}`,
+      
+      value: formatCurrency(summaryOther?.expenses?.current),
       delta: summary?.expenses?.delta?.toFixed(2),
     },
     {
       label: "Net Profit",
-      value: `$${summary?.netProfit?.current?.toFixed(2) ?? "0.00"}`,
+      
+      value: formatCurrency(summary?.netProfit?.current),
       delta: summary?.netProfit?.delta?.toFixed(2),
     },
   ];
