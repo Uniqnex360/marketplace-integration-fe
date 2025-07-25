@@ -1097,9 +1097,9 @@ const MetricCard = ({
 
           margin: `${safeGet(periodData, "summary.margin.current", 0).toFixed(2)}%`,
 
-          orders: safeGet(periodData, "summary.orders.current", 0).toLocaleDateString('en-US'),
-          unitsSold: safeGet(periodData, "summary.unitsSold.current", 0).toLocaleDateString('en-US'),
-          refunds: safeGet(periodData, "summary.refunds.current", 0).toLocaleDateString('en-US'),
+          orders: safeGet(periodData, "summary.orders.current", 0).toLocaleString('en-US'),
+          unitsSold: safeGet(periodData, "summary.unitsSold.current", 0).toLocaleString('en-US'),
+          refunds: safeGet(periodData, "summary.refunds.current", 0).toLocaleString('en-US'),
           previous: formatCurrency(safeGet(periodData, "summary.grossRevenue.previous", 0)),
 
           revenueChange: `${safeGet(periodData, "summary.grossRevenue.delta", 0) >= 0 ? "+" : "-"
