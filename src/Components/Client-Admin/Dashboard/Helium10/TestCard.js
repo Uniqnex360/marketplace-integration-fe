@@ -649,7 +649,7 @@ const TestCard = ({
                         displayDates.displayDate,
                         displayDates.selectedDate
                       )}
-                      {!selectedDate.isSame(today, "day") && (
+                      {!displayDates.selectedDate.isSame(today, "day") && (
                         <span
                           style={{
                             color: "#0A6FE8",
