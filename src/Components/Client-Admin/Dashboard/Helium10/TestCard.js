@@ -105,7 +105,7 @@ const MetricItem = ({
   justifyContent="flex-start"
           alignItems="center"
           mt={0.5}
-          sx={{ paddingRight: "4px",gap:2}}
+          sx={{ paddingRight: "4px",gap:1}}
         >
           <Tooltip title={tooltip || ""}>
             <Typography
