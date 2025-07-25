@@ -102,10 +102,10 @@ const MetricItem = ({
 
         <Box
           display="flex"
-          justifyContent="space-between"
+  justifyContent="flex-start"
           alignItems="center"
           mt={0.5}
-          sx={{ paddingRight: "4px" }}
+          sx={{ paddingRight: "4px",gap:2}}
         >
           <Tooltip title={tooltip || ""}>
             <Typography
@@ -627,7 +627,6 @@ const TestCard = ({
     borderBottom: "1px solid #e0e0e0",
     py: 1,
     px: 2,
-    gap:2
   };
 
   return (
