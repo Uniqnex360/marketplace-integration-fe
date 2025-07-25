@@ -227,7 +227,6 @@ const TestCard = ({
       );
 
       const data = response.data.data;
-      console.log('data',data)
       
       setDataState({
         metrics: data.targeted || {},
@@ -382,15 +381,11 @@ const TestCard = ({
     setCurrentPreset(widgetData);
   }, [widgetData, DateStartDate, DateEndDate]);
 
-const formatCurrency = (value) => {
-  const num = Number(value);
-  if (isNaN(num)) return "$0.00";
-  return num.toLocaleString("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-  });
-};
+  const formatCurrency = (value) =>
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(value ?? 0);
 
   const METRICS_CONFIG = {
     total_orders: {
@@ -634,8 +629,8 @@ const formatCurrency = (value) => {
             <Box sx={metricBlockStyle}>
               <MetricItem
                 title="Gross Revenue"
-                value={formatCurrency(dataState.metrics.gross_revenue)}
-                change={formatCurrency(dataState.difference.gross_revenue)}
+                value={dataState.metrics.gross_revenue}
+                change={dataState.difference.gross_revenue}
                 isNegative={String(dataState.difference.gross_revenue).startsWith("-")}
                 tooltip={
                   currentDates.selectedDate.isSame(today, "day")
@@ -814,44 +809,32 @@ const formatCurrency = (value) => {
 
           {/* Other Metric Cards */}
           {[
-  "total_orders",
-  "total_units",
-  "refund",
-  "total_cogs",
-  "margin",
-  "business_value",
-].map((id, idx) => {
-  const item = METRICS_CONFIG[id];
-  const isCurrency = !!item.currencySymbol;
-  const isPercent = !!item.percentSymbol;
+            "total_orders",
+            "total_units",
+            "refund",
+            "total_cogs",
+            "margin",
+            "business_value",
+          ].map((id, idx) => {
+            const item = METRICS_CONFIG[id];
 
-  return (
-    visibleMetrics.includes(id) && (
-      <Box key={idx} sx={metricBlockStyle}>
-        <MetricItem
-          title={item.title}
-          value={
-            isCurrency
-              ? dataState.metrics[id]
-              : isPercent
-                ? `${Number(dataState.metrics[id] ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
-                : Number(dataState.metrics[id] ?? 0).toLocaleString("en-US")
-          }
-          change={
-            isCurrency
-              ? dataState.difference[id]
-              : isPercent
-                ? `${Number(dataState.difference[id] ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
-                : Number(dataState.difference[id] ?? 0).toLocaleString("en-US")
-          }
-          isNegative={String(dataState.difference[id]).startsWith("-")}
-          tooltip={item.tooltip(currentDates.selectedDate, today, dataState.previous[id])}
-          loading={dataLoading}
-        />
-      </Box>
-    )
-  );
-})}
+            return (
+              visibleMetrics.includes(id) && (
+                <Box key={idx} sx={metricBlockStyle}>
+                  <MetricItem
+                    title={item.title}
+                    value={dataState.metrics[id]}
+                    change={dataState.difference[id]}
+                    isNegative={String(dataState.difference[id]).startsWith("-")}
+                    tooltip={item.tooltip(currentDates.selectedDate, today, dataState.previous[id])}
+                    currencySymbol={item.currencySymbol}
+                    percentSymbol={item.percentSymbol}
+                    loading={dataLoading}
+                  />
+                </Box>
+              )
+            );
+          })}
 
           {/* Settings Toggle */}
           <Box
