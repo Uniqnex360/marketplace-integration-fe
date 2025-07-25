@@ -22,7 +22,6 @@ import NotificationTooltip from "./NotificationTooltip";
 
 import { Delete } from "@mui/icons-material";
 import DottedCircleLoading from "../../../Loading/DotLoading";
-import { formatCurrency } from "../../../../utils/currencyFormatter";
 const CustomPopover = styled(Popover)(({ theme }) => ({
   "& .MuiPopover-paper": {
     backgroundColor: "white",
@@ -1041,73 +1040,85 @@ const MetricCard = ({
           range?.[key] || range?.[fallbackKey];
 
         const cardData = {
-  title:
-    period === "last7Days"
-      ? "Last 7 Days"
-      : period.charAt(0).toUpperCase() + period.slice(1),
+          title:
+            period === "last7Days"
+              ? "Last 7 Days"
+              : period.charAt(0).toUpperCase() + period.slice(1),
 
-  // Date Ranges
-  dateRange: periodData.dateRanges?.current
-    ? `${safeFormatDate(
-        getLocal(periodData.dateRanges.current, "from_local", "from"),
-        formatterLong
-      )} - ${safeFormatDate(
-        getLocal(periodData.dateRanges.current, "to_local", "to"),
-        formatterLong
-      )}`
-    : "",
+          // Use from_local / to_local with fallback to from / to
+          dateRange: periodData.dateRanges?.current
+            ? `${safeFormatDate(
+                getLocal(periodData.dateRanges.current, "from_local", "from"),
+                formatterLong
+              )} - ${safeFormatDate(
+                getLocal(periodData.dateRanges.current, "to_local", "to"),
+                formatterLong
+              )}`
+            : "",
 
-  dateRangePrev: periodData.dateRanges?.previous
-    ? `${safeFormatDate(
-        getLocal(periodData.dateRanges.previous, "from_local", "from"),
-        formatterLong
-      )} - ${safeFormatDate(
-        getLocal(periodData.dateRanges.previous, "to_local", "to"),
-        formatterLong
-      )}`
-    : "",
+          dateRangePrev: periodData.dateRanges?.previous
+            ? `${safeFormatDate(
+                getLocal(periodData.dateRanges.previous, "from_local", "from"),
+                formatterLong
+              )} - ${safeFormatDate(
+                getLocal(periodData.dateRanges.previous, "to_local", "to"),
+                formatterLong
+              )}`
+            : "",
 
-  dateRangeFormat: periodData.dateRanges?.current
-    ? `${safeFormatDate(
-        getLocal(periodData.dateRanges.current, "from_local", "from"),
-        formatterShort
-      )} - ${safeFormatDate(
-        getLocal(periodData.dateRanges.current, "to_local", "to"),
-        formatterShort
-      )}`
-    : "",
+          dateRangeFormat: periodData.dateRanges?.current
+            ? `${safeFormatDate(
+                getLocal(periodData.dateRanges.current, "from_local", "from"),
+                formatterShort
+              )} - ${safeFormatDate(
+                getLocal(periodData.dateRanges.current, "to_local", "to"),
+                formatterShort
+              )}`
+            : "",
 
-  dateRangePrevFormat: periodData.dateRanges?.previous
-    ? `${safeFormatDate(
-        getLocal(periodData.dateRanges.previous, "from_local", "from"),
-        formatterShort
-      )} - ${safeFormatDate(
-        getLocal(periodData.dateRanges.previous, "to_local", "to"),
-        formatterShort
-      )}`
-    : "",
+          dateRangePrevFormat: periodData.dateRanges?.previous
+            ? `${safeFormatDate(
+                getLocal(periodData.dateRanges.previous, "from_local", "from"),
+                formatterShort
+              )} - ${safeFormatDate(
+                getLocal(periodData.dateRanges.previous, "to_local", "to"),
+                formatterShort
+              )}`
+            : "",
 
-  // Currency values
-  grossRevenue: formatCurrency(safeGet(periodData, "summary.grossRevenue.current", 0)),
-  expenses: "-" + formatCurrency(safeGet(periodData, "summary.expenses.current", 0)),
-  netProfit: formatCurrency(safeGet(periodData, "summary.netProfit.current", 0)),
-  netPrevious: formatCurrency(safeGet(periodData, "summary.netProfit.previous", 0)),
-  previous: formatCurrency(safeGet(periodData, "summary.grossRevenue.previous", 0)),
+          grossRevenue: formatCurrency(
+            safeGet(periodData, "summary.grossRevenue.current", 0)
+          ),
+          expenses: `-${formatCurrency(
+            safeGet(periodData, "summary.expenses.current", 0)
+          )}`,
+          netProfit: formatCurrency(
+            safeGet(periodData, "summary.netProfit.current", 0)
+          ),
+          netPrevious: formatCurrency(
+            safeGet(periodData, "summary.netProfit.previous", 0)
+          ),
 
-  // Percentages
-  margin: `${Number(safeGet(periodData, "summary.margin.current", 0)).toFixed(2)}%`,
+          margin: `${safeGet(periodData, "summary.margin.current", 0).toFixed(
+            2
+          )}%`,
 
-  // Plain numbers with commas
-  orders: Number(safeGet(periodData, "summary.orders.current", 0)).toLocaleString("en-US"),
-  unitsSold: Number(safeGet(periodData, "summary.unitsSold.current", 0)).toLocaleString("en-US"),
-  refunds: Number(safeGet(periodData, "summary.refunds.current", 0)).toLocaleString("en-US"),
+          orders: safeGet(periodData, "summary.orders.current", 0),
+          unitsSold: safeGet(periodData, "summary.unitsSold.current", 0),
+          refunds: safeGet(periodData, "summary.refunds.current", 0),
+          previous: formatCurrency(
+            safeGet(periodData, "summary.grossRevenue.previous", 0)
+          ),
+          revenueChange: `${
+            safeGet(periodData, "summary.grossRevenue.delta", 0) >= 0
+              ? "+"
+              : "-"
+          }${formatCurrency(
+            Math.abs(safeGet(periodData, "summary.grossRevenue.delta", 0))
+          )}`,
 
-  // Revenue change (currency, with sign)
-  revenueChange: `${ safeGet(periodData, "summary.grossRevenue.delta", 0) >= 0 ? "+" : "" }$${safeGet(periodData, "summary.grossRevenue.delta", 0).toFixed(2)}`,
-
-  // Net profit calculation (if you use it)
-  netProfitCalculation: periodData.netProfitCalculation || {},
-};
+          netProfitCalculation: periodData.netProfitCalculation || {},
+        };
 
         acc.push(cardData);
       } catch (error) {
