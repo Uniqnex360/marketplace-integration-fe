@@ -47,7 +47,14 @@ const formatterShort = new Intl.DateTimeFormat("en-US", {
   day: "2-digit",
   timeZone: "UTC",
 });
-
+const formatCurrency = (value) => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value ?? 0);
+};
 function OrderInfoPopover({
   open,
   anchorEl,
@@ -162,6 +169,7 @@ const PerformanceCard = ({
   const [openGrossRevenuePopover, setOpenGrossRevenuePopover] = useState(false);
   const [anchorElNetProfit, setAnchorElNetProfit] = useState(null);
   const [openNetProfitPopover, setOpenNetProfitPopover] = useState(false);
+
 
   const openOrder = Boolean(anchorElOrders);
   const previousGrossRevenue = parseFloat(previous);
@@ -504,14 +512,14 @@ const PerformanceCard = ({
                       }}
                     >
                       {(() => {
-                        const value =
-                          parseFloat(
-                            grossRevenue?.replace("$", "").replace(",", "") ||
-                              "0"
-                          ) - parseFloat(previous || "0");
-                        const formatted = Math.abs(value).toFixed(2);
-                        return `${value < 0 ? "-" : ""}$${formatted}`;
-                      })()}
+  const current = parseFloat(
+    grossRevenue?.replace("$", "").replace(/,/g, "") || "0"
+  );
+  const prev = parseFloat(previous || "0");
+  const value = current - prev;
+  return formatCurrency(value);
+})()}
+
                     </span>
                   </div>
                 </Typography>
@@ -727,17 +735,15 @@ const PerformanceCard = ({
                         }}
                       >
                         {(() => {
-                          const profit = parseFloat(
-                            netProfit?.replace("$", "").replace(",", "") || "0"
-                          );
-                          const previous = parseFloat(
-                            netPrevious?.replace("$", "").replace(",", "") ||
-                              "0"
-                          );
-                          const difference = profit - previous;
-                          const formatted = Math.abs(difference).toFixed(2);
-                          return `${difference < 0 ? "-" : ""}$${formatted}`;
-                        })()}
+  const profit = parseFloat(
+    netProfit?.replace("$", "").replace(/,/g, "") || "0"
+  );
+  const previous = parseFloat(
+    netPrevious?.replace("$", "").replace(/,/g, "") || "0"
+  );
+  const difference = profit - previous;
+  return formatCurrency(difference);
+})()}
                       </span>
                     </div>
                   </Typography>
@@ -1002,138 +1008,143 @@ const MetricCard = ({
       setLoading(false);
     }
   };
-
+const formatCurrency = (value) => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value ?? 0);
+};
   const transformData = (data) => {
-    if (!data) return [];
+  if (!data) return [];
 
-    // Helper function to safely format dates
-    const safeFormatDate = (dateString, formatter) => {
-      try {
-        return dateString ? formatter.format(new Date(dateString)) : "";
-      } catch (e) {
-        console.warn("Date formatting error:", e);
-        return "";
-      }
-    };
-
-    // Helper function to safely access nested properties
-    const safeGet = (obj, path, defaultValue = 0) => {
-      try {
-        return (
-          path.split(".").reduce((acc, part) => acc && acc[part], obj) ??
-          defaultValue
-        );
-      } catch (e) {
-        return defaultValue;
-      }
-    };
-
-    const periods = ["today", "yesterday", "last7Days", "custom"];
-
-    return periods.reduce((acc, period) => {
-      if (!data[period]) return acc;
-
-      const periodData = data[period];
-
-      try {
-        const getLocal = (range, key, fallbackKey = key) =>
-          range?.[key] || range?.[fallbackKey];
-
-        const cardData = {
-          title:
-            period === "last7Days"
-              ? "Last 7 Days"
-              : period.charAt(0).toUpperCase() + period.slice(1),
-
-          // Use from_local / to_local with fallback to from / to
-          dateRange: periodData.dateRanges?.current
-            ? `${safeFormatDate(
-                getLocal(periodData.dateRanges.current, "from_local", "from"),
-                formatterLong
-              )} - ${safeFormatDate(
-                getLocal(periodData.dateRanges.current, "to_local", "to"),
-                formatterLong
-              )}`
-            : "",
-
-          dateRangePrev: periodData.dateRanges?.previous
-            ? `${safeFormatDate(
-                getLocal(periodData.dateRanges.previous, "from_local", "from"),
-                formatterLong
-              )} - ${safeFormatDate(
-                getLocal(periodData.dateRanges.previous, "to_local", "to"),
-                formatterLong
-              )}`
-            : "",
-
-          dateRangeFormat: periodData.dateRanges?.current
-            ? `${safeFormatDate(
-                getLocal(periodData.dateRanges.current, "from_local", "from"),
-                formatterShort
-              )} - ${safeFormatDate(
-                getLocal(periodData.dateRanges.current, "to_local", "to"),
-                formatterShort
-              )}`
-            : "",
-
-          dateRangePrevFormat: periodData.dateRanges?.previous
-            ? `${safeFormatDate(
-                getLocal(periodData.dateRanges.previous, "from_local", "from"),
-                formatterShort
-              )} - ${safeFormatDate(
-                getLocal(periodData.dateRanges.previous, "to_local", "to"),
-                formatterShort
-              )}`
-            : "",
-
-          grossRevenue: `$${safeGet(
-            periodData,
-            "summary.grossRevenue.current",
-            0
-          ).toFixed(2)}`,
-
-          expenses: `-$${safeGet(
-            periodData,
-            "summary.expenses.current",
-            0
-          ).toFixed(2)}`,
-
-          netProfit: `$${safeGet(
-            periodData,
-            "summary.netProfit.current",
-            0
-          ).toFixed(2)}`,
-
-          netPrevious: `$${safeGet(
-            periodData,
-            "summary.netProfit.previous",
-            0
-          ).toFixed(2)}`,
-
-          margin: `${safeGet(periodData, "summary.margin.current", 0).toFixed(
-            2
-          )}%`,
-
-          orders: safeGet(periodData, "summary.orders.current", 0),
-          unitsSold: safeGet(periodData, "summary.unitsSold.current", 0),
-          refunds: safeGet(periodData, "summary.refunds.current", 0),
-          previous: safeGet(periodData, "summary.grossRevenue.previous", 0),
-
-          revenueChange: `${
-            safeGet(periodData, "summary.grossRevenue.delta", 0) >= 0 ? "+" : ""
-          }$${safeGet(periodData, "summary.grossRevenue.delta", 0).toFixed(2)}`,
-
-          netProfitCalculation: periodData.netProfitCalculation || {},
-        };
-
-        acc.push(cardData);
-      } catch (error) {
-        console.error(`Error processing ${period} data:`, error);
-      }
-
-      return acc;
-    }, []);
+  // Helper function to safely format dates
+  const safeFormatDate = (dateString, formatter) => {
+    try {
+      return dateString ? formatter.format(new Date(dateString)) : "";
+    } catch (e) {
+      console.warn("Date formatting error:", e);
+      return "";
+    }
   };
+
+  // Helper function to safely access nested properties
+  const safeGet = (obj, path, defaultValue = 0) => {
+    try {
+      return (
+        path.split(".").reduce((acc, part) => acc && acc[part], obj) ??
+        defaultValue
+      );
+    } catch (e) {
+      return defaultValue;
+    }
+  };
+
+  const periods = ["today", "yesterday", "last7Days", "custom"];
+
+  return periods.reduce((acc, period) => {
+    if (!data[period]) return acc;
+
+    const periodData = data[period];
+
+    try {
+      const getLocal = (range, key, fallbackKey = key) =>
+        range?.[key] || range?.[fallbackKey];
+
+      const cardData = {
+        title:
+          period === "last7Days"
+            ? "Last 7 Days"
+            : period.charAt(0).toUpperCase() + period.slice(1),
+
+        // Use from_local / to_local with fallback to from / to
+        dateRange: periodData.dateRanges?.current
+          ? `${safeFormatDate(
+              getLocal(periodData.dateRanges.current, "from_local", "from"),
+              formatterLong
+            )} - ${safeFormatDate(
+              getLocal(periodData.dateRanges.current, "to_local", "to"),
+              formatterLong
+            )}`
+          : "",
+
+        dateRangePrev: periodData.dateRanges?.previous
+          ? `${safeFormatDate(
+              getLocal(periodData.dateRanges.previous, "from_local", "from"),
+              formatterLong
+            )} - ${safeFormatDate(
+              getLocal(periodData.dateRanges.previous, "to_local", "to"),
+              formatterLong
+            )}`
+          : "",
+
+        dateRangeFormat: periodData.dateRanges?.current
+          ? `${safeFormatDate(
+              getLocal(periodData.dateRanges.current, "from_local", "from"),
+              formatterShort
+            )} - ${safeFormatDate(
+              getLocal(periodData.dateRanges.current, "to_local", "to"),
+              formatterShort
+            )}`
+          : "",
+
+        dateRangePrevFormat: periodData.dateRanges?.previous
+          ? `${safeFormatDate(
+              getLocal(periodData.dateRanges.previous, "from_local", "from"),
+              formatterShort
+            )} - ${safeFormatDate(
+              getLocal(periodData.dateRanges.previous, "to_local", "to"),
+              formatterShort
+            )}`
+          : "",
+
+        // Updated currency formatting with commas
+        grossRevenue: formatCurrency(
+          safeGet(periodData, "summary.grossRevenue.current", 0)
+        ),
+
+        expenses: `-${formatCurrency(
+          safeGet(periodData, "summary.expenses.current", 0)
+        ).substring(1)}`, // Remove the $ and add - prefix
+
+        netProfit: formatCurrency(
+          safeGet(periodData, "summary.netProfit.current", 0)
+        ),
+
+        netPrevious: formatCurrency(
+          safeGet(periodData, "summary.netProfit.previous", 0)
+        ),
+
+        // Margin stays the same (percentage, no commas needed)
+        margin: `${safeGet(periodData, "summary.margin.current", 0).toFixed(
+          2
+        )}%`,
+
+        // These stay the same (not currency)
+        orders: safeGet(periodData, "summary.orders.current", 0),
+        unitsSold: safeGet(periodData, "summary.unitsSold.current", 0),
+        refunds: safeGet(periodData, "summary.refunds.current", 0),
+        previous: safeGet(periodData, "summary.grossRevenue.previous", 0),
+
+        // Updated revenue change formatting
+        revenueChange: (() => {
+          const delta = safeGet(periodData, "summary.grossRevenue.delta", 0);
+          const sign = delta >= 0 ? "+" : "";
+          return `${sign}${formatCurrency(Math.abs(delta))}`;
+        })(),
+
+        netProfitCalculation: periodData.netProfitCalculation || {},
+      };
+
+      acc.push(cardData);
+    } catch (error) {
+      console.error(`Error processing ${period} data:`, error);
+    }
+
+    return acc;
+  }, []);
+};
   const processedData = metricsData ? transformData(metricsData) : [];
 
   return (
