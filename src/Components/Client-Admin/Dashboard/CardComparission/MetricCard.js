@@ -22,7 +22,6 @@ import NotificationTooltip from "./NotificationTooltip";
 
 import { Delete } from "@mui/icons-material";
 import DottedCircleLoading from "../../../Loading/DotLoading";
-import { formatCurrency } from "../../../../utils/currencyFormatter";
 const CustomPopover = styled(Popover)(({ theme }) => ({
   "& .MuiPopover-paper": {
     backgroundColor: "white",
@@ -1087,18 +1086,29 @@ const MetricCard = ({
               )}`
             : "",
 
-          grossRevenue: formatCurrency(
-            safeGet(periodData, "summary.grossRevenue.current", 0)
-          ),
-          expenses: `-${formatCurrency(
-            safeGet(periodData, "summary.expenses.current", 0)
-          )}`,
-          netProfit: formatCurrency(
-            safeGet(periodData, "summary.netProfit.current", 0)
-          ),
-          netPrevious: formatCurrency(
-            safeGet(periodData, "summary.netProfit.previous", 0)
-          ),
+          grossRevenue: `$${safeGet(
+            periodData,
+            "summary.grossRevenue.current",
+            0
+          ).toFixed(2)}`,
+
+          expenses: `-$${safeGet(
+            periodData,
+            "summary.expenses.current",
+            0
+          ).toFixed(2)}`,
+
+          netProfit: `$${safeGet(
+            periodData,
+            "summary.netProfit.current",
+            0
+          ).toFixed(2)}`,
+
+          netPrevious: `$${safeGet(
+            periodData,
+            "summary.netProfit.previous",
+            0
+          ).toFixed(2)}`,
 
           margin: `${safeGet(periodData, "summary.margin.current", 0).toFixed(
             2
@@ -1107,16 +1117,11 @@ const MetricCard = ({
           orders: safeGet(periodData, "summary.orders.current", 0),
           unitsSold: safeGet(periodData, "summary.unitsSold.current", 0),
           refunds: safeGet(periodData, "summary.refunds.current", 0),
-          previous: formatCurrency(
-            safeGet(periodData, "summary.grossRevenue.previous", 0)
-          ),
+          previous: safeGet(periodData, "summary.grossRevenue.previous", 0),
+
           revenueChange: `${
-            safeGet(periodData, "summary.grossRevenue.delta", 0) >= 0
-              ? "+"
-              : "-"
-          }${formatCurrency(
-            Math.abs(safeGet(periodData, "summary.grossRevenue.delta", 0))
-          )}`,
+            safeGet(periodData, "summary.grossRevenue.delta", 0) >= 0 ? "+" : ""
+          }$${safeGet(periodData, "summary.grossRevenue.delta", 0).toFixed(2)}`,
 
           netProfitCalculation: periodData.netProfitCalculation || {},
         };
