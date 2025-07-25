@@ -50,38 +50,39 @@ const MetricItem = ({
   const absValue = Math.abs(value ?? 0);
   const absChange = Math.abs(change ?? 0);
 
-const displayValue = `${(value ?? 0) < 0 ? "-" : ""}${
-  currencySymbol 
-    ? new Intl.NumberFormat("en-US", {
-        style: "currency", 
-        currency: "USD",
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }).format(Math.abs(value ?? 0))
-    : percentSymbol 
+  const displayValue = `${(value ?? 0) < 0 ? "-" : ""}${
+    currencySymbol
+      ? new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(Math.abs(value ?? 0))
+      : percentSymbol
       ? `${Math.abs(value ?? 0)}%`
       : new Intl.NumberFormat("en-US", {
           minimumFractionDigits: 0,
           maximumFractionDigits: 0,
         }).format(Math.abs(value ?? 0))
-}`;
-const displayChange = change !== undefined
-  ? `${change < 0 ? "-" : ""}${
-      currencySymbol 
-        ? new Intl.NumberFormat("en-US", {
-            style: "currency", 
-            currency: "USD",
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          }).format(Math.abs(change ?? 0))
-        : percentSymbol 
-          ? `${Math.abs(change ?? 0)}%`
-          : new Intl.NumberFormat("en-US", {
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
-            }).format(Math.abs(change ?? 0))
-    }`
-  : "";
+  }`;
+  const displayChange =
+    change !== undefined
+      ? `${change < 0 ? "-" : ""}${
+          currencySymbol
+            ? new Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: "USD",
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }).format(Math.abs(change ?? 0))
+            : percentSymbol
+            ? `${Math.abs(change ?? 0)}%`
+            : new Intl.NumberFormat("en-US", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              }).format(Math.abs(change ?? 0))
+        }`
+      : "";
 
   return (
     <Card
@@ -156,8 +157,7 @@ const TestCard = ({
     selectedDate: dayjs().tz(TIMEZONE),
     displayDate: dayjs().tz(TIMEZONE),
   });
-  const formatNumber = (value) =>
-  (value ?? 0).toLocaleString("en-US");
+  const formatNumber = (value) => (value ?? 0).toLocaleString("en-US");
   const [currentPreset, setCurrentPreset] = useState(widgetData);
 
   // Data state
@@ -434,13 +434,12 @@ const TestCard = ({
   }, [widgetData, DateStartDate, DateEndDate]);
 
   const formatCurrency = (value) =>
-  new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value ?? 0);
-
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value ?? 0);
 
   const METRICS_CONFIG = {
     total_orders: {
@@ -751,10 +750,14 @@ const TestCard = ({
                 ).startsWith("-")}
                 tooltip={
                   currentDates.selectedDate.isSame(today, "day")
-                    ? `Yesterday: ${formatCurrency(
+                    ? `Current: ${formatCurrency(
+                        dataState.metrics.gross_revenue
+                      )} | Yesterday: ${formatCurrency(
                         dataState.previous.gross_revenue
                       )}`
-                    : `${currentDates.selectedDate
+                    : `Current: ${formatCurrency(
+                        dataState.metrics.gross_revenue
+                      )} | ${currentDates.selectedDate
                         .subtract(1, "day")
                         .format("MMM DD")}: ${formatCurrency(
                         dataState.previous.gross_revenue
@@ -950,8 +953,7 @@ const TestCard = ({
                     }}
                   >
                     <Typography fontWeight="bold" fontSize={14} color="#485E75">
-                      {dayjs(tooltipData.fullDate)
-                        .format("MMM DD, YYYY")}
+                      {dayjs(tooltipData.fullDate).format("MMM DD, YYYY")}
                     </Typography>
                     <Typography fontSize={14} color="#000" fontWeight="bold">
                       {formatCurrency(tooltipData.revenue)}
