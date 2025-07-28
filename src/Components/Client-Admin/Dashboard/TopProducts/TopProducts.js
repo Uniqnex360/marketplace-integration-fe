@@ -44,11 +44,7 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 
 // Define a consistent set of colors
-const colors = [
-  "#0d47a1", "#00bcd4", "#00897b", "#9c27b0", "#f44336",
-  "#FF9800", "#8BC34A", "#03A9F4", "#FF5722", "#795548",
-  "#9C27B0", "#3F51B5", "#00BCD4", "#4CAF50", "#FFEB3B",
-];
+const colors = ["#0d47a1", "#00bcd4", "#00897b", "#9c27b0", "#f44336"];
 
 function CopyAsin({ open, onClose, children }) {
   return (
