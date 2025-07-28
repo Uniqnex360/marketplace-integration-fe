@@ -49,6 +49,7 @@ const OrderList = ({ fetchOrdersFromParent }) => {
   const [selectedBrand, setSelectedBrand] = useState([]);
   const [inputValueBrand, setInputValueBrand] = useState("");
   const [brandList, setBrandList] = useState([]);
+    const userData = localStorage.getItem("user");
   const [brandLimit, setBrandLimit] = useState(10);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -79,7 +80,10 @@ const OrderList = ({ fetchOrdersFromParent }) => {
       setSelectedCategory(parsedCategory);
     }
   }, []);
-
+   if (userData) {
+    const data = JSON.parse(userData);
+    userIds = data.id;
+  }
   console.log(selectedCategory);
   const [categories, setCategories] = useState([
     "All",
@@ -146,6 +150,7 @@ const OrderList = ({ fetchOrdersFromParent }) => {
           {
             params: {
               search_query: inputValueBrand,
+              user_id: userIds,
               limit: brandLimit,
             },
           }
