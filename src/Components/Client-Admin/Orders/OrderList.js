@@ -312,15 +312,18 @@ const OrderList = ({ fetchOrdersFromParent }) => {
   const handleDownload = async () => {
     try {
       // Validate inputs
-      if (selectedBrand.length === 0) {
-        toast.error("Please select at least one brand");
-        return;
-      }
-
-      if (!downloadStartDate || !downloadEndDate) {
-        toast.error("Please select both start and end dates");
-        return;
-      }
+      if (selectedBrand.length === 0 && (!downloadStartDate || !downloadEndDate)) {
+  toast.error("Please select at least one brand OR a valid date range");
+  return;
+}
+if (
+  downloadStartDate &&
+  downloadEndDate &&
+  new Date(downloadEndDate) < new Date(downloadStartDate)
+) {
+  toast.error("End date must be after start date");
+  return;
+}
 
       const startDate = new Date(downloadStartDate);
       const endDate = new Date(downloadEndDate);
@@ -331,12 +334,18 @@ const OrderList = ({ fetchOrdersFromParent }) => {
 
       // Prepare request data
       const brandIds = selectedBrand.map(b => b.id);
-      const requestData = {
-        brands: brandIds,
-        start_date: downloadStartDate,
-        end_date: downloadEndDate,
-        format: downloadFormat
-      };
+      const requestData = {};
+
+if (selectedBrand.length > 0) {
+  requestData.brands = selectedBrand.map((b) => b.id);
+}
+
+if (downloadStartDate && downloadEndDate) {
+  requestData.start_date = downloadStartDate;
+  requestData.end_date = downloadEndDate;
+}
+
+requestData.format = downloadFormat;
 
       // Show loading state
       setIsLoading(true);
@@ -1189,12 +1198,10 @@ const OrderList = ({ fetchOrdersFromParent }) => {
             color="primary"
             onClick={handleDownload}
             fullWidth
-            disabled={
-              selectedBrand.length === 0 ||
-              !downloadStartDate ||
-              !downloadEndDate ||
-              isLoading
-            }
+           disabled={
+  (selectedBrand.length === 0 && (!downloadStartDate || !downloadEndDate)) ||
+  isLoading
+}
             startIcon={isLoading ? <CircularProgress size={20} /> : null}
           >
             {isLoading ? "Preparing Download..." : "Download"}
