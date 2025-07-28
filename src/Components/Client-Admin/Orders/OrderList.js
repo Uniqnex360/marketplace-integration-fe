@@ -24,8 +24,12 @@ import {
   IconButton,
   FormControl,
   InputLabel,
+  CircularProgress,
+  DatePicker,
+  LocalizationProvider,
 } from "@mui/material";
-import { FilterList, Refresh, Try, Visibility } from "@mui/icons-material";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { FilterList, Refresh, Visibility } from "@mui/icons-material";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import DottedCircleLoading from "../../Loading/DotLoading";
@@ -38,6 +42,7 @@ import { MoreVert as MoreVertIcon } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import BrandSelector from "../../../utils/BrandSelector";
+
 const OrderList = ({ fetchOrdersFromParent }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -49,7 +54,7 @@ const OrderList = ({ fetchOrdersFromParent }) => {
   const [selectedBrand, setSelectedBrand] = useState([]);
   const [inputValueBrand, setInputValueBrand] = useState("");
   const [brandList, setBrandList] = useState([]);
-    const userData = localStorage.getItem("user");
+  const [userIds, setUserIds] = useState("");
   const [brandLimit, setBrandLimit] = useState(10);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -80,45 +85,22 @@ const OrderList = ({ fetchOrdersFromParent }) => {
       setSelectedCategory(parsedCategory);
     }
   }, []);
-   if (userData) {
-    const data = JSON.parse(userData);
-    userIds = data.id;
-  }
-  console.log(selectedCategory);
-  const [categories, setCategories] = useState([
-    "All",
-    "Category 1",
-    "Category 2",
-  ]);
-  const handleDownload=async()=>{
-    try {
-      const brandIds=selectedBrand.map(b=>b.id)
-      const response=await axios.post(
-        `${process.env.REACT_APP_IP}downloadOrders/`,{
-          brands:brandIds,
-          start_date:downloadStartDate,
-          end_date:downloadEndDate,
-          format:downloadFormat
-        },{responseType:'blob'}
-      )
-      const url=window.URL.createObjectURL(new Blob([response.data]))
-      const link=document.createElement('a')
-      link.href=url
-      link.setAttribute('download',`orders.${downloadFormat}`)
-      document.body.appendChild(link)
-      link.click()
-      link.remove()
-      setDownloadModalOpen(false)
-    } catch (error) {
-      toast.error("Failed to download errors")
+
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      const data = JSON.parse(userData);
+      setUserIds(data.id);
     }
-  }
-  const [open, setOpen] = useState(false);
+  }, []);
+
   const queryParams = new URLSearchParams(window.location.search);
   const initialPage = parseInt(queryParams.get("page")) || 1;
   const initialRowsPerPage = parseInt(queryParams.get("rowsPerPage"), 10) || 25;
   const [page, setPage] = useState(initialPage);
   const [market, setMarket] = useState(null);
+  const [open, setOpen] = useState(false);
+
   const handleOpen = () => setOpen(true);
 
   const handlePageChange = (event, newPage) => {
@@ -131,16 +113,17 @@ const OrderList = ({ fetchOrdersFromParent }) => {
     navigate(`/Home/orders?page=${page}&rowsPerPage=${event.target.value}`);
     setPage(1);
   };
+
   useEffect(() => {
     setRowsPerPage(initialRowsPerPage);
   }, [location.search]);
-  useEffect(() => {
-    console.log("pagination", page);
 
+  useEffect(() => {
     if (location.state && location.state.searchQuery) {
       setSearchTerm(location.state.searchQuery);
     }
   }, [location.state]);
+
   useEffect(() => {
     const fetchBrands = async () => {
       setIsLoading(true);
@@ -156,34 +139,27 @@ const OrderList = ({ fetchOrdersFromParent }) => {
           }
         );
         const names = response.data.data.brand_list || [];
-        setBrandLimit(names);
+        setBrandList(names);
         setHasMore(names.length >= brandLimit);
       } catch (error) {
+        console.error("Error fetching brands:", error);
         setHasMore(false);
       } finally {
         setIsLoading(false);
       }
     };
     fetchBrands();
-  }, [inputValueBrand, brandLimit]);
-  useEffect(() => {
-    console.log("9090", selectedCategory);
-  }, [selectedCategory]);
+  }, [inputValueBrand, brandLimit, userIds]);
 
   const fetchOrderData = async (marketId = "all", page, rowsPerPage) => {
     setLoading(true);
     const validRowsPerPage = rowsPerPage && rowsPerPage > 0 ? rowsPerPage : 25;
     const skip = (page - 1) * validRowsPerPage;
     try {
-      const userData = localStorage.getItem("user");
-      let userIds = "";
-      if (userData) {
-        const data = JSON.parse(userData);
-        userIds = data.id;
-      }
       const marketplaceId = localStorage.getItem("selectedCategory")
         ? JSON.parse(localStorage.getItem("selectedCategory")).id
         : "all";
+
       const response = await axios.post(
         `${process.env.REACT_APP_IP}fetchAllorders/`,
         {
@@ -217,13 +193,12 @@ const OrderList = ({ fetchOrdersFromParent }) => {
       setManualOrders([]);
     } catch (error) {
       console.error("Error fetching orders:", error);
-
+      toast.error("Failed to load orders. Please try again.");
       setOrders([]);
       setManualOrders([]);
       setLogoMarket([]);
       setOrderCount(0);
       setTotalPages(1);
-      toast.error("Failed to load orders. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -245,9 +220,9 @@ const OrderList = ({ fetchOrdersFromParent }) => {
       JSON.stringify(sortConfig) !==
         JSON.stringify(prevParams.current.sortConfig) ||
       searchQuery !== prevParams.current.searchQuery;
+
     if (shouldFetch) {
       fetchOrderData(selectedCategory.id, page, rowsPerPage);
-
       prevParams.current = {
         selectedCategoryId: selectedCategory.id,
         page,
@@ -285,6 +260,7 @@ const OrderList = ({ fetchOrdersFromParent }) => {
       customerOrderId.includes(searchQuery.toLowerCase())
     );
   });
+
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
@@ -298,32 +274,33 @@ const OrderList = ({ fetchOrdersFromParent }) => {
     setAnchorEl(event.currentTarget);
     setCurrentColumn(column);
   };
-  const handleSelectSort = (key, direction) => {
-    console.log("army", key, direction);
-    setSortConfig({ key, direction });
 
+  const handleSelectSort = (key, direction) => {
+    setSortConfig({ key, direction });
     setAnchorEl(null);
   };
+
   const handleCloseMenu = () => {
     setAnchorEl(null);
   };
+
   const handleProduct = (category) => {
-    console.log("555", category);
     setSelectedCategory(category);
   };
+
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
   };
+
   const handleResetChange = () => {
     setSearchQuery("");
     setSortConfig({ key: "", direction: "asc" });
-
     setSelectedCategory({ id: "all", name: "All Channels" });
     localStorage.setItem(
       "selectedCategory",
       JSON.stringify({ id: "all", name: "All Channels" })
     );
-
+    setPage(1);
     toast.success("Reset Successfully", {
       position: "top-right",
       autoClose: 2000,
@@ -333,6 +310,74 @@ const OrderList = ({ fetchOrdersFromParent }) => {
       draggable: true,
     });
   };
+
+  const handleDownload = async () => {
+    try {
+      // Validate inputs
+      if (selectedBrand.length === 0) {
+        toast.error("Please select at least one brand");
+        return;
+      }
+
+      if (!downloadStartDate || !downloadEndDate) {
+        toast.error("Please select both start and end dates");
+        return;
+      }
+
+      const startDate = new Date(downloadStartDate);
+      const endDate = new Date(downloadEndDate);
+      if (endDate < startDate) {
+        toast.error("End date must be after start date");
+        return;
+      }
+
+      // Prepare request data
+      const brandIds = selectedBrand.map(b => b.id);
+      const requestData = {
+        brands: brandIds,
+        start_date: downloadStartDate,
+        end_date: downloadEndDate,
+        format: downloadFormat
+      };
+
+      // Show loading state
+      setIsLoading(true);
+
+      // Make API call
+      const response = await axios.post(
+        `${process.env.REACT_APP_IP}downloadOrders/`,
+        requestData,
+        { responseType: 'blob' }
+      );
+
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `orders_${new Date().toISOString().split('T')[0]}.${downloadFormat}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      // Clean up
+      window.URL.revokeObjectURL(url);
+
+      // Close modal and reset state
+      setDownloadModalOpen(false);
+      setSelectedBrand([]);
+      setDownloadStartDate("");
+      setDownloadEndDate("");
+      setDownloadFormat("csv");
+
+      toast.success("Download started successfully");
+    } catch (error) {
+      console.error("Download error:", error);
+      toast.error("Failed to download orders. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Box sx={{ flex: 1, width: "100%" }}>
       <Box
@@ -352,7 +397,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
           zIndex: 100,
         }}
       >
-        {/* Filters and controls */}
         <Box
           sx={{
             display: "flex",
@@ -374,7 +418,7 @@ const OrderList = ({ fetchOrdersFromParent }) => {
 
           <TextField
             size="small"
-            placeholder="Search Purchase Order ID "
+            placeholder="Search Purchase Order ID"
             value={searchQuery}
             onChange={handleSearchChange}
             sx={{
@@ -407,45 +451,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
               Create Order
             </Button>
           )}
-          {/* <Tooltip title="Filter" arrow>
-      <Button
-        variant="outlined"
-        color="primary"
-        sx={{
-          backgroundColor: "#000080",
-          color: "white",
-          minWidth: "auto",
-          padding: "6px",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          "&:hover": {
-            backgroundColor: "darkblue",
-          },
-        }}
-        
-      >
-        <FilterList sx={{ color: "white", fontSize: "20px" }} />
-      </Button>
-      {showFilter && (
-        <Paper
-          elevation={3}
-          sx={{
-            position: "absolute",
-            top: "50px",
-            marginTop: '6%',
-            right: "30px",
-            width: "300px",
-            padding: "10px",
-            backgroundColor: "white",
-            zIndex: 1000,
-          }}
-        >
-          <Typography variant="h6">Filter Orders</Typography>
-             <FilterOrders onFilterChange={handleFilterChange} />
-        </Paper>
-      )}
-    </Tooltip> */}
           <Tooltip title="Reset" arrow>
             <Button
               variant="outlined"
@@ -460,9 +465,7 @@ const OrderList = ({ fetchOrdersFromParent }) => {
                   backgroundColor: "darkblue",
                 },
               }}
-              onClick={() => {
-                handleResetChange();
-              }}
+              onClick={handleResetChange}
             >
               <Refresh sx={{ color: "white", fontSize: "20px" }} />
             </Button>
@@ -472,15 +475,17 @@ const OrderList = ({ fetchOrdersFromParent }) => {
           </Typography>
         </Box>
       </Box>
+
       <Button
         variant="contained"
         color="primary"
         onClick={() => setDownloadModalOpen(true)}
+        sx={{ margin: "16px 0" }}
       >
         Download orders
       </Button>
+
       <Box sx={{ paddingTop: "150px" }}>
-        {/* Conditionally render the first table if customStatus is 'custom' */}
         {customStatus === "custom" ? (
           <TableContainer
             component={Paper}
@@ -659,7 +664,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
                               }
                             )
                           : "N/A"}
-                        {/* {order.purchase_order_date ? new Date(order.purchase_order_date).toLocaleDateString('en-GB') : 'N/A'} */}
                       </TableCell>
                       <TableCell align="center">
                         {order.currency ? order.currency : "USD"}
@@ -716,7 +720,7 @@ const OrderList = ({ fetchOrdersFromParent }) => {
             </Table>
           </TableContainer>
         ) : null}
-        {/* Conditionally render the second table if customStatus is not 'custom' */}
+
         {customStatus !== "custom" ? (
           <TableContainer
             component={Paper}
@@ -966,7 +970,7 @@ const OrderList = ({ fetchOrdersFromParent }) => {
           </TableContainer>
         ) : null}
       </Box>
-      {/* Pagination Controls */}
+
       <Box
         sx={{
           display: "flex",
@@ -999,6 +1003,7 @@ const OrderList = ({ fetchOrdersFromParent }) => {
           }}
         />
       </Box>
+
       <Modal open={open} onClose={handleClose}>
         <Slide direction="left" in={open} mountOnEnter unmountOnExit>
           <Box
@@ -1017,12 +1022,12 @@ const OrderList = ({ fetchOrdersFromParent }) => {
           </Box>
         </Slide>
       </Modal>
+
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleCloseMenu}
       >
-        {/* Sorting for Brand */}
         {currentColumn === "customer_name" && (
           <>
             <MenuItem onClick={() => handleSelectSort("customer_name", "asc")}>
@@ -1033,7 +1038,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
             </MenuItem>
           </>
         )}
-        {/* Sorting for Price */}
         {currentColumn === "total_price" && (
           <>
             <MenuItem onClick={() => handleSelectSort("total_price", "asc")}>
@@ -1068,7 +1072,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
             </MenuItem>
           </>
         )}
-        {/* Sorting for Price */}
         {currentColumn === "order_total" && (
           <>
             <MenuItem onClick={() => handleSelectSort("order_total", "asc")}>
@@ -1079,7 +1082,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
             </MenuItem>
           </>
         )}
-        {/* Sorting for Price */}
         {currentColumn === "total_quantity" && (
           <>
             <MenuItem onClick={() => handleSelectSort("total_quantity", "asc")}>
@@ -1093,6 +1095,7 @@ const OrderList = ({ fetchOrdersFromParent }) => {
           </>
         )}
       </Menu>
+
       <Modal
         open={downloadModalOpen}
         onClose={() => setDownloadModalOpen(false)}
@@ -1105,12 +1108,15 @@ const OrderList = ({ fetchOrdersFromParent }) => {
             transform: "translate(-50%, -50%)",
             width: 400,
             bgcolor: "background.paper",
-
             boxShadow: 24,
             p: 4,
             borderRadius: 2,
           }}
         >
+          <Typography variant="h6" gutterBottom>
+            Download Orders
+          </Typography>
+
           <BrandSelector
             selectedBrand={selectedBrand}
             setSelectedBrand={setSelectedBrand}
@@ -1133,24 +1139,28 @@ const OrderList = ({ fetchOrdersFromParent }) => {
             label="Brands"
             width={190}
           />
-          <TextField
-            label="Start Date"
-            type="date"
-            value={downloadStartDate}
-            onChange={(e) => setDownloadStartDate(e.target.value)}
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-            sx={{ mb: 2, mt: 2 }}
-          />
-          <TextField
-            label="End Date"
-            type="date"
-            value={downloadEndDate}
-            onChange={(e) => setDownloadEndDate(e.target.value)}
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-            sx={{ mb: 2 }}
-          />
+
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <DatePicker
+              label="Start Date"
+              value={downloadStartDate}
+              onChange={(newValue) => setDownloadStartDate(newValue)}
+              renderInput={(params) => (
+                <TextField {...params} fullWidth sx={{ mb: 2, mt: 2 }} />
+              )}
+              maxDate={new Date(downloadEndDate)}
+            />
+            <DatePicker
+              label="End Date"
+              value={downloadEndDate}
+              onChange={(newValue) => setDownloadEndDate(newValue)}
+              renderInput={(params) => (
+                <TextField {...params} fullWidth sx={{ mb: 2 }} />
+              )}
+              minDate={new Date(downloadStartDate)}
+            />
+          </LocalizationProvider>
+
           <FormControl fullWidth sx={{ mb: 2 }}>
             <InputLabel>Format</InputLabel>
             <Select
@@ -1159,10 +1169,10 @@ const OrderList = ({ fetchOrdersFromParent }) => {
               onChange={(e) => setDownloadFormat(e.target.value)}
             >
               <MenuItem value="csv">CSV</MenuItem>
-              <MenuItem value="txt">CSV</MenuItem>
-              <MenuItem value="xlsx">XLSX</MenuItem>
+              <MenuItem value="xlsx">Excel (XLSX)</MenuItem>
             </Select>
           </FormControl>
+
           <Button
             variant="contained"
             color="primary"
@@ -1171,14 +1181,17 @@ const OrderList = ({ fetchOrdersFromParent }) => {
             disabled={
               selectedBrand.length === 0 ||
               !downloadStartDate ||
-              !downloadEndDate
+              !downloadEndDate ||
+              isLoading
             }
+            startIcon={isLoading ? <CircularProgress size={20} /> : null}
           >
-            Download
+            {isLoading ? "Preparing Download..." : "Download"}
           </Button>
         </Box>
       </Modal>
     </Box>
   );
 };
+
 export default OrderList;
