@@ -142,7 +142,7 @@ const OrderList = ({ fetchOrdersFromParent }) => {
       setIsLoading(true);
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_IP}getBrandListforFilter/`,
+          `${process.env.REACT_APP_IP}getBrandListforfilter/`,
           {
             params: {
               search_query: inputValueBrand,
