@@ -1,5 +1,19 @@
 import React, { useState } from "react";
-import { AppBar, Toolbar, IconButton, Typography, ListItemText, List, Avatar, ListItem, Menu, MenuItem, Divider, ListItemIcon, Box } from "@mui/material";
+import {
+  AppBar,
+  Toolbar,
+  IconButton,
+  Typography,
+  ListItemText,
+  List,
+  Avatar,
+  ListItem,
+  Menu,
+  MenuItem,
+  Divider,
+  ListItemIcon,
+  Box,
+} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import {
   Notifications,
@@ -28,34 +42,54 @@ function Notificationbar() {
 
   const handleLogout = () => {
     navigate("/");
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
   };
 
   return (
-    <AppBar position="fixed" sx={{ backgroundColor: accentColor, zIndex: 1201 }}>
+    <AppBar
+      position="fixed"
+      sx={{ backgroundColor: accentColor, zIndex: 1201 }}
+    >
       <Toolbar>
         {/* <IconButton edge="start" color="inherit" aria-label="menu">
           <MenuIcon />
         </IconButton> */}
 
-<IconButton edge="start" color="inherit" aria-label="menu">
-
-  <img src={require('../../assets/One Tree Brands Main Logo 2400x1800 (HIGH RES).jpg')} alt="Logo" style={{ height: '40px', width: 'auto' }} />
-</IconButton>
+        <IconButton edge="start" color="inherit" aria-label="menu">
+          <img
+            src={require("../../assets/One Tree Brands Main Logo 2400x1800 (HIGH RES).jpg")}
+            alt="Logo"
+            style={{ height: "40px", width: "auto" }}
+          />
+        </IconButton>
         <Typography variant="h6" sx={{ flexGrow: 1, textAlign: "center" }}>
           MarketPlace Management
         </Typography>
 
         {/* Right-aligned Box */}
-        <Box sx={{ display: "flex", alignItems: "center",    height: '67px', justifyContent: "flex-end" }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            height: "67px",
+            justifyContent: "flex-end",
+          }}
+        >
           {/* Notification Icon */}
           <ListItem sx={{ display: "flex", alignItems: "center", padding: 0 }}>
             <Notifications sx={{ fontSize: 28, color: "#fff" }} />
           </ListItem>
 
           {/* Profile Section */}
-          <List sx={{ width: "100%", textAlign: "right", marginTop:'13px', marginBottom: 2 }}>
+          <List
+            sx={{
+              width: "100%",
+              textAlign: "right",
+              marginTop: "13px",
+              marginBottom: 2,
+            }}
+          >
             <ListItem
               button
               onClick={handleProfileClick}
@@ -65,7 +99,9 @@ function Notificationbar() {
                 padding: "10px",
               }}
             >
-              <Avatar sx={{ bgcolor: "white", color: "blue" }}>S</Avatar>
+              <Avatar sx={{ bgcolor: "white", color: "blue" }}>
+                <AccountCircle sx={{fontSize:28}}/>
+              </Avatar>
               {/* <ListItemText primary="User" sx={{ color: "#fff", fontSize: "14px", marginTop: "4px" }} /> */}
             </ListItem>
           </List>
@@ -73,9 +109,17 @@ function Notificationbar() {
       </Toolbar>
 
       {/* Profile Dropdown Menu */}
-      <Menu anchorEl={anchorEl} open={open} onClose={handleClose} sx={{ mt: 1 }}>
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        sx={{ mt: 1 }}
+      >
         <MenuItem disabled>
-          <ListItemText primary="Hello, MarketPlace User01" secondary="marketplace@user1gmail.com" />
+          <ListItemText
+            primary="Hello, MarketPlace User01"
+            secondary="marketplace@user1gmail.com"
+          />
         </MenuItem>
         <Divider />
         <MenuItem onClick={handleClose}>
