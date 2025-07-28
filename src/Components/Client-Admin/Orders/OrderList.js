@@ -348,7 +348,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
         { responseType: 'blob' }
       );
 
-      // Create download link
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -449,6 +448,20 @@ const OrderList = ({ fetchOrdersFromParent }) => {
               Create Order
             </Button>
           )}
+            <Button
+    variant="contained"
+    color="primary"
+    onClick={() => setDownloadModalOpen(true)}
+    sx={{ 
+      marginLeft: "10px",
+      backgroundColor: "#000080",
+      "&:hover": {
+        backgroundColor: "darkblue",
+      }
+    }}
+  >
+    Download orders
+  </Button>
           <Tooltip title="Reset" arrow>
             <Button
               variant="outlined"
