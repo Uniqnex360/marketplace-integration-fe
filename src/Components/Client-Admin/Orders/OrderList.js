@@ -25,10 +25,10 @@ import {
   FormControl,
   InputLabel,
   CircularProgress,
-  DatePicker,
-  LocalizationProvider,
-
+  DatePicker,  
 } from "@mui/material";
+import { LocalizationProvider } from '@mui/x-date-pickers';
+
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { FilterList, Refresh, Visibility } from "@mui/icons-material";
 import { Link, useNavigate, useLocation } from "react-router-dom";
