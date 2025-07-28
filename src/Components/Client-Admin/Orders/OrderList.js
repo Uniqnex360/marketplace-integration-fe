@@ -54,7 +54,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
   const [selectedBrand, setSelectedBrand] = useState([]);
   const [inputValueBrand, setInputValueBrand] = useState("");
   const [brandList, setBrandList] = useState([]);
-  const [userIds, setUserIds] = useState("");
   const [brandLimit, setBrandLimit] = useState(10);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -86,13 +85,12 @@ const OrderList = ({ fetchOrdersFromParent }) => {
     }
   }, []);
 
-  useEffect(() => {
-    const userData = localStorage.getItem("user");
+  const userData = localStorage.getItem("user");
+    let  userIds=""
     if (userData) {
       const data = JSON.parse(userData);
-      setUserIds(data.id);
+      userIds = data.id;
     }
-  }, []);
 
   const queryParams = new URLSearchParams(window.location.search);
   const initialPage = parseInt(queryParams.get("page")) || 1;
