@@ -26,7 +26,7 @@ import {
   InputLabel,
   CircularProgress,
 } from "@mui/material";
-import { LocalizationProvider,DatePicker} from '@mui/x-date-pickers';
+import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { FilterList, Refresh, Visibility } from "@mui/icons-material";
@@ -86,11 +86,11 @@ const OrderList = ({ fetchOrdersFromParent }) => {
   }, []);
 
   const userData = localStorage.getItem("user");
-    let  userIds=""
-    if (userData) {
-      const data = JSON.parse(userData);
-      userIds = data.id;
-    }
+  let userIds = "";
+  if (userData) {
+    const data = JSON.parse(userData);
+    userIds = data.id;
+  }
 
   const queryParams = new URLSearchParams(window.location.search);
   const initialPage = parseInt(queryParams.get("page")) || 1;
@@ -312,40 +312,37 @@ const OrderList = ({ fetchOrdersFromParent }) => {
   const handleDownload = async () => {
     try {
       // Validate inputs
-      if (selectedBrand.length === 0 && (!downloadStartDate || !downloadEndDate)) {
-  toast.error("Please select at least one brand OR a valid date range");
-  return;
-}
-if (
-  downloadStartDate &&
-  downloadEndDate &&
-  new Date(downloadEndDate) < new Date(downloadStartDate)
-) {
-  toast.error("End date must be after start date");
-  return;
-}
-
-      const startDate = new Date(downloadStartDate);
-      const endDate = new Date(downloadEndDate);
-      if (endDate < startDate) {
+      if (
+        selectedBrand.length === 0 &&
+        (!downloadStartDate || !downloadEndDate)
+      ) {
+        toast.error("Please select at least one brand OR a valid date range");
+        return;
+      }
+      if (
+        downloadStartDate &&
+        downloadEndDate &&
+        new Date(downloadEndDate) < new Date(downloadStartDate)
+      ) {
         toast.error("End date must be after start date");
         return;
       }
 
       // Prepare request data
-      const brandIds = selectedBrand.map(b => b.id);
+      const brandIds = selectedBrand.map((b) => b.id);
       const requestData = {};
 
-if (selectedBrand.length > 0) {
-  requestData.brands = selectedBrand.map((b) => b.id);
-}
+      if (selectedBrand.length > 0) {
+        requestData.brands = selectedBrand.map((b) => b.id);
+      }
 
-if (downloadStartDate && downloadEndDate) {
-  requestData.start_date = downloadStartDate;
-  requestData.end_date = downloadEndDate;
-}
+      if (downloadStartDate && downloadEndDate) {
+        requestData.start_date = downloadStartDate;
+        requestData.end_date = downloadEndDate;
+      }
 
-requestData.format = downloadFormat;
+      requestData.format = downloadFormat;
+      requestData.user_id = userIds;
 
       // Show loading state
       setIsLoading(true);
@@ -354,13 +351,16 @@ requestData.format = downloadFormat;
       const response = await axios.post(
         `${process.env.REACT_APP_IP}downloadOrders/`,
         requestData,
-        { responseType: 'blob' }
+        { responseType: "blob" }
       );
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.setAttribute('download', `orders_${new Date().toISOString().split('T')[0]}.${downloadFormat}`);
+      link.setAttribute(
+        "download",
+        `orders_${new Date().toISOString().split("T")[0]}.${downloadFormat}`
+      );
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -457,20 +457,20 @@ requestData.format = downloadFormat;
               Create Order
             </Button>
           )}
-            <Button
-    variant="contained"
-    color="primary"
-    onClick={() => setDownloadModalOpen(true)}
-    sx={{ 
-      marginLeft: "10px",
-      backgroundColor: "#000080",
-      "&:hover": {
-        backgroundColor: "darkblue",
-      }
-    }}
-  >
-    Download orders
-  </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setDownloadModalOpen(true)}
+            sx={{
+              marginLeft: "10px",
+              backgroundColor: "#000080",
+              "&:hover": {
+                backgroundColor: "darkblue",
+              },
+            }}
+          >
+            Download orders
+          </Button>
           <Tooltip title="Reset" arrow>
             <Button
               variant="outlined"
@@ -1198,10 +1198,11 @@ requestData.format = downloadFormat;
             color="primary"
             onClick={handleDownload}
             fullWidth
-           disabled={
-  (selectedBrand.length === 0 && (!downloadStartDate || !downloadEndDate)) ||
-  isLoading
-}
+            disabled={
+              (selectedBrand.length === 0 &&
+                (!downloadStartDate || !downloadEndDate)) ||
+              isLoading
+            }
             startIcon={isLoading ? <CircularProgress size={20} /> : null}
           >
             {isLoading ? "Preparing Download..." : "Download"}
