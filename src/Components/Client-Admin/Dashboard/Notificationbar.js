@@ -40,8 +40,8 @@ function Notificationbar() {
         </IconButton> */}
 
 <IconButton edge="start" color="inherit" aria-label="menu">
-  Logo
-  {/* <img src={require('../../assets/logo.jpg')} alt="Logo" style={{ height: '40px', width: 'auto' }} /> */}
+
+  <img src={require('../../assets/One Tree Brands Main Logo 2400x1800 (HIGH RES).jpg')} alt="Logo" style={{ height: '40px', width: 'auto' }} />
 </IconButton>
         <Typography variant="h6" sx={{ flexGrow: 1, textAlign: "center" }}>
           MarketPlace Management
