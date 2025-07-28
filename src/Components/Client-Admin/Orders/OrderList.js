@@ -347,12 +347,16 @@ const OrderList = ({ fetchOrdersFromParent }) => {
       // Show loading state
       setIsLoading(true);
 
-      // Make API call
-      const response = await axios.post(
-        `${process.env.REACT_APP_IP}downloadOrders/`,
-        requestData,
-        { responseType: "blob" }
-      );
+     const response = await axios.post(
+  `${process.env.REACT_APP_IP}downloadOrders/`,
+  requestData,
+  {
+    responseType: "blob",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  }
+);
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
