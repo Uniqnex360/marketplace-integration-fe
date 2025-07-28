@@ -27,9 +27,9 @@ import {
 } from "@mui/material";
 import { Info as InfoIcon } from "@mui/icons-material";
 import dayjs from "dayjs";
-import utc from 'dayjs/plugin/utc'
+import utc from "dayjs/plugin/utc";
 import "dayjs/locale/en-in";
-import timezone from 'dayjs/plugin/timezone'
+import timezone from "dayjs/plugin/timezone";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -40,8 +40,8 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import TooltipName from "./TooltipName";
 import DottedCircleLoading from "../../../Loading/DotLoading";
 // import './Helium.css';
-dayjs.extend(utc)
-dayjs.extend(timezone)
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 // Define a consistent set of colors
 const colors = [
@@ -375,7 +375,7 @@ export default function TopProductsChart({
           fulfillment_channel: fulfillment_channel,
           start_date: DateStartDate,
           end_date: DateEndDate,
-          timeZone: "US/Pacific" 
+          timeZone: "US/Pacific",
         }
       );
       console.log("get_top_products", response);
@@ -508,7 +508,6 @@ export default function TopProductsChart({
       </div>
     );
   }
-
 
   return (
     <Box p={2}>
@@ -863,7 +862,7 @@ export default function TopProductsChart({
                     connectNulls={true}
                     isAnimationActive={false}
                     dot={
-                      Object.keys(product.chart).length<=2  ?{r:4}:false
+                      Object.keys(product.chart).length <= 2 ? { r: 4 } : false
                     }
                     // These are crucial for setting the hovered product
                     onMouseEnter={() => setHoveredProductId(product.id)}
