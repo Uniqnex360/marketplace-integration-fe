@@ -372,9 +372,10 @@ const TestCard = ({
           newSelectedDate = today.endOf("week");
           break;
         case "Last Week":
-          newDisplayDate =today.startOf('week').subtract(1,'week')
-          newSelectedDate = today.startOf('week').subtract(1,'week').endOf('week')
+          newDisplayDate =today.startOf("week").subtract(1, "week");
+          newSelectedDate =today.startOf("week").subtract(1, "week").endOf("week");
           break;
+
         case "Last 7 days":
           newDisplayDate = today.subtract(6, "day");
           newSelectedDate = today;
