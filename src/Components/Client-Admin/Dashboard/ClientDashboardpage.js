@@ -1637,7 +1637,7 @@ function ClientDashboardpage() {
           <TestCard
             marketPlaceId={
               selectedCategory == "all" ? selectedCategory : filterFinal
-            }
+            } 
             startDate={appliedStartDateHelium}
             endDate={appliedEndDateHelium}
             widgetData={appliedPreset}

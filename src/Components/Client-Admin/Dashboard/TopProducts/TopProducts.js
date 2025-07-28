@@ -27,9 +27,9 @@ import {
 } from "@mui/material";
 import { Info as InfoIcon } from "@mui/icons-material";
 import dayjs from "dayjs";
-import utc from 'dayjs/plugin/utc'
+import utc from "dayjs/plugin/utc";
 import "dayjs/locale/en-in";
-import timezone from 'dayjs/plugin/timezone'
+import timezone from "dayjs/plugin/timezone";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -40,8 +40,8 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import TooltipName from "./TooltipName";
 import DottedCircleLoading from "../../../Loading/DotLoading";
 // import './Helium.css';
-dayjs.extend(utc)
-dayjs.extend(timezone)
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 // Define a consistent set of colors
 const colors = ["#0d47a1", "#00bcd4", "#00897b", "#9c27b0", "#f44336"];
@@ -364,7 +364,7 @@ export default function TopProductsChart({
           fulfillment_channel: fulfillment_channel,
           start_date: DateStartDate,
           end_date: DateEndDate,
-          timeZone: "US/Pacific" 
+          timeZone: "US/Pacific",
         }
       );
       console.log("get_top_products", response);
@@ -497,7 +497,6 @@ export default function TopProductsChart({
       </div>
     );
   }
-
 
   return (
     <Box p={2}>
@@ -810,10 +809,10 @@ export default function TopProductsChart({
                 tick={{ fontSize: "12px", fill: "#666" }}
                 padding={{ left: 20, right: 20 }}
                 tickFormatter={(val) => {
-                  const pacific = dayjs(val).tz("US/Pacific");
+                  const date = dayjs(val);
                   return isTodayOrYesterday
-                    ? pacific.format("h:mm A")
-                    : pacific.format("MMM D");
+                    ? date.format("h:mm A")
+                    : date.format("MMM D");
                 }}
               />
               {/* Y Axis with dollar formatting and no border */}
