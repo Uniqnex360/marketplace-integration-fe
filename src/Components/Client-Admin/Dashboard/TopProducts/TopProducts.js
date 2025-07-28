@@ -862,7 +862,9 @@ export default function TopProductsChart({
                     strokeWidth={2}
                     connectNulls={true}
                     isAnimationActive={false}
-                    dot={false}
+                    dot={
+                      Object.keys(product.chart).length<=2  ?{r:4}:false
+                    }
                     // These are crucial for setting the hovered product
                     onMouseEnter={() => setHoveredProductId(product.id)}
                     onMouseLeave={() => setHoveredProductId(null)} // Reset when leaving this specific line
