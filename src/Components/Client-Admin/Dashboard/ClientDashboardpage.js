@@ -53,6 +53,7 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import CompareChart from "./Revenue/DataChangeRevenue";
+import BrandSelector from "../../../utils/BrandSelector";
 function ClientDashboardpage() {
   const [selectedCategory, setSelectedCategory] = useState({
     id: "all",
@@ -141,7 +142,7 @@ function ClientDashboardpage() {
   };
   const handlePresetSelectHelium = (preset) => {
     setSelectedPreset(preset);
-    updateActiveFilters('date','customDate',"",false)
+    updateActiveFilters("date", "customDate", "", false);
     updateActiveFilters("preset", preset, preset, true);
     if (befePreset && befePreset !== preset) {
       updateActiveFilters("preset", befePreset, befePreset, false);
@@ -297,10 +298,10 @@ function ClientDashboardpage() {
         setBefePreset("Today");
         break;
       case "date":
-        setStartDate(null)
-        setEndDate(null)
-        setAppliedEndDate(null)
-        setAppliedStartDate(null)
+        setStartDate(null);
+        setEndDate(null);
+        setAppliedEndDate(null);
+        setAppliedStartDate(null);
         break;
       default:
         break;
@@ -460,18 +461,16 @@ function ClientDashboardpage() {
       fetchManufacturerList("");
     }
   }, [selectedCategory]);
-  useEffect(()=>{
-    updateActiveFilters('date','customDate',"",false)
-    if(startDate && endDate)
-    {
-      const startLabel=dayjs(startDate).format("MMM D,YYYY")
-      const endLabel=dayjs(endDate).format("MMM D, YYYY")
-      const dateLabel=`${startLabel} - ${endLabel}`
-      updateActiveFilters('date','customDate',dateLabel,true)
-      updateActiveFilters('preset',selectedPreset,selectedPreset,false)
-      
+  useEffect(() => {
+    updateActiveFilters("date", "customDate", "", false);
+    if (startDate && endDate) {
+      const startLabel = dayjs(startDate).format("MMM D,YYYY");
+      const endLabel = dayjs(endDate).format("MMM D, YYYY");
+      const dateLabel = `${startLabel} - ${endLabel}`;
+      updateActiveFilters("date", "customDate", dateLabel, true);
+      updateActiveFilters("preset", selectedPreset, selectedPreset, false);
     }
-  },[startDate,endDate])
+  }, [startDate, endDate]);
   useEffect(() => {
     if (inputValueBrand.trim()) {
       setIsTyping(true);
@@ -752,7 +751,7 @@ function ClientDashboardpage() {
     setSelectedAsin([]);
     setMergedProducts([]);
     setMergedProductsFilter([]);
-    setActiveFilters([])
+    setActiveFilters([]);
     setSelectedBrandFilter([]);
     setSelectedManufacturerFilter([]);
     setStartDate(null);
@@ -789,8 +788,8 @@ function ClientDashboardpage() {
           top: 0,
           zIndex: 1000,
           backgroundColor: "white",
-          paddingBottom:activeFilters.length>0?0:2,
-          boxShadow:"0 2px 4px rgba(0,0,0,0.1)"
+          paddingBottom: activeFilters.length > 0 ? 0 : 2,
+          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
         }}
       >
         <Grid item xs={12}>
@@ -835,142 +834,20 @@ function ClientDashboardpage() {
                 >
                   Welcome
                 </Box>
-                <Box
-                  sx={{
-                    position: "relative",
-                    paddingRight: "7.25%",
-                    width: "110px",
-                  }}
-                >
-                  <Autocomplete
-                    multiple
-                    disableCloseOnSelect
-                    options={[
-                      ...selectedBrand,
-                      ...brandList.filter(
-                        (b) => !selectedBrand.some((sb) => sb.id === b.id)
-                      ),
-                    ]}
-                    getOptionLabel={(option) => option.name}
-                    isOptionEqualToValue={(option, value) =>
-                      option.id === value.id
-                    }
-                    inputValue={inputValueBrand}
-                    onInputChange={(event, newInputValue) => {
-                      setInputValueBrand(newInputValue);
-                      setBrandLimit(11);
-                    }}
-                    value={selectedBrand}
-                    onChange={(event, newValue) => {
-                      setSelectedBrand(newValue);
-                    }}
-                    renderTags={() => null}
-                    noOptionsText={inputValueBrand ? "No options" : ""}
-                    renderOption={(props, option) => {
-                      const isSelected = selectedBrand.some(
-                        (b) => b.id === option.id
-                      );
-                      return (
-                        <Box
-                          component="li"
-                          {...props}
-                          onClick={() => toggleSelection(option)}
-                          sx={{
-                            backgroundColor: isSelected
-                              ? "#b6d5f3 !important"
-                              : "transparent",
-                            fontSize: 13,
-                            cursor: "pointer",
-                          }}
-                          key={option.id}
-                        >
-                          {option.name}
-                        </Box>
-                      );
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Brands"
-                        size="small"
-                        placeholder="Search brands..."
-                        InputProps={{
-                          ...params.InputProps,
-                          endAdornment: <>{params.InputProps.endAdornment}</>,
-                        }}
-                      />
-                    )}
-                    PopperComponent={(props) => (
-                      <Box
-                        {...props}
-                        sx={{
-                          zIndex: 1300,
-                          width: 220,
-                          bgcolor: "white",
-                          boxShadow: 3,
-                          borderRadius: 1,
-                          overflow: "auto",
-                          maxHeight: 300,
-                          position: "absolute",
-                        }}
-                        onScroll={(event) => {
-                          const { scrollTop, scrollHeight, clientHeight } =
-                            event.target;
-                          if (
-                            scrollTop + clientHeight >= scrollHeight - 5 &&
-                            !isLoading &&
-                            hasMore
-                          ) {
-                            setBrandLimit((prev) => prev + 10);
-                          }
-                        }}
-                      >
-                        {/* {selectedBrand.length > 0 && (
-              <Box
-                sx={{
-                  display: 'flex',
-                  overflowX: 'auto',
-                  whiteSpace: 'nowrap',
-                  gap: 1,
-                  px: 1,
-                  pt: 1,
-                }}
-              >
-                {selectedBrand.map((brand) => (
-                  <Chip
-                    key={brand.id}
-                    label={brand.name}
-                    size="small"
-                    onDelete={() => handleRemove(brand.id)}
-                    sx={{
-                      backgroundColor: '#007bff',
-                      color: '#fff',
-                      fontWeight: 500,
-                      fontSize: '0.75rem',
-                      '.MuiChip-deleteIcon': {
-                        color: '#fff',
-                      },
-                    }}
-                  />
-                ))}
-              </Box>
-            )} */}
-                        {props.children}
-                        {/* {isLoading && <div style={{ padding: 8 }}>Loading more brands...</div>} */}
-                      </Box>
-                    )}
-                    sx={{
-                      "& .MuiInputBase-root": {
-                        height: 40,
-                        fontSize: 14,
-                        width: 190,
-                      },
-                      "& input": {
-                        fontSize: 13,
-                      },
-                    }}
-                  />
-                </Box>
+                <BrandSelector
+                  selectedBrand={selectedBrand}
+                  setSelectedBrand={setSelectedBrand}
+                  brandList={brandList}
+                  inputValueBrand={inputValueBrand}
+                  setInputValueBrand={setInputValueBrand}
+                  brandLimit={brandLimit}
+                  setBrandLimit={setBrandLimit}
+                  isLoading={isLoading}
+                  hasMore={hasMore}
+                  toggleSelection={toggleSelection}
+                  label="Brands"
+                  width={190}
+                />
                 <Box
                   sx={{
                     position: "relative",
@@ -1637,7 +1514,7 @@ function ClientDashboardpage() {
           <TestCard
             marketPlaceId={
               selectedCategory == "all" ? selectedCategory : filterFinal
-            } 
+            }
             startDate={appliedStartDateHelium}
             endDate={appliedEndDateHelium}
             widgetData={appliedPreset}
@@ -1962,7 +1839,6 @@ function ClientDashboardpage() {
         </Grid>  */}
       </Grid>
       {/* Move this outside the sticky header */}
-
     </Box>
   );
 }
