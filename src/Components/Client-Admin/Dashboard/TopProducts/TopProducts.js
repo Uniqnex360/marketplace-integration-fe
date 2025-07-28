@@ -44,7 +44,18 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 
 // Define a consistent set of colors
-const colors = ["#0d47a1", "#00bcd4", "#00897b", "#9c27b0", "#f44336"];
+const colors = [
+  "#0d47a1", // Deep Blue
+  "#00bcd4", // Cyan
+  "#00897b", // Teal
+  "#9c27b0", // Purple
+  "#f44336", // Red
+  "#FF9800", // Orange
+  "#8BC34A", // Green
+  "#03A9F4", // Light Blue
+  "#FF5722", // Deep Orange
+  "#795548", // Brown
+];
 
 function CopyAsin({ open, onClose, children }) {
   return (
@@ -400,7 +411,7 @@ export default function TopProductsChart({
         name: item.product,
         sku: item.sku,
         asin: item.asin,
-        color: colors[index % colors.length],
+        color: colors[index],
         img: item.product_image || "",
         chart: item.chart || {},
       }));
