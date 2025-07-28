@@ -855,15 +855,18 @@ export default function TopProductsChart({
                 return (
                   <Line
                     key={product.id}
-                    type="monotone"
+                    type="linear"
                     dataKey={product.id} // This is the ID that will appear in payload.dataKey
                     stroke={product.color}
-                    strokeWidth={2}
+                    strokeWidth={2.5}
+                    strokeLinecap="butt"
+                    strokeLinejoin="mitter"
                     connectNulls={true}
                     isAnimationActive={false}
                     dot={
                       Object.keys(product.chart).length <= 2 ? { r: 4 } : false
                     }
+                    activeDot={{r:6,strokeWidth:0}}
                     // These are crucial for setting the hovered product
                     onMouseEnter={() => setHoveredProductId(product.id)}
                     onMouseLeave={() => setHoveredProductId(null)} // Reset when leaving this specific line
