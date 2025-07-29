@@ -426,7 +426,7 @@ export default function TopProductsChart({
 
       const isTodayOrYesterday =
         widgetData === "Today" || widgetData === "Yesterday";
-
+      
       products.forEach((product) => {
         Object.entries(product.chart || {}).forEach(([datetime, value]) => {
           const dateObj = dayjs(datetime);
@@ -476,7 +476,31 @@ export default function TopProductsChart({
       prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]
     );
   };
-
+  let allPrices=[]
+  if (bindGraph.length>0 && activeProducts.length>0)
+  {
+    bindGraph.forEach((row)=>{
+      activeProducts.forEach((productId)=>{
+        if(row[productId]!==undefined && row[productId]!==null)
+        {
+          allPrices.push(row[productId])
+        }
+      })
+    })
+  }
+  let yTicks=[]
+  if(allPrices.length>0)
+  {
+    const minPrice=Math.floor(Math.min(...allPrices))
+    const maxPrice=Math.floor(Math.max(...allPrices))
+    const range=maxPrice-minPrice
+    const step=range>0 ? Math.ceil(range/5):1
+    for(let p=minPrice;p<=maxPrice;p+=step)
+    {
+      yTicks.push(p)
+    }
+    if (yTicks[yTicks.length-1]<maxPrice)yTicks.push(maxPrice)
+  }
   // Util: Format date for X-axis
   const formatXAxisTick = (tick) => {
     const dateObj = dayjs(tick);
@@ -832,8 +856,9 @@ export default function TopProductsChart({
                 tickFormatter={(value) => `$${Math.round(value)}`} // ✅ Rounded to nearest whole number
                 axisLine={false}
                 tickLine={false}
-                domain={["auto", "auto"]}
-                tickCount={2} // ✅ Only two ticks
+                domain={yTicks.length>0?[Math.min(...yTicks),Math.max(...yTicks)]:['auto','auto']}
+                ticks={yTicks.length>0?yTicks:undefined}
+                tickCount={yTicks.length>0  ?  yTicks.length:2} // ✅ Only two ticks
               />
               {/* Tooltip */}
               <Tooltip
