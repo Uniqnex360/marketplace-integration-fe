@@ -102,10 +102,10 @@ const MetricItem = ({
 
         <Box
           display="flex"
-  justifyContent="flex-start"
+          justifyContent="flex-start"
           alignItems="center"
           mt={0.5}
-          sx={{ paddingRight: "4px",gap:1}}
+          sx={{ paddingRight: "4px", gap: 1 }}
         >
           <Tooltip title={tooltip || ""}>
             <Typography
@@ -372,11 +372,9 @@ const TestCard = ({
           newSelectedDate = today.endOf("week");
           break;
         case "Last Week":
-  newDisplayDate = today.clone().subtract(1, 'week').startOf('week');
-  newSelectedDate = today.clone().subtract(1, 'week').endOf('week');
-  break;
-          
-
+          newDisplayDate = today.clone().subtract(1, "week").startOf("week");
+          newSelectedDate = today.clone().subtract(1, "week").endOf("week");
+          break;
 
         case "Last 7 days":
           newDisplayDate = today.subtract(6, "day");
@@ -452,6 +450,15 @@ const TestCard = ({
           ? `Yesterday: ${prev || "0"}`
           : `${date.subtract(1, "day").format("MMM DD")}: ${prev || "0"}`,
     },
+    total_tax:{
+      title:"Total Tax",
+      tooltip:(date,today,prev)=>
+         date.isSame(today, "day")
+          ? `Yesterday: ${formatCurrency(prev)}`
+          : `${date.subtract(1, "day").format("MMM DD")}: ${formatCurrency(
+              prev
+            )}`,
+            currencySymbol:"$"},
     total_units: {
       title: "Units Sold",
       tooltip: (date, today, prev) =>
@@ -966,6 +973,7 @@ const TestCard = ({
           {/* Other Metric Cards */}
           {[
             "total_orders",
+            "total_tax",
             "total_units",
             "refund",
             "total_cogs",
