@@ -1,7 +1,15 @@
+import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from "recharts";
 
-import { useState, useEffect, useRef } from "react"
-import axios from "axios"
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts"
 import {
   Box,
   Tabs,
@@ -16,24 +24,24 @@ import {
   Paper,
   Grid,
   Tooltip as MuiTooltip,
-  Select,
-  MenuItem,
-  FormControl,
-  Modal,
-  TextField,
-} from "@mui/material"
-import dayjs from "dayjs"
-import utc from "dayjs/plugin/utc"
-import "dayjs/locale/en-in"
-import timezone from "dayjs/plugin/timezone"
-import ContentCopyIcon from "@mui/icons-material/ContentCopy"
-import CheckCircleIcon from "@mui/icons-material/CheckCircle"
-import CheckIcon from "@mui/icons-material/Check"
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined"
-import CloseIcon from "@mui/icons-material/Close"
+} from "@mui/material";
+import { Info as InfoIcon } from "@mui/icons-material";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import "dayjs/locale/en-in";
+import timezone from "dayjs/plugin/timezone";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CheckIcon from "@mui/icons-material/Check";
+import NoteModel from "../NoteModel";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
-dayjs.extend(utc)
-dayjs.extend(timezone)
+import TooltipName from "./TooltipName";
+import DottedCircleLoading from "../../../Loading/DotLoading";
+// import './Helium.css';
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 // Define a consistent set of colors
 const colors = [
@@ -47,95 +55,7 @@ const colors = [
   "#03A9F4", // Light Blue
   "#FF5722", // Deep Orange
   "#795548", // Brown
-]
-
-// Simple Note Modal Component
-function NoteModal({ open, onClose }) {
-  const [note, setNote] = useState("")
-
-  const handleSave = () => {
-    console.log("Note saved:", note)
-    setNote("")
-    onClose()
-  }
-
-  return (
-    <Modal open={open} onClose={onClose}>
-      <Box
-        sx={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: 400,
-          bgcolor: "background.paper",
-          borderRadius: 2,
-          boxShadow: 24,
-          p: 3,
-        }}
-      >
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h6">Add Note</Typography>
-          <IconButton onClick={onClose} size="small">
-            <CloseIcon />
-          </IconButton>
-        </Box>
-        <TextField
-          fullWidth
-          multiline
-          rows={4}
-          placeholder="Enter your note here..."
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          sx={{ mb: 2 }}
-        />
-        <Box display="flex" justifyContent="flex-end" gap={1}>
-          <Button onClick={onClose} variant="outlined" size="small">
-            Cancel
-          </Button>
-          <Button onClick={handleSave} variant="contained" size="small">
-            Save Note
-          </Button>
-        </Box>
-      </Box>
-    </Modal>
-  )
-}
-
-// Simple Loading Component
-function DottedCircleLoading() {
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        "& .dot": {
-          width: 8,
-          height: 8,
-          borderRadius: "50%",
-          backgroundColor: "#1976d2",
-          margin: "0 2px",
-          animation: "dotPulse 1.4s infinite ease-in-out both",
-        },
-        "& .dot:nth-of-type(1)": { animationDelay: "-0.32s" },
-        "& .dot:nth-of-type(2)": { animationDelay: "-0.16s" },
-        "@keyframes dotPulse": {
-          "0%, 80%, 100%": {
-            transform: "scale(0)",
-          },
-          "40%": {
-            transform: "scale(1)",
-          },
-        },
-      }}
-    >
-      <div className="dot" />
-      <div className="dot" />
-      <div className="dot" />
-    </Box>
-  )
-}
+];
 
 function CopyAsin({ open, onClose, children }) {
   return (
@@ -162,18 +82,27 @@ function CopyAsin({ open, onClose, children }) {
     >
       {children}
     </MuiTooltip>
-  )
+  );
 }
 
-const CustomTooltip = ({ active, payload, label, productList, tab, hoveredProductId }) => {
-  if (!active || !payload || payload.length === 0) return null
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+  productList,
+  tab,
+  hoveredProductId,
+}) => {
+  if (!active || !payload || payload.length === 0) return null;
 
-  const filteredPayload = hoveredProductId ? payload.filter((entry) => entry.dataKey === hoveredProductId) : payload
+  const filteredPayload = hoveredProductId
+    ? payload.filter((entry) => entry.dataKey === hoveredProductId)
+    : payload;
 
   // Only return null if there's nothing to display after filtering
-  if (filteredPayload.length === 0) return null
+  if (filteredPayload.length === 0) return null;
 
-  const formattedDate = dayjs(label).tz("US/Pacific").format("MMM D, h:mm A")
+  const formattedDate = dayjs(label).tz("US/Pacific").format("MMM D, h:mm A");
 
   return (
     <Paper
@@ -188,13 +117,23 @@ const CustomTooltip = ({ active, payload, label, productList, tab, hoveredProduc
       <Typography fontWeight={600} fontSize={14} gutterBottom>
         {formattedDate}
       </Typography>
+
       {filteredPayload.map((entry) => {
-        const product = productList.find((p) => p.id === entry.dataKey)
-        if (!product) return null
+        const product = productList.find((p) => p.id === entry.dataKey);
+        if (!product) return null;
 
         return (
-          <Stack key={entry.dataKey} direction="column" spacing={1} sx={{ mb: 1 }}>
-            <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Stack
+            key={entry.dataKey}
+            direction="column"
+            spacing={1}
+            sx={{ mb: 1 }}
+          >
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+            >
               <Stack direction="row" spacing={1} alignItems="center">
                 <Box
                   sx={{
@@ -208,6 +147,7 @@ const CustomTooltip = ({ active, payload, label, productList, tab, hoveredProduc
                   {product?.sku || "N/A"}
                 </Typography>
               </Stack>
+
               <Typography fontWeight="bold" fontSize={14}>
                 {tab === 0
                   ? new Intl.NumberFormat("en-US", {
@@ -217,10 +157,21 @@ const CustomTooltip = ({ active, payload, label, productList, tab, hoveredProduc
                   : entry.value}
               </Typography>
             </Stack>
+
             <Stack direction="row" spacing={1} alignItems="center">
-              <Avatar src={product?.img} variant="rounded" sx={{ width: 30, height: 30 }} />
+              <Avatar
+                src={product?.img}
+                variant="rounded"
+                sx={{ width: 30, height: 30 }}
+              />
               <Box>
-                <Typography fontSize={14} fontWeight={500} noWrap maxWidth={180} sx={{ fontWeight: "bold" }}>
+                <Typography
+                  fontSize={14}
+                  fontWeight={500}
+                  noWrap
+                  maxWidth={180}
+                  sx={{ fontWeight: "bold" }}
+                >
                   {product?.title || product?.name}
                 </Typography>
                 <Typography fontSize={14} color="text.secondary">
@@ -229,11 +180,11 @@ const CustomTooltip = ({ active, payload, label, productList, tab, hoveredProduc
               </Box>
             </Stack>
           </Stack>
-        )
+        );
       })}
     </Paper>
-  )
-}
+  );
+};
 
 export default function TopProductsChart({
   startDate,
@@ -246,195 +197,214 @@ export default function TopProductsChart({
   DateStartDate,
   DateEndDate,
 }) {
-  const [tab, setTab] = useState(0)
-  const [productList, setProductList] = useState([])
-  const [activeProducts, setActiveProducts] = useState([])
-  const [bindGraph, setBindGraph] = useState([])
-  const [apiResponse, setApiResponse] = useState(null)
-  const [copiedId, setCopiedId] = useState(null)
-  const [isCopied, setIsCopied] = useState(false)
-  const [copiedAsin, setCopiedAsin] = useState(null)
-  const [tooltipText, setTooltipText] = useState("Copy ASIN")
-  const [copied, setCopied] = useState(false)
-  const copyTimeoutRef = useRef(null)
-  const isTodayOrYesterday = widgetData === "Today" || widgetData === "Yesterday"
-  const [hoveredProductId, setHoveredProductId] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [priceMetric, setPriceMetric] = useState("price")
-
+  const [tab, setTab] = useState(0);
+  const [productList, setProductList] = useState([]);
+  const [activeProducts, setActiveProducts] = useState([]);
+  const [bindGraph, setBindGraph] = useState([]);
+  const [apiResponse, setApiResponse] = useState(null);
+  const [copiedId, setCopiedId] = useState(null);
+  const [isCopied, setIsCopied] = useState(false);
+  const [copiedAsin, setCopiedAsin] = useState(null);
+  const [tooltipText, setTooltipText] = useState("Copy ASIN");
+  const [copied, setCopied] = useState(false);
+  const copyTimeoutRef = useRef(null);
+  const isTodayOrYesterday =
+    widgetData === "Today" || widgetData === "Yesterday";
+  const [hoveredProductId, setHoveredProductId] = useState(null);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     // Cleanup function to clear the timeout if the component unmounts
     return () => {
       if (copyTimeoutRef.current) {
-        clearTimeout(copyTimeoutRef.current)
+        clearTimeout(copyTimeoutRef.current);
       }
-    }
-  }, [])
+    };
+  }, []);
 
   /**
    * Handles copying the ASIN value to the clipboard using document.execCommand.
    * This method is more compatible in environments where navigator.clipboard might be restricted (e.g., iframes).
    * @param {string} asinValue - The ASIN value to be copied.
    */
+
   const handleTooltipOpen = (value) => {
-    const isNumberOnly = /^\d+$/.test(value)
-    const label = isNumberOnly ? "WPID" : "ASIN"
-    setTooltipText(`Copy ${label}`)
-  }
+    const isNumberOnly = /^\d+$/.test(value);
+    const label = isNumberOnly ? "WPID" : "ASIN";
+    setTooltipText(`Copy ${label}`);
+  };
 
   const handleCopy = async (value) => {
-    if (!value) return
+    if (!value) return;
 
-    const isNumberOnly = /^\d+$/.test(value)
-    const label = isNumberOnly ? "WPID" : "ASIN"
+    const isNumberOnly = /^\d+$/.test(value);
+    const label = isNumberOnly ? "WPID" : "ASIN";
 
     try {
       if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(value)
+        await navigator.clipboard.writeText(value);
       } else {
-        const textarea = document.createElement("textarea")
-        textarea.value = value
-        textarea.style.position = "fixed"
-        document.body.appendChild(textarea)
-        textarea.focus()
-        textarea.select()
-        document.execCommand("copy")
-        document.body.removeChild(textarea)
+        const textarea = document.createElement("textarea");
+        textarea.value = value;
+        textarea.style.position = "fixed";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
       }
-      setTooltipText(`${label} Copied!`)
+
+      setTooltipText(`${label} Copied!`);
     } catch (err) {
-      console.error("Copy failed", err)
-      setTooltipText("Copy Failed")
+      console.error("Copy failed", err);
+      setTooltipText("Copy Failed");
     }
 
     setTimeout(() => {
-      setTooltipText(`Copy ${label}`)
-    }, 1500)
-  }
+      setTooltipText(`Copy ${label}`);
+    }, 1500);
+  };
 
   /**
    * Helper function to copy text using document.execCommand.
    * @param {string} text - The text to be copied.
    */
   const copyUsingExecCommand = (text) => {
-    let textArea
+    let textArea;
     try {
-      textArea = document.createElement("textarea")
-      textArea.value = text
+      textArea = document.createElement("textarea");
+      textArea.value = text;
       // Make the textarea invisible and outside the viewport
-      textArea.style.position = "fixed"
-      textArea.style.top = "0"
-      textArea.style.left = "0"
-      textArea.style.width = "2em"
-      textArea.style.height = "2em"
-      textArea.style.padding = "0"
-      textArea.style.border = "none"
-      textArea.style.outline = "none"
-      textArea.style.boxShadow = "none"
-      textArea.style.background = "transparent"
-      document.body.appendChild(textArea)
-      textArea.focus()
-      textArea.select()
+      textArea.style.position = "fixed";
+      textArea.style.top = "0";
+      textArea.style.left = "0";
+      textArea.style.width = "2em";
+      textArea.style.height = "2em";
+      textArea.style.padding = "0";
+      textArea.style.border = "none";
+      textArea.style.outline = "none";
+      textArea.style.boxShadow = "none";
+      textArea.style.background = "transparent";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
       // Execute the copy command
-      document.execCommand("copy")
-      setCopied(true)
+      document.execCommand("copy");
+
+      setCopied(true);
       copyTimeoutRef.current = setTimeout(() => {
-        setCopied(false)
-      }, 5000)
+        setCopied(false);
+      }, 5000);
     } catch (err) {
-      console.error("Failed to copy using document.execCommand:", err)
+      console.error("Failed to copy using document.execCommand:", err);
       // Optionally, show a user-friendly message that copying failed
     } finally {
       // Clean up: remove the textarea from the DOM
       if (textArea && textArea.parentNode) {
-        textArea.parentNode.removeChild(textArea)
+        textArea.parentNode.removeChild(textArea);
       }
     }
-  }
+  };
 
-  const userData = JSON.parse(localStorage.getItem("user") || "{}")
-  const userId = userData?.id || ""
-  const [openNote, setOpenNote] = useState(false)
-  const [events, setEvents] = useState(true)
-
+  const userData = JSON.parse(localStorage.getItem("user") || "{}");
+  const userId = userData?.id || "";
+  const [openNote, setOpenNote] = useState(false);
+  const [events, setEvents] = useState(true);
   const runCerebro = () => {
-    console.log("Running Cerebro...")
-  }
+    console.log("Running Cerebro...");
+  };
 
   const analyzeListing = () => {
-    console.log("Analyzing Listing...")
-  }
-
-  const startOfDay = dayjs().startOf("day")
+    console.log("Analyzing Listing...");
+  };
+  const startOfDay = dayjs().startOf("day");
   const ticks = Array.from(
     { length: 12 },
-    (_, i) => startOfDay.add(i * 2, "hour").format("YYYY-MM-DD HH:mm:ss"), // Match your data format
-  )
-
+    (_, i) => startOfDay.add(i * 2, "hour").format("YYYY-MM-DD HH:mm:ss") // Match your data format
+  );
   const getSortByValue = (tab) => {
     switch (tab) {
       case 0:
-        return "price"
+        return "price";
       case 1:
-        return "units_sold"
+        return "units_sold";
       case 2:
-        return "refund"
+        return "refund";
       default:
-        return "price"
+        return "price";
     }
-  }
+  };
 
   const generateTickTimes = (graphData) => {
-    if (!graphData || graphData.length === 0) return []
+    if (!graphData || graphData.length === 0) return [];
 
-    const start = dayjs(graphData[0].date).startOf("day")
-    const end = dayjs(graphData[graphData.length - 1].date).endOf("day")
-    const totalTicks = 7
-    const intervalMs = end.diff(start) / (totalTicks - 1)
-    const ticks = []
+    const start = dayjs(graphData[0].date).startOf("day");
+    const end = dayjs(graphData[graphData.length - 1].date).endOf("day");
+    const totalTicks = 7;
+    const intervalMs = end.diff(start) / (totalTicks - 1);
+
+    const ticks = [];
 
     for (let i = 0; i < totalTicks; i++) {
-      const tickTime = start.add(i * intervalMs, "millisecond")
+      const tickTime = start.add(i * intervalMs, "millisecond");
       // Round to nearest 2-hour mark
-      const roundedHour = Math.round(tickTime.hour() / 2) * 2
-      ticks.push(tickTime.set("hour", roundedHour).set("minute", 0).set("second", 0).toISOString())
+      const roundedHour = Math.round(tickTime.hour() / 2) * 2;
+      ticks.push(
+        tickTime
+          .set("hour", roundedHour)
+          .set("minute", 0)
+          .set("second", 0)
+          .toISOString()
+      );
     }
 
-    return [...new Set(ticks)]
-  }
-
+    return [...new Set(ticks)];
+  };
   const fetchTopProducts = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const response = await axios.post(`${process.env.REACT_APP_IP}get_top_products/`, {
-        sortBy: getSortByValue(tab),
-        preset: widgetData,
-        user_id: userId,
-        marketplace_id: marketPlaceId.id,
-        brand_id: brand_id,
-        manufacturer_name: manufacturer_name,
-        fulfillment_channel: fulfillment_channel,
-        start_date: DateStartDate,
-        end_date: DateEndDate,
-        timeZone: "US/Pacific",
-      })
-      console.log("get_top_products", response)
-      setApiResponse(response.data)
+      const response = await axios.post(
+        `${process.env.REACT_APP_IP}get_top_products/`,
+        {
+          sortBy: getSortByValue(tab),
+          preset: widgetData,
+          user_id: userId,
+          marketplace_id: marketPlaceId.id,
+          brand_id: brand_id,
+          manufacturer_name: manufacturer_name,
+          fulfillment_channel: fulfillment_channel,
+          start_date: DateStartDate,
+          end_date: DateEndDate,
+          timeZone: "US/Pacific",
+        }
+      );
+      console.log("get_top_products", response);
+      setApiResponse(response.data);
     } catch (error) {
-      console.error("Error fetching data:", error)
+      console.error("Error fetching data:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    if (widgetData) fetchTopProducts()
+    if (widgetData) fetchTopProducts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab, widgetData, marketPlaceId, brand_id, manufacturer_name, fulfillment_channel, DateStartDate, DateEndDate])
+  }, [
+    tab,
+    widgetData,
+    marketPlaceId,
+    brand_id,
+    manufacturer_name,
+    fulfillment_channel,
+    DateStartDate,
+    DateEndDate,
+  ]);
 
   useEffect(() => {
     if (apiResponse?.data?.results?.items) {
-      const items = apiResponse.data.results.items
+      const items = apiResponse.data.results.items;
+
       const products = items.map((item, index) => ({
         id: `product_${index}`,
         topIds: item.id,
@@ -444,75 +414,86 @@ export default function TopProductsChart({
         color: colors[index],
         img: item.product_image || "",
         chart: item.chart || {},
-      }))
+      }));
 
-      console.log("grant", products)
-      setProductList(products)
-      setActiveProducts(products.map((p) => p.id))
+      console.log("grant", products);
+      setProductList(products);
+      setActiveProducts(products.map((p) => p.id));
 
-      const allowedHours = new Set([0, 3, 5]) // 12 AM, 3 AM, 5 AM
-      const chartDataMap = {}
-      const allTimestamps = new Set()
-      const isTodayOrYesterday = widgetData === "Today" || widgetData === "Yesterday"
+      const allowedHours = new Set([0, 3, 5]); // 12 AM, 3 AM, 5 AM
+      const chartDataMap = {};
+      const allTimestamps = new Set();
+
+      const isTodayOrYesterday =
+        widgetData === "Today" || widgetData === "Yesterday";
 
       products.forEach((product) => {
         Object.entries(product.chart || {}).forEach(([datetime, value]) => {
-          const dateObj = dayjs(datetime)
+          const dateObj = dayjs(datetime);
+
           if (isTodayOrYesterday) {
             // Only include data from today or yesterday
-            const targetDay = widgetData === "Today" ? dayjs() : dayjs().subtract(1, "day")
-            if (!dateObj.isSame(targetDay, "day")) return
+            const targetDay =
+              widgetData === "Today" ? dayjs() : dayjs().subtract(1, "day");
+            if (!dateObj.isSame(targetDay, "day")) return;
 
-            const timeKey = dateObj.minute(0).second(0).millisecond(0).toISOString() // round to hour
-            allTimestamps.add(timeKey)
+            const timeKey = dateObj
+              .minute(0)
+              .second(0)
+              .millisecond(0)
+              .toISOString(); // round to hour
+            allTimestamps.add(timeKey);
 
             if (!chartDataMap[timeKey]) {
-              chartDataMap[timeKey] = { date: timeKey }
+              chartDataMap[timeKey] = { date: timeKey };
             }
-            chartDataMap[timeKey][product.id] = value
+
+            chartDataMap[timeKey][product.id] = value;
           } else {
             // Other ranges: use date only (group by day)
-            const dateKey = dateObj.startOf("day").toISOString()
-            allTimestamps.add(dateKey)
+            const dateKey = dateObj.startOf("day").toISOString();
+            allTimestamps.add(dateKey);
 
             if (!chartDataMap[dateKey]) {
-              chartDataMap[dateKey] = { date: dateKey }
+              chartDataMap[dateKey] = { date: dateKey };
             }
-            chartDataMap[dateKey][product.id] = value
+
+            chartDataMap[dateKey][product.id] = value;
           }
-        })
-      })
+        });
+      });
 
       const sortedChartData = [...allTimestamps]
         .sort((a, b) => new Date(a) - new Date(b))
-        .map((timestamp) => chartDataMap[timestamp])
+        .map((timestamp) => chartDataMap[timestamp]);
 
-      setBindGraph(sortedChartData)
+      setBindGraph(sortedChartData);
     }
-  }, [apiResponse, widgetData])
+  }, [apiResponse, widgetData]);
 
   const handleToggle = (id) => {
-    setActiveProducts((prev) => (prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]))
-  }
+    setActiveProducts((prev) =>
+      prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]
+    );
+  };
 
   // Util: Format date for X-axis
   const formatXAxisTick = (tick) => {
-    const dateObj = dayjs(tick)
-    const today = dayjs()
-    const yesterday = today.subtract(1, "day")
+    const dateObj = dayjs(tick);
+    const today = dayjs();
+    const yesterday = today.subtract(1, "day");
 
     if (dateObj.isSame(today, "day") || dateObj.isSame(yesterday, "day")) {
-      return dateObj.format("h:mm A") // e.g., "3:00 AM"
+      return dateObj.format("h:mm A"); // e.g., "3:00 AM"
     } else {
-      return dateObj.format("MMM D") // e.g., "Apr 1"
+      return dateObj.format("MMM D"); // e.g., "Apr 1"
     }
-  }
+  };
 
   const isTwoHourTick = (dateString) => {
-    const hour = dayjs(dateString).hour()
-    return hour % 2 === 0
-  }
-
+    const hour = dayjs(dateString).hour();
+    return hour % 2 === 0;
+  };
   if (loading) {
     return (
       <div
@@ -525,7 +506,7 @@ export default function TopProductsChart({
       >
         <DottedCircleLoading />
       </div>
-    )
+    );
   }
 
   return (
@@ -533,6 +514,7 @@ export default function TopProductsChart({
       <Typography sx={{ fontSize: "20px" }} fontWeight="bold" mb={1}>
         Top 10 Products
       </Typography>
+
       <Grid container spacing={2}>
         <Grid item xs={12} md={4} sx={{ marginLeft: "-13px" }}>
           <Box
@@ -540,6 +522,7 @@ export default function TopProductsChart({
               backgroundColor: "#e1e8f0",
               borderRadius: "16px", // Smaller border radius for tighter look
               display: "inline-flex",
+
               p: "1px", // 🔽 Less padding for reduced height
               mb: 1.5, // Slightly less bottom margin
             }}
@@ -558,13 +541,17 @@ export default function TopProductsChart({
                 <Tab
                   key={index}
                   label={
-                    <Typography fontSize="11px" fontWeight={tab === index ? 600 : "normal"}>
+                    <Typography
+                      fontSize="11px"
+                      fontWeight={tab === index ? 600 : "normal"}
+                    >
                       {label}
                     </Typography>
                   }
                   sx={{
                     fontFamily:
                       'Nunito Sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
+
                     minHeight: "20px",
                     minWidth: "auto",
                     px: 1.2,
@@ -579,7 +566,8 @@ export default function TopProductsChart({
                       color: "#000",
                     },
                     "&:hover": {
-                      backgroundColor: tab === index ? "#fff" : "rgb(166, 183, 201)",
+                      backgroundColor:
+                        tab === index ? "#fff" : "rgb(166, 183, 201)",
                     },
                     "&:active": {
                       backgroundColor: "rgb(103, 132, 162)",
@@ -617,13 +605,19 @@ export default function TopProductsChart({
             }}
           >
             {productList.map((product) => {
-              console.log("ids", product)
-              const isActive = activeProducts.includes(product.id)
-              const hasAsin = Boolean(product.asin)
-              const isCurrentlyCopied = copiedId === product.asin
+              console.log("ids", product);
+              const isActive = activeProducts.includes(product.id);
+              const hasAsin = Boolean(product.asin);
+              const isCurrentlyCopied = copiedId === product.asin;
 
               return (
-                <Stack key={product.id} direction="row" alignItems="center" spacing={1} sx={{ paddingBottom: "3px" }}>
+                <Stack
+                  key={product.id}
+                  direction="row"
+                  alignItems="center"
+                  spacing={1}
+                  sx={{ paddingBottom: "3px" }}
+                >
                   <Checkbox
                     checked={isActive}
                     onChange={() => handleToggle(product.id)}
@@ -661,7 +655,11 @@ export default function TopProductsChart({
                   />
                   <Avatar src={product.img} sx={{ width: 28, height: 28 }} />
                   <Box sx={{ flexGrow: 1 }}>
-                    <MuiTooltip title={product?.title || product?.name} placement="top" arrow>
+                    <TooltipName
+                      title={product?.title || product?.name}
+                      onRunCerebro={runCerebro}
+                      onAnalyzeListing={analyzeListing}
+                    >
                       <a
                         href={`/Home/product-detail/${product?.topIds}`}
                         target="_blank"
@@ -693,8 +691,11 @@ export default function TopProductsChart({
                           {product.name}
                         </Typography>
                       </a>
-                    </MuiTooltip>
-                    <Box sx={{ display: "flex", alignItems: "center", mt: 0.3 }}>
+                    </TooltipName>
+
+                    <Box
+                      sx={{ display: "flex", alignItems: "center", mt: 0.3 }}
+                    >
                       <img
                         src="https://re-cdn.helium10.com/container/static/Flag-united-states-ksqXwksC.svg"
                         alt="Country Flag"
@@ -702,16 +703,47 @@ export default function TopProductsChart({
                         height={16}
                         style={{ marginRight: 6 }}
                       />
-                      <Typography fontSize="14px" color="text.secondary" mr={0.5}>
+
+                      <Typography
+                        fontSize="14px"
+                        color="text.secondary"
+                        mr={0.5}
+                      >
                         {product?.asin}
                       </Typography>
+
                       <Stack direction="row" spacing={0.5} alignItems="center">
-                        <MuiTooltip title={tooltipText} onOpen={() => handleTooltipOpen(product.asin)} arrow>
-                          <IconButton onClick={() => handleCopy(product.asin)} size="small" sx={{ mr: 0.5 }}>
-                            <ContentCopyIcon sx={{ fontSize: "14px", color: "#757575" }} />
+                        <MuiTooltip
+                          title={tooltipText}
+                          onOpen={() => handleTooltipOpen(product.asin)}
+                          arrow
+                        >
+                          <IconButton
+                            onClick={() => handleCopy(product.asin)}
+                            size="small"
+                            sx={{ mr: 0.5 }}
+                          >
+                            <ContentCopyIcon
+                              sx={{ fontSize: "14px", color: "#757575" }}
+                            />
                           </IconButton>
                         </MuiTooltip>
-                        <MuiTooltip title={`SKU: ${product.sku}`} placement="top" arrow>
+
+                        {/* {product?.sku ? (
+                                                    <Typography sx={{
+                                                        fontSize: '14px',
+                                                        color: '#485E75',
+                                                        fontFamily: "'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif",
+                                                    }} mr={0.5}>
+                                                        • {product.sku}
+                                                    </Typography>
+                                                ) : null} */}
+
+                        <MuiTooltip
+                          title={`SKU: ${product.sku}`}
+                          placement="top"
+                          arrow
+                        >
                           <IconButton size="small" sx={{ p: 0.5 }}>
                             •{" "}
                             <InfoOutlinedIcon
@@ -728,10 +760,11 @@ export default function TopProductsChart({
                     </Box>
                   </Box>
                 </Stack>
-              )
+              );
             })}
           </Stack>
         </Grid>
+
         <Grid item xs={12} md={8}>
           {/* Add Note and Events */}
           <Box display="flex" justifyContent="flex-end">
@@ -752,131 +785,98 @@ export default function TopProductsChart({
                   + Add Note
                 </Button>
               )}
-              <Typography variant="body2" sx={{ fontSize: "14px", lineHeight: 1 }}>
+
+              <Typography
+                variant="body2"
+                sx={{ fontSize: "14px", lineHeight: 1 }}
+              >
                 Events
               </Typography>
-              <Switch checked={events} onChange={() => setEvents(!events)} size="small" />
+
+              <Switch
+                checked={events}
+                onChange={() => setEvents(!events)}
+                size="small"
+              />
             </Box>
           </Box>
-          <NoteModal open={openNote} onClose={() => setOpenNote(false)} />
 
-          {/* Chart Container with Price Dropdown */}
-          <Box sx={{ position: "relative", width: "100%", height: 400 }}>
-            {/* Price Dropdown positioned on the left */}
-            <Box
-              sx={{
-                position: "absolute",
-                left: -10,
-                top: "50%",
-                transform: "translateY(-50%) rotate(-90deg)",
-                transformOrigin: "center",
-                zIndex: 10,
-              }}
+          <NoteModel open={openNote} onClose={() => setOpenNote(false)} />
+
+          <ResponsiveContainer width="100%" height={400}>
+            <LineChart
+              data={bindGraph}
+              margin={{ top: 20, right: 30, left: 0, bottom: 20 }}
             >
-              <FormControl size="small" sx={{ minWidth: 80 }}>
-                <Select
-                  value={priceMetric}
-                  onChange={(e) => setPriceMetric(e.target.value)}
-                  sx={{
-                    fontSize: "12px",
-                    "& .MuiSelect-select": {
-                      padding: "4px 8px",
-                      fontSize: "12px",
-                      color: "#666",
-                    },
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      border: "none",
-                    },
-                    "&:hover .MuiOutlinedInput-notchedOutline": {
-                      border: "none",
-                    },
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      border: "none",
-                    },
-                  }}
-                  MenuProps={{
-                    PaperProps: {
-                      sx: {
-                        transform: "rotate(90deg)",
-                        transformOrigin: "center",
-                      },
-                    },
-                  }}
-                >
-                  <MenuItem value="price" sx={{ fontSize: "12px" }}>
-                    Price
-                  </MenuItem>
-                  <MenuItem value="revenue" sx={{ fontSize: "12px" }}>
-                    Revenue
-                  </MenuItem>
-                  <MenuItem value="profit" sx={{ fontSize: "12px" }}>
-                    Profit
-                  </MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
+              {/* Grid lines */}
+              <CartesianGrid
+                stroke="#e0e0e0"
+                strokeDasharray="3 3"
+                vertical={false}
+              />{" "}
+              {/* No vertical line on left */}
+              <XAxis
+                dataKey="date"
+                tick={{ fontSize: "12px", fill: "#666" }}
+                padding={{ left: 20, right: 20 }}
+                tickFormatter={(val) => {
+                  const pacific = dayjs(val).tz("US/Pacific");
+                  return isTodayOrYesterday
+                    ? pacific.format("h:mm A")
+                    : pacific.format("MMM D");
+                }}
+              />
+              {/* Y Axis with dollar formatting and no border */}
+              <YAxis
+                tick={{ fontSize: "12px", fill: "#666" }}
+                tickFormatter={(value) => `$${Math.round(value)}`} // ✅ Rounded to nearest whole number
+                axisLine={false}
+                tickLine={false}
+                domain={["auto", "auto"]}
+                tickCount={2} // ✅ Only two ticks
+              />
+              {/* Tooltip */}
+              <Tooltip
+                content={
+                  <CustomTooltip
+                    productList={productList}
+                    tab={tab}
+                    hoveredProductId={hoveredProductId}
+                  />
+                }
+                wrapperStyle={{ zIndex: 1000 }}
+                filterNull={true}
+              />
+              {/* Line Series for Active Products */}
+              {activeProducts.map((productId) => {
+                const product = productList.find((p) => p.id === productId);
+                if (!product) return null;
 
-            <ResponsiveContainer width="100%" height={400}>
-              <LineChart data={bindGraph} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
-                {/* Grid lines */}
-                <CartesianGrid stroke="#e0e0e0" strokeDasharray="3 3" vertical={false} />{" "}
-                {/* No vertical line on left */}
-                <XAxis
-                  dataKey="date"
-                  tick={{ fontSize: "12px", fill: "#666" }}
-                  padding={{ left: 20, right: 20 }}
-                  tickFormatter={(val) => {
-                    const pacific = dayjs(val).tz("US/Pacific")
-                    return isTodayOrYesterday ? pacific.format("h:mm A") : pacific.format("MMM D")
-                  }}
-                />
-                {/* Y Axis with dollar formatting and no border */}
-                <YAxis
-                  tick={{ fontSize: "12px", fill: "#666" }}
-                  tickFormatter={(value) => `$${Math.round(value)}`} // ✅ Rounded to nearest whole number
-                  axisLine={false}
-                  tickLine={false}
-                  domain={["auto", "auto"]}
-                  tickCount={2} // ✅ Only two ticks
-                />
-                {/* Tooltip */}
-                <Tooltip
-                  content={<CustomTooltip productList={productList} tab={tab} hoveredProductId={hoveredProductId} />}
-                  wrapperStyle={{ zIndex: 1000 }}
-                  filterNull={true}
-                />
-                {/* Line Series for Active Products */}
-                {activeProducts.map((productId) => {
-                  const product = productList.find((p) => p.id === productId)
-                  if (!product) return null
-
-                  return (
-                    <Line
-                      key={product.id}
-                      type="linear"
-                      dataKey={product.id} // This is the ID that will appear in payload.dataKey
-                      stroke={product.color}
-                      strokeWidth={2.5}
-                      strokeLinecap="butt"
-                      strokeLinejoin="mitter"
-                      connectNulls={true}
-                      isAnimationActive={false}
-                      dot={Object.keys(product.chart).length <= 2 ? { r: 4 } : false}
-                      activeDot={{
-                        r: 6,
-                        strokeWidth: 0,
-                      }}
-                      // These are crucial for setting the hovered product
-                      onMouseEnter={() => setHoveredProductId(product.id)}
-                      onMouseLeave={() => setHoveredProductId(null)} // Reset when leaving this specific line
-                    />
-                  )
-                })}
-              </LineChart>
-            </ResponsiveContainer>
-          </Box>
+                return (
+                  <Line
+                    key={product.id}
+                    type="linear"
+                    dataKey={product.id} // This is the ID that will appear in payload.dataKey
+                    stroke={product.color}
+                    strokeWidth={2.5}
+                    strokeLinecap="butt"
+                    strokeLinejoin="mitter"
+                    connectNulls={true}
+                    isAnimationActive={false}
+                    dot={
+                      Object.keys(product.chart).length <= 2 ? { r: 4 } : false
+                    }
+                    activeDot={{r:6,strokeWidth:0}}
+                    // These are crucial for setting the hovered product
+                    onMouseEnter={() => setHoveredProductId(product.id)}
+                    onMouseLeave={() => setHoveredProductId(null)} // Reset when leaving this specific line
+                  />
+                );
+              })}
+            </LineChart>
+          </ResponsiveContainer>
         </Grid>
       </Grid>
     </Box>
-  )
+  );
 }
