@@ -567,7 +567,7 @@ const ProfitAndLoss = ({
     {
       label: "Gross Revenue",
       
-      value: formatCurrency(summaryOther?.grossRevenue?.current),
+      value: formatCurrency(summaryOther?.current?.gross),
       delta: summary?.grossRevenue?.delta?.toFixed(2),
     },
     // { label: "Reimbursements", value: `$${summaryOther?.current?.reimbursements?.toFixed(2) ?? '0.00'}`, delta: (summaryOther?.current?.reimbursements - summaryOther?.previous?.reimbursements)?.toFixed(2) },
