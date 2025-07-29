@@ -312,11 +312,11 @@ const ProfitAndLoss = ({
           timezone: systemTimeZone,
         }
       );
-
+      
       // Add null checks for the response data
       const responseData = response?.data || {};
       const customData = responseData?.custom || {};
-
+      console.log('response of fetch profit and losst',responseData)
       setSummaryDate(customData?.dateRanges || null);
       setSummaryOther(customData?.netProfitCalculation || null);
       setSummary(customData?.summary || null);
