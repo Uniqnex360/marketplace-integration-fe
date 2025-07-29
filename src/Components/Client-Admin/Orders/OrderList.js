@@ -30,7 +30,6 @@ import {
   Chip,
 } from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
-
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { FilterList, Refresh, Visibility } from "@mui/icons-material";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -45,7 +44,6 @@ import { MoreVert as MoreVertIcon } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import BrandSelector from "../../../utils/BrandSelector";
-
 const OrderList = ({ fetchOrdersFromParent }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -95,44 +93,36 @@ const OrderList = ({ fetchOrdersFromParent }) => {
       setSelectedCategory(parsedCategory);
     }
   }, []);
-
   const userData = localStorage.getItem("user");
   let userIds = "";
   if (userData) {
     const data = JSON.parse(userData);
     userIds = data.id;
   }
-
   const queryParams = new URLSearchParams(window.location.search);
   const initialPage = parseInt(queryParams.get("page")) || 1;
   const initialRowsPerPage = parseInt(queryParams.get("rowsPerPage"), 10) || 25;
   const [page, setPage] = useState(initialPage);
   const [market, setMarket] = useState(null);
   const [open, setOpen] = useState(false);
-
   const handleOpen = () => setOpen(true);
-
   const handlePageChange = (event, newPage) => {
     setPage(newPage);
     navigate(`/Home/orders?page=${newPage}&rowsPerPage=${rowsPerPage}`);
   };
-
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     navigate(`/Home/orders?page=${page}&rowsPerPage=${event.target.value}`);
     setPage(1);
   };
-
   useEffect(() => {
     setRowsPerPage(initialRowsPerPage);
   }, [location.search]);
-
   useEffect(() => {
     if (location.state && location.state.searchQuery) {
       setSearchTerm(location.state.searchQuery);
     }
   }, [location.state]);
-
   useEffect(() => {
     const fetchBrands = async () => {
       setIsLoading(true);
@@ -160,7 +150,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
     };
     fetchBrands();
   }, [inputValueBrand, brandLimit, userIds]);
-
   const fetchOrderData = async (marketId = "all", page, rowsPerPage) => {
     setLoading(true);
     const validRowsPerPage = rowsPerPage && rowsPerPage > 0 ? rowsPerPage : 25;
@@ -169,7 +158,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
       const marketplaceId = localStorage.getItem("selectedCategory")
         ? JSON.parse(localStorage.getItem("selectedCategory")).id
         : "all";
-
       const response = await axios.post(
         `${process.env.REACT_APP_IP}fetchAllorders/`,
         {
@@ -183,23 +171,18 @@ const OrderList = ({ fetchOrdersFromParent }) => {
           timezone: "US/Pacific",
         }
       );
-
       const responseData = response.data || {};
-
       setOrders(Array.isArray(responseData.orders) ? responseData.orders : []);
-
       setLogoMarket(
         Array.isArray(responseData.marketplace_list)
           ? responseData.marketplace_list
           : []
       );
-
       setOrderCount(responseData.total_count || 0);
       setTotalPages(
         Math.ceil((responseData.total_count || 0) / validRowsPerPage)
       );
       setCustomStatus(responseData.status || "");
-
       setManualOrders([]);
     } catch (error) {
       console.error("Error fetching orders:", error);
@@ -213,7 +196,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
       setLoading(false);
     }
   };
-
   const prevParams = useRef({
     selectedCategoryId: selectedCategory.id,
     page,
@@ -221,7 +203,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
     sortConfig,
     searchQuery,
   });
-
   useEffect(() => {
     const shouldFetch =
       selectedCategory.id !== prevParams.current.selectedCategoryId ||
@@ -230,7 +211,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
       JSON.stringify(sortConfig) !==
         JSON.stringify(prevParams.current.sortConfig) ||
       searchQuery !== prevParams.current.searchQuery;
-
     if (shouldFetch) {
       fetchOrderData(selectedCategory.id, page, rowsPerPage);
       prevParams.current = {
@@ -242,22 +222,18 @@ const OrderList = ({ fetchOrdersFromParent }) => {
       };
     }
   }, [selectedCategory.id, page, rowsPerPage, sortConfig, searchQuery]);
-
   useEffect(() => {
     const storedCategory = localStorage.getItem("selectedCategory");
     if (storedCategory) {
       const category = JSON.parse(storedCategory);
       setSelectedCategory(category);
     }
-
     fetchOrderData(selectedCategory.id, page, rowsPerPage);
   }, []);
-
   const handleClose = () => {
     setOpen(false);
     fetchOrderData(selectedCategory.id, page, rowsPerPage);
   };
-
   const filteredOrders = orders.filter((order) => {
     const purchaseOrderId = order.purchaseOrderId
       ? order.purchaseOrderId.toLowerCase()
@@ -270,38 +246,30 @@ const OrderList = ({ fetchOrdersFromParent }) => {
       customerOrderId.includes(searchQuery.toLowerCase())
     );
   });
-
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
-
   const handleChangePage = (event, newPage) => {
     navigate(`/Home/orders?page=${newPage}&rowsPerPage=${rowsPerPage}`);
     setPage(newPage);
   };
-
   const handleOpenMenu = (event, column) => {
     setAnchorEl(event.currentTarget);
     setCurrentColumn(column);
   };
-
   const handleSelectSort = (key, direction) => {
     setSortConfig({ key, direction });
     setAnchorEl(null);
   };
-
   const handleCloseMenu = () => {
     setAnchorEl(null);
   };
-
   const handleProduct = (category) => {
     setSelectedCategory(category);
   };
-
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
   };
-
   const handleResetChange = () => {
     setSearchQuery("");
     setSortConfig({ key: "", direction: "asc" });
@@ -320,7 +288,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
       draggable: true,
     });
   };
-
   const handleDownload = async () => {
     try {
       if (
@@ -338,28 +305,25 @@ const OrderList = ({ fetchOrdersFromParent }) => {
         toast.error("End date must be after start date");
         return;
       }
-
       const brandIds = selectedBrand.map((b) => b.id);
       const requestData = {};
-
       if (selectedBrand.length > 0) {
         requestData.brands = selectedBrand.map((b) => b.id);
       }
-
       if (downloadStartDate && downloadEndDate) {
-        const startDate = new Date(downloadStartDate);
-        const formattedStartDate = startDate.toISOString().split("T")[0];
-        const endDate = new Date(downloadEndDate);
-        const formattedEndDate = endDate.toISOString().split("T")[0];
-        requestData.start_date = formattedStartDate;
-        requestData.end_date = formattedEndDate;
+        const formatLocalDate = (date) => {
+          if (!date) return null;
+          const year = date.getFullYear();
+          const month = (date.getMonth() + 1).toString().padStart(2, "0");
+          const day = date.getDate().toString().padStart(2, "0");
+          return `${year}-${month}-${day}`;
+        };
+        requestData.start_date = formatLocalDate(downloadStartDate);
+        requestData.end_date = formatLocalDate(downloadEndDate);
       }
-
       requestData.format = downloadFormat;
       requestData.user_id = userIds;
-
       setIsLoading(true);
-
       const response = await axios.post(
         `${process.env.REACT_APP_IP}downloadOrders/`,
         requestData,
@@ -370,7 +334,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
           },
         }
       );
-
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -381,15 +344,12 @@ const OrderList = ({ fetchOrdersFromParent }) => {
       document.body.appendChild(link);
       link.click();
       link.remove();
-
       window.URL.revokeObjectURL(url);
-
       setDownloadModalOpen(false);
       setSelectedBrand([]);
-      setDownloadStartDate("");
-      setDownloadEndDate("");
+      setDownloadStartDate(null);
+      setDownloadEndDate(null);
       setDownloadFormat("csv");
-
       toast.success("Download started successfully");
     } catch (error) {
       console.error("Download error:", error);
@@ -398,7 +358,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
       setIsLoading(false);
     }
   };
-
   return (
     <Box sx={{ flex: 1, width: "100%" }}>
       <Box
@@ -436,7 +395,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
               clearChannel={selectedCategory}
             />
           </Box>
-
           <TextField
             size="small"
             placeholder="Search Purchase Order ID"
@@ -510,7 +468,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
           </Typography>
         </Box>
       </Box>
-
       <Button
         variant="contained"
         color="primary"
@@ -519,7 +476,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
       >
         Download orders
       </Button>
-
       <Box sx={{ paddingTop: "150px" }}>
         {customStatus === "custom" ? (
           <TableContainer
@@ -755,7 +711,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
             </Table>
           </TableContainer>
         ) : null}
-
         {customStatus !== "custom" ? (
           <TableContainer
             component={Paper}
@@ -1005,7 +960,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
           </TableContainer>
         ) : null}
       </Box>
-
       <Box
         sx={{
           display: "flex",
@@ -1038,7 +992,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
           }}
         />
       </Box>
-
       <Modal open={open} onClose={handleClose}>
         <Slide direction="left" in={open} mountOnEnter unmountOnExit>
           <Box
@@ -1057,7 +1010,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
           </Box>
         </Slide>
       </Modal>
-
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
@@ -1130,7 +1082,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
           </>
         )}
       </Menu>
-
       <Modal
         open={downloadModalOpen}
         onClose={() => setDownloadModalOpen(false)}
@@ -1175,7 +1126,7 @@ const OrderList = ({ fetchOrdersFromParent }) => {
                   </Typography>
                   <Button
                     size="small"
-                    onClick={() => setSelectedBrand([])} // Clears all selected brands
+                    onClick={() => setSelectedBrand([])}
                     sx={{ textTransform: "none" }}
                   >
                     Clear All
@@ -1253,7 +1204,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
                 minDate={new Date(downloadStartDate)}
               />
             </LocalizationProvider>
-
             <FormControl fullWidth>
               <InputLabel>Format</InputLabel>
               <Select
@@ -1266,7 +1216,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
                 <MenuItem value="txt">Text</MenuItem>
               </Select>
             </FormControl>
-
             <Button
               variant="contained"
               color="primary"
@@ -1288,5 +1237,4 @@ const OrderList = ({ fetchOrdersFromParent }) => {
     </Box>
   );
 };
-
 export default OrderList;
