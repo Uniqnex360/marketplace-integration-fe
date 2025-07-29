@@ -372,16 +372,11 @@ const ProfitAndLoss = ({
           .format("MMM DD, YYYY")}`
       : "";
   const xAxisTickFormatter = (value) => {
-    const dateObj = dayjs(value);
-    const today = dayjs().format("YYYY-MM-DD");
-    const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
-    const valueDate = dateObj.format("YYYY-MM-DD");
-
-    if (
-      (valueDate === today && widgetData === "Today") ||
-      (valueDate === yesterday && widgetData === "Yesterday")
-    ) {
-      return dateObj.format("HH:mm");
+    const dateObj = dayjs(Number.isFinite(value)?value:new Date(value))
+    if (graph && graph.length>0 && Object.keys(graph[0].values).every((k)=>
+    dayjs(k).format('YYYY-MM-DD')===dayjs(Object.keys(graph[0].values)[0]).format('YYYY-MM-DD')))
+    {
+      return dateObj.format("HH:mm")
     }
 
     return dateObj.format("MMM D");
