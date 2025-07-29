@@ -78,7 +78,15 @@ const OrderList = ({ fetchOrdersFromParent }) => {
     name: "All Channels",
   });
   const systemTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
+  const handleClearFilter = () => {
+    setSelectedBrand([]);
+    toast.success("Brands reset successfully!", {
+      position: "top-right",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+    });
+  };
   useEffect(() => {
     const storedCategory = localStorage.getItem("selectedCategory");
     if (storedCategory) {
@@ -144,6 +152,7 @@ const OrderList = ({ fetchOrdersFromParent }) => {
       } catch (error) {
         console.error("Error fetching brands:", error);
         setHasMore(false);
+        setBrandList([]);
       } finally {
         setIsLoading(false);
       }
@@ -1139,85 +1148,138 @@ const OrderList = ({ fetchOrdersFromParent }) => {
           }}
         >
           <Stack spacing={2}>
-
             <Typography variant="h6" gutterBottom>
-            Download Orders
-          </Typography>
-
-          <BrandSelector
-            selectedBrand={selectedBrand}
-            setSelectedBrand={setSelectedBrand}
-            brandList={brandList}
-            inputValueBrand={inputValueBrand}
-            setInputValueBrand={setInputValueBrand}
-            brandLimit={brandLimit}
-            isLoading={isLoading}
-            hasMore={hasMore}
-            toggleSelection={(option) => {
-              const isSelected = selectedBrand.some((b) => b.id === option.id);
-              if (isSelected) {
-                setSelectedBrand(
-                  selectedBrand.filter((b) => b.id !== option.id)
+              Download Orders
+            </Typography>
+            {selectedBrand.length > 0 && (
+              <Box
+                sx={{
+                  p: 1.5,
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 2,
+                  bgcolor: "action.hover",
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    mb: 1,
+                  }}
+                >
+                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+                    Selected Brands ({selectedBrand.length})
+                  </Typography>
+                  <Button
+                    size="small"
+                    onClick={() => setSelectedBrand([])} // Clears all selected brands
+                    sx={{ textTransform: "none" }}
+                  >
+                    Clear All
+                  </Button>
+                </Box>
+                <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                  {selectedBrand.map((brand) => (
+                    <Chip
+                      key={brand.id}
+                      label={brand.name}
+                      size="small"
+                      onDelete={() =>
+                        setSelectedBrand((prev) =>
+                          prev.filter((b) => b.id !== brand.id)
+                        )
+                      }
+                    />
+                  ))}
+                </Box>
+              </Box>
+            )}
+            <BrandSelector
+              selectedBrand={selectedBrand}
+              setSelectedBrand={setSelectedBrand}
+              brandList={brandList}
+              inputValueBrand={inputValueBrand}
+              setInputValueBrand={setInputValueBrand}
+              brandLimit={brandLimit}
+              isLoading={isLoading}
+              hasMore={hasMore}
+              toggleSelection={(option) => {
+                const isSelected = selectedBrand.some(
+                  (b) => b.id === option.id
                 );
-              } else {
-                setSelectedBrand([...selectedBrand, option]);
+                if (isSelected) {
+                  setSelectedBrand(
+                    selectedBrand.filter((b) => b.id !== option.id)
+                  );
+                } else {
+                  setSelectedBrand([...selectedBrand, option]);
+                }
+              }}
+              label="Brands"
+              width="100%"
+            />
+            <Divider>
+              <Typography variant="overline">OR</Typography>
+            </Divider>
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DatePicker
+                label="Start Date"
+                value={downloadStartDate}
+                onChange={(newValue) => setDownloadStartDate(newValue)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    fullWidth
+                    InputLabelProps={{ required: false }}
+                  />
+                )}
+                maxDate={new Date(downloadEndDate)}
+              />
+              <DatePicker
+                label="End Date"
+                value={downloadEndDate}
+                onChange={(newValue) => setDownloadEndDate(newValue)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    fullWidth
+                    InputLabelProps={{ required: false }}
+                  />
+                )}
+                minDate={new Date(downloadStartDate)}
+              />
+            </LocalizationProvider>
+
+            <FormControl fullWidth>
+              <InputLabel>Format</InputLabel>
+              <Select
+                value={downloadFormat}
+                label="Format"
+                onChange={(e) => setDownloadFormat(e.target.value)}
+              >
+                <MenuItem value="csv">CSV</MenuItem>
+                <MenuItem value="xlsx">Excel (XLSX)</MenuItem>
+                <MenuItem value="txt">Text</MenuItem>
+              </Select>
+            </FormControl>
+
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleDownload}
+              fullWidth
+              disabled={
+                (selectedBrand.length === 0 &&
+                  (!downloadStartDate || !downloadEndDate)) ||
+                isLoading
               }
-            }}
-            label="Brands"
-            width='100%'
-          />
-          <Divider>
-            <Typography variant="overline">OR</Typography>
-          </Divider>
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <DatePicker
-              label="Start Date"
-              value={downloadStartDate}
-              onChange={(newValue) => setDownloadStartDate(newValue)}
-              renderInput={(params) => (
-                <TextField {...params} fullWidth InputLabelProps={{required:false}}/>
-              )}
-              maxDate={new Date(downloadEndDate)}
-            />
-            <DatePicker
-              label="End Date"
-              value={downloadEndDate}
-              onChange={(newValue) => setDownloadEndDate(newValue)}
-              renderInput={(params) => (
-                <TextField {...params} fullWidth InputLabelProps={{required:false}}/>
-              )}
-              minDate={new Date(downloadStartDate)}
-            />
-          </LocalizationProvider>
-
-          <FormControl fullWidth>
-            <InputLabel>Format</InputLabel>
-            <Select
-              value={downloadFormat}
-              label="Format"
-              onChange={(e) => setDownloadFormat(e.target.value)}
+              startIcon={isLoading ? <CircularProgress size={20} /> : null}
+              sx={{ mt: 1 }}
             >
-              <MenuItem value="csv">CSV</MenuItem>
-              <MenuItem value="xlsx">Excel (XLSX)</MenuItem>
-              <MenuItem value='txt'>Text</MenuItem>
-            </Select>
-          </FormControl>
-
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleDownload}
-            fullWidth
-            disabled={
-              (selectedBrand.length === 0 &&
-                (!downloadStartDate || !downloadEndDate)) ||
-              isLoading
-            }
-            startIcon={isLoading ? <CircularProgress size={20} /> : null}
-            sx={{mt:1}}
-          >
-            {isLoading ? "Preparing Download..." : "Download"}
-          </Button>
+              {isLoading ? "Preparing Download..." : "Download"}
+            </Button>
           </Stack>
         </Box>
       </Modal>
