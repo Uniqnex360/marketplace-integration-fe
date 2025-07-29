@@ -104,6 +104,23 @@ const CustomTooltip = ({
 
   const formattedDate = dayjs(label).tz("US/Pacific").format("MMM D, h:mm A");
 
+  // Helper function to format tooltip values based on tab
+  const formatTooltipValue = (value, tab) => {
+    switch (tab) {
+      case 0: // Revenue
+        return new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+        }).format(value);
+      case 1: // Units Sold
+        return `${value} units`;
+      case 2: // Refunds
+        return `${value} refunds`;
+      default:
+        return value;
+    }
+  };
+
   return (
     <Paper
       sx={{
@@ -149,12 +166,7 @@ const CustomTooltip = ({
               </Stack>
 
               <Typography fontWeight="bold" fontSize={14}>
-                {tab === 0
-                  ? new Intl.NumberFormat("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                    }).format(entry.value)
-                  : entry.value}
+                {formatTooltipValue(entry.value, tab)}
               </Typography>
             </Stack>
 
@@ -212,6 +224,7 @@ export default function TopProductsChart({
     widgetData === "Today" || widgetData === "Yesterday";
   const [hoveredProductId, setHoveredProductId] = useState(null);
   const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     // Cleanup function to clear the timeout if the component unmounts
     return () => {
@@ -310,6 +323,7 @@ export default function TopProductsChart({
   const userId = userData?.id || "";
   const [openNote, setOpenNote] = useState(false);
   const [events, setEvents] = useState(true);
+  
   const runCerebro = () => {
     console.log("Running Cerebro...");
   };
@@ -317,11 +331,13 @@ export default function TopProductsChart({
   const analyzeListing = () => {
     console.log("Analyzing Listing...");
   };
+
   const startOfDay = dayjs().startOf("day");
   const ticks = Array.from(
     { length: 12 },
     (_, i) => startOfDay.add(i * 2, "hour").format("YYYY-MM-DD HH:mm:ss") // Match your data format
   );
+
   const getSortByValue = (tab) => {
     switch (tab) {
       case 0:
@@ -332,6 +348,44 @@ export default function TopProductsChart({
         return "refund";
       default:
         return "price";
+    }
+  };
+
+  // Helper function to get the appropriate data field based on tab
+  const getDataField = (item) => {
+    switch (tab) {
+      case 0: // Revenue
+        return item.total_price;
+      case 1: // Units Sold
+        return item.total_units;
+      case 2: // Refunds
+        return item.refund_qty;
+      default:
+        return item.total_price;
+    }
+  };
+
+  // Helper function to format Y-axis values based on tab
+  const formatYAxisTick = (value) => {
+    switch (tab) {
+      case 0: // Revenue
+        if (value >= 1000000) {
+          return `$${(value / 1000000).toFixed(1)}M`;
+        } else if (value >= 1000) {
+          return `$${(value / 1000).toFixed(1)}K`;
+        } else {
+          return `$${Math.round(value)}`;
+        }
+      case 1: // Units Sold
+        if (value >= 1000) {
+          return `${(value / 1000).toFixed(1)}K`;
+        } else {
+          return Math.round(value).toString();
+        }
+      case 2: // Refunds
+        return Math.round(value).toString();
+      default:
+        return `$${Math.round(value)}`;
     }
   };
 
@@ -360,6 +414,7 @@ export default function TopProductsChart({
 
     return [...new Set(ticks)];
   };
+
   const fetchTopProducts = async () => {
     setLoading(true);
     try {
@@ -414,13 +469,16 @@ export default function TopProductsChart({
         color: colors[index],
         img: item.product_image || "",
         chart: item.chart || {},
+        // Store all the data fields for easy access
+        total_price: item.total_price,
+        total_units: item.total_units,
+        refund_qty: item.refund_qty,
       }));
 
       console.log("grant", products);
       setProductList(products);
       setActiveProducts(products.map((p) => p.id));
 
-      const allowedHours = new Set([0, 3, 5]); // 12 AM, 3 AM, 5 AM
       const chartDataMap = {};
       const allTimestamps = new Set();
 
@@ -494,6 +552,7 @@ export default function TopProductsChart({
     const hour = dayjs(dateString).hour();
     return hour % 2 === 0;
   };
+
   if (loading) {
     return (
       <div
@@ -522,7 +581,6 @@ export default function TopProductsChart({
               backgroundColor: "#e1e8f0",
               borderRadius: "16px", // Smaller border radius for tighter look
               display: "inline-flex",
-
               p: "1px", // 🔽 Less padding for reduced height
               mb: 1.5, // Slightly less bottom margin
             }}
@@ -551,7 +609,6 @@ export default function TopProductsChart({
                   sx={{
                     fontFamily:
                       'Nunito Sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
-
                     minHeight: "20px",
                     minWidth: "auto",
                     px: 1.2,
@@ -729,16 +786,6 @@ export default function TopProductsChart({
                           </IconButton>
                         </MuiTooltip>
 
-                        {/* {product?.sku ? (
-                                                    <Typography sx={{
-                                                        fontSize: '14px',
-                                                        color: '#485E75',
-                                                        fontFamily: "'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif",
-                                                    }} mr={0.5}>
-                                                        • {product.sku}
-                                                    </Typography>
-                                                ) : null} */}
-
                         <MuiTooltip
                           title={`SKU: ${product.sku}`}
                           placement="top"
@@ -826,14 +873,14 @@ export default function TopProductsChart({
                     : pacific.format("MMM D");
                 }}
               />
-              {/* Y Axis with dollar formatting and no border */}
+              {/* Y Axis with dynamic formatting based on tab */}
               <YAxis
                 tick={{ fontSize: "12px", fill: "#666" }}
-                tickFormatter={(value) => `$${Math.round(value)}`} // ✅ Rounded to nearest whole number
+                tickFormatter={formatYAxisTick}
                 axisLine={false}
                 tickLine={false}
                 domain={["auto", "auto"]}
-                tickCount={2} // ✅ Only two ticks
+                tickCount={5} // Increased from 2 to show better price ranges
               />
               {/* Tooltip */}
               <Tooltip
@@ -866,7 +913,7 @@ export default function TopProductsChart({
                     dot={
                       Object.keys(product.chart).length <= 2 ? { r: 4 } : false
                     }
-                    activeDot={{r:6,strokeWidth:0}}
+                    activeDot={{ r: 6, strokeWidth: 0 }}
                     // These are crucial for setting the hovered product
                     onMouseEnter={() => setHoveredProductId(product.id)}
                     onMouseLeave={() => setHoveredProductId(null)} // Reset when leaving this specific line
