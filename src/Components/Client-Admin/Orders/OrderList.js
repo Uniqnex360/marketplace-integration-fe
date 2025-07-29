@@ -25,6 +25,8 @@ import {
   FormControl,
   InputLabel,
   CircularProgress,
+  Stack,
+  Divider,
 } from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 
@@ -1136,7 +1138,9 @@ const OrderList = ({ fetchOrdersFromParent }) => {
             borderRadius: 2,
           }}
         >
-          <Typography variant="h6" gutterBottom>
+          <Stack spacing={2}>
+
+            <Typography variant="h6" gutterBottom>
             Download Orders
           </Typography>
 
@@ -1160,16 +1164,18 @@ const OrderList = ({ fetchOrdersFromParent }) => {
               }
             }}
             label="Brands"
-            width={190}
+            width='100%'
           />
-
+          <Divider>
+            <Typography variant="overline">OR</Typography>
+          </Divider>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DatePicker
               label="Start Date"
               value={downloadStartDate}
               onChange={(newValue) => setDownloadStartDate(newValue)}
               renderInput={(params) => (
-                <TextField {...params} fullWidth sx={{ mb: 2, mt: 2 }} />
+                <TextField {...params} fullWidth InputLabelProps={{required:false}}/>
               )}
               maxDate={new Date(downloadEndDate)}
             />
@@ -1178,13 +1184,13 @@ const OrderList = ({ fetchOrdersFromParent }) => {
               value={downloadEndDate}
               onChange={(newValue) => setDownloadEndDate(newValue)}
               renderInput={(params) => (
-                <TextField {...params} fullWidth sx={{ mb: 2,mt:2 }} />
+                <TextField {...params} fullWidth InputLabelProps={{required:false}}/>
               )}
               minDate={new Date(downloadStartDate)}
             />
           </LocalizationProvider>
 
-          <FormControl fullWidth sx={{ mb: 2}}>
+          <FormControl fullWidth>
             <InputLabel>Format</InputLabel>
             <Select
               value={downloadFormat}
@@ -1208,9 +1214,11 @@ const OrderList = ({ fetchOrdersFromParent }) => {
               isLoading
             }
             startIcon={isLoading ? <CircularProgress size={20} /> : null}
+            sx={{mt:1}}
           >
             {isLoading ? "Preparing Download..." : "Download"}
           </Button>
+          </Stack>
         </Box>
       </Modal>
     </Box>
