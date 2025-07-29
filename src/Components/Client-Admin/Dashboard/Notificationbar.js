@@ -58,7 +58,7 @@ function Notificationbar() {
 
         <IconButton edge="start" color="inherit" aria-label="menu">
           <img
-            src={require("../../assets/One Tree Brands Main Logo 2400x1800 (HIGH RES).607b435d3277b92df838.png")}
+            src={require("../../assets/One Tree Brands Main Logo 2400x1800 (HIGH RES).607b435d3277b92df838 (1).png")}
             alt="Logo"
             style={{ height: "40px", width: "auto" }}
           />
