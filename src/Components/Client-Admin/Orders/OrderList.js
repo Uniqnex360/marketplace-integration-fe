@@ -1178,13 +1178,13 @@ const OrderList = ({ fetchOrdersFromParent }) => {
               value={downloadEndDate}
               onChange={(newValue) => setDownloadEndDate(newValue)}
               renderInput={(params) => (
-                <TextField {...params} fullWidth sx={{ mb: 2 }} />
+                <TextField {...params} fullWidth sx={{ mb: 2,mt:2 }} />
               )}
               minDate={new Date(downloadStartDate)}
             />
           </LocalizationProvider>
 
-          <FormControl fullWidth sx={{ mb: 2 }}>
+          <FormControl fullWidth sx={{ mb: 2}}>
             <InputLabel>Format</InputLabel>
             <Select
               value={downloadFormat}
@@ -1193,6 +1193,7 @@ const OrderList = ({ fetchOrdersFromParent }) => {
             >
               <MenuItem value="csv">CSV</MenuItem>
               <MenuItem value="xlsx">Excel (XLSX)</MenuItem>
+              <MenuItem value='txt'>Text</MenuItem>
             </Select>
           </FormControl>
 
