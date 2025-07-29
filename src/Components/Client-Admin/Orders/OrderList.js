@@ -1204,6 +1204,7 @@ const OrderList = ({ fetchOrdersFromParent }) => {
               inputValueBrand={inputValueBrand}
               setInputValueBrand={setInputValueBrand}
               brandLimit={brandLimit}
+              setBrandLimit={setBrandLimit}
               isLoading={isLoading}
               hasMore={hasMore}
               toggleSelection={(option) => {
