@@ -311,7 +311,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
 
   const handleDownload = async () => {
     try {
-      // Validate inputs
       if (
         selectedBrand.length === 0 &&
         (!downloadStartDate || !downloadEndDate)
@@ -328,7 +327,6 @@ const OrderList = ({ fetchOrdersFromParent }) => {
         return;
       }
 
-      // Prepare request data
       const brandIds = selectedBrand.map((b) => b.id);
       const requestData = {};
 
@@ -337,26 +335,29 @@ const OrderList = ({ fetchOrdersFromParent }) => {
       }
 
       if (downloadStartDate && downloadEndDate) {
-        requestData.start_date = downloadStartDate;
-        requestData.end_date = downloadEndDate;
+        const startDate = new Date(downloadStartDate);
+        const formattedStartDate = startDate.toISOString().split("T")[0];
+        const endDate = new Date(downloadEndDate);
+        const formattedEndDate = endDate.toISOString().split("T")[0];
+        requestData.start_date = formattedStartDate;
+        requestData.end_date = formattedEndDate;
       }
 
       requestData.format = downloadFormat;
       requestData.user_id = userIds;
 
-      // Show loading state
       setIsLoading(true);
 
-     const response = await axios.post(
-  `${process.env.REACT_APP_IP}downloadOrders/`,
-  requestData,
-  {
-    responseType: "blob",
-    headers: {
-      "Content-Type": "application/json"
-    }
-  }
-);
+      const response = await axios.post(
+        `${process.env.REACT_APP_IP}downloadOrders/`,
+        requestData,
+        {
+          responseType: "blob",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
@@ -369,10 +370,8 @@ const OrderList = ({ fetchOrdersFromParent }) => {
       link.click();
       link.remove();
 
-      // Clean up
       window.URL.revokeObjectURL(url);
 
-      // Close modal and reset state
       setDownloadModalOpen(false);
       setSelectedBrand([]);
       setDownloadStartDate("");
