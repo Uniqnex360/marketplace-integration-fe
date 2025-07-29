@@ -60,9 +60,16 @@ function Notificationbar() {
           <img
             src={require("../../assets/One Tree Brands Main Logo 2400x1800 (HIGH RES).607b435d3277b92df838 (1).png")}
             alt="Logo"
-            style={{ height: "40px", width: "auto" }}
+            style={{
+              height: "40px",
+              width: "auto",
+              backgroundColor: "#fff",
+              padding: "2px",
+              borderRadius: "2px",
+            }}
           />
         </IconButton>
+
         <Typography variant="h6" sx={{ flexGrow: 1, textAlign: "center" }}>
           MarketPlace Management
         </Typography>
@@ -100,7 +107,7 @@ function Notificationbar() {
               }}
             >
               <Avatar sx={{ bgcolor: "white", color: "blue" }}>
-                <AccountCircle sx={{fontSize:28}}/>
+                <AccountCircle sx={{ fontSize: 28 }} />
               </Avatar>
               {/* <ListItemText primary="User" sx={{ color: "#fff", fontSize: "14px", marginTop: "4px" }} /> */}
             </ListItem>
