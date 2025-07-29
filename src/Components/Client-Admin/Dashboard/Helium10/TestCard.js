@@ -974,8 +974,8 @@ const TestCard = ({
           {/* Other Metric Cards */}
           {[
             "total_orders",
-            "total_tax",
             "total_units",
+             "total_tax",
             "refund",
             "total_cogs",
             "margin",
