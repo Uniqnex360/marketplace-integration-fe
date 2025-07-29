@@ -8,6 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
+  ReferenceLine,
 } from "recharts";
 
 import {
@@ -305,7 +306,30 @@ export default function TopProductsChart({
       }
     }
   };
+  const calculatePriceBreakpoints=(data,activeProducts)=>{
+    if(!data ||data.length===0)return []
+    let minValue=Infinity
+    let maxValue=-Infinity
+    data.forEach(item=>{
+      activeProducts.forEach(productId=>{
+        if(item[productId]!==undefined && item[productId]!==null)
+        {
+          minValue=Math.min(minValue,item[productId])
+          maxValue=Math.max(maxValue,item[productId])
+        }
+      })
+    })
+    if(minValue===Infinity||maxValue===-Infinity)return []
+    const range=maxValue-minValue
+    const step=range/4
+    return [
+      Math.round(minValue+step),
+      Math.round(minValue+step*2),
+      Math.round(minValue+step*3)
 
+    ]
+  }
+  const priceBreakPoints=calculatePriceBreakpoints(bindGraph,activeProducts)
   const userData = JSON.parse(localStorage.getItem("user") || "{}");
   const userId = userData?.id || "";
   const [openNote, setOpenNote] = useState(false);
@@ -811,7 +835,7 @@ export default function TopProductsChart({
               {/* Grid lines */}
               <CartesianGrid
                 stroke="#e0e0e0"
-                strokeDasharray="3 3"
+                strokeDasharray="2 2"
                 vertical={false}
               />{" "}
               {/* No vertical line on left */}
@@ -835,7 +859,19 @@ export default function TopProductsChart({
                 domain={["auto", "auto"]}
                 tickCount={2} // ✅ Only two ticks
               />
-              {/* Tooltip */}
+                {priceBreakPoints.map((price,index)=>(
+                  <ReferenceLine key={`price-${price}`}
+                  y={price}
+                  stroke="#d0d0d0"
+                  strokeDasharray='5 5'
+                  strokeWidth={1}
+                  label={{
+                    value:`$${price}`,
+                    position:'topLeft',
+                    style:{fontSize:'10px',fill:"#666"}
+                  }}
+                  />
+                ))}
               <Tooltip
                 content={
                   <CustomTooltip
