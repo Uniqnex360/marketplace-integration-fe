@@ -444,7 +444,6 @@ export default function TopProductsChart({
 
   useEffect(() => {
     if (widgetData) fetchTopProducts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     tab,
     widgetData,
