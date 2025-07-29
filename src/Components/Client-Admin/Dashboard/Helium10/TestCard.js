@@ -450,6 +450,14 @@ const TestCard = ({
           ? `Yesterday: ${prev || "0"}`
           : `${date.subtract(1, "day").format("MMM DD")}: ${prev || "0"}`,
     },
+    
+    total_units: {
+      title: "Units Sold",
+      tooltip: (date, today, prev) =>
+        date.isSame(today, "day")
+          ? `Yesterday: ${prev || "0"}`
+          : `${date.subtract(1, "day").format("MMM DD")}: ${prev || "0"}`,
+    },
     total_tax:{
       title:"Total Tax",
       tooltip:(date,today,prev)=>
@@ -459,13 +467,6 @@ const TestCard = ({
               prev
             )}`,
             currencySymbol:"$"},
-    total_units: {
-      title: "Units Sold",
-      tooltip: (date, today, prev) =>
-        date.isSame(today, "day")
-          ? `Yesterday: ${prev || "0"}`
-          : `${date.subtract(1, "day").format("MMM DD")}: ${prev || "0"}`,
-    },
     refund: {
       title: "Refunds",
       tooltip: (date, today, prev) =>
