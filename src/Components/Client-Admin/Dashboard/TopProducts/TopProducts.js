@@ -102,7 +102,9 @@ const CustomTooltip = ({
   // Only return null if there's nothing to display after filtering
   if (filteredPayload.length === 0) return null;
 
-  const formattedDate = dayjs(label).tz("US/Pacific").format("MMM D, h:mm A");
+  const formattedDate = label.split(' ')[0];
+  const displayDate = dayjs(formattedDate).format("MMM D, YYYY");
+
 
   // Helper function to format tooltip values based on tab
   const formatTooltipValue = (value, tab) => {
@@ -491,8 +493,8 @@ export default function TopProductsChart({
 
       products.forEach((product) => {
         Object.entries(product.chart || {}).forEach(([datetime, value]) => {
-          const dateObj = dayjs(datetime);
-
+          const dateObj = datetime.split(' ')[0];
+          allTimestamps.add(dateKey);
           if (isTodayOrYesterday) {
             // Only include data from today or yesterday
             const targetDay =
@@ -866,17 +868,35 @@ export default function TopProductsChart({
                 vertical={false}
               />{" "}
               {/* No vertical line on left */}
-              <XAxis
-                dataKey="date"
-                tick={{ fontSize: "12px", fill: "#666" }}
-                padding={{ left: 20, right: 20 }}
-                tickFormatter={(val) => {
-                  const pacific = dayjs(val).tz("US/Pacific");
-                  return isTodayOrYesterday
-                    ? pacific.format("h:mm A")
-                    : pacific.format("MMM D");
-                }}
-              />
+             <XAxis
+  dataKey="date"
+  tick={{ fontSize: "12px", fill: "#666" }}
+  padding={{ left: 20, right: 20 }}
+  tickFormatter={(val) => {
+    // Extract just the date part (YYYY-MM-DD)
+    const datePart = val.split(' ')[0];
+    const dateObj = dayjs(datePart);
+    
+    if (isTodayOrYesterday) {
+      // For Today/Yesterday, we want to show time if available
+      // First try to get the full datetime from the original value
+      try {
+        const timePart = val.split(' ')[1]; // Get the time part if exists
+        if (timePart) {
+          const fullDateTime = `${datePart}T${timePart.split('+')[0]}`; // Remove timezone if present
+          return dayjs(fullDateTime).format("h:mm A");
+        }
+      } catch (e) {
+        console.log("Couldn't parse time", e);
+      }
+      // Fallback to just showing the date
+      return dateObj.format("MMM D");
+    } else {
+      // For other date ranges, just show the date
+      return dateObj.format("MMM D");
+    }
+  }}
+/>
               {/* Y Axis with dynamic formatting based on tab */}
               <YAxis
                 tick={{ fontSize: "12px", fill: "#666" }}
