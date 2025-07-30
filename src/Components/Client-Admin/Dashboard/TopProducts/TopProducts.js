@@ -870,12 +870,12 @@ export default function TopProductsChart({
                 dataKey="date"
                 tick={{ fontSize: "12px", fill: "#666" }}
                 padding={{ left: 20, right: 20 }}
-                tickFormatter={(val) => {
-                  const pacific = dayjs(val).tz("US/Pacific");
-                  return isTodayOrYesterday
-                    ? pacific.format("h:mm A")
-                    : pacific.format("MMM D");
-                }}
+                tickFormatter={(value) => {
+  const utcMidnight = dayjs.utc(value + 'T00:00:00Z');
+  const pacific = utcMidnight.tz("US/Pacific");
+  return pacific.format("MMM D");
+}}
+
               />
               {/* Y Axis with dynamic formatting based on tab */}
               <YAxis
