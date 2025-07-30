@@ -453,6 +453,8 @@ export default function TopProductsChart({
     fulfillment_channel,
     DateStartDate,
     DateEndDate,
+    startDate,
+    endDate
   ]);
 
   useEffect(() => {

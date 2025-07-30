@@ -709,6 +709,7 @@ function ClientDashboardpage() {
       console.log("Formatted:", formattedStartDate, formattedEndDate);
       setAppliedStartDate(formattedStartDate);
       setAppliedEndDate(formattedEndDate);
+      setAppliedPreset("")
       console.log("Applied end date:", formattedEndDate);
       setFilter(selectedCategory);
       setFilterFinal(selectedCategory);
@@ -1686,8 +1687,8 @@ function ClientDashboardpage() {
 )} */}
                 {tab === 1 && (
                   <TopProducts
-                    startDate={appliedStartDate}
-                    endDate={appliedEndDate}
+                    startDate={appliedStartDateHelium}
+                    endDate={appliedEndDateHelium}
                     widgetData={appliedPreset}
                     marketPlaceId={
                       selectedCategory == "all" ? selectedCategory : filterFinal
