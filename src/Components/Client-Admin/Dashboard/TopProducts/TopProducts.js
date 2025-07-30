@@ -494,7 +494,7 @@ console.log("DateEndDate",DateEndDate)
 
       products.forEach((product) => {
         Object.entries(product.chart || {}).forEach(([datetime, value]) => {
-          const dateObj = dayjs(datetime);
+          const dateObj = dayjs.utc(datetime).tz("US/Pacific");
 
           if (isTodayOrYesterday) {
             // Only include data from today or yesterday
