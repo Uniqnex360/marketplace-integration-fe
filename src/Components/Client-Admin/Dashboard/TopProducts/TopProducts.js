@@ -92,6 +92,7 @@ const CustomTooltip = ({
   productList,
   tab,
   hoveredProductId,
+  widgetData
 }) => {
   if (!active || !payload || payload.length === 0) return null;
 
@@ -99,12 +100,22 @@ const CustomTooltip = ({
     ? payload.filter((entry) => entry.dataKey === hoveredProductId)
     : payload;
 
-  // Only return null if there's nothing to display after filtering
   if (filteredPayload.length === 0) return null;
+    const isTodayOrYesterday = widgetData === "Today" || widgetData === "Yesterday";
 
-  const formattedDate = dayjs(label).tz("US/Pacific").format("MMM D, h:mm A");
+ const formatTooltipDate = (label) => {
+    const pacific = dayjs(label).tz("US/Pacific");
+    
+    if (isTodayOrYesterday) {
+      // For hourly data, show date and time
+      return pacific.format("MMM D, h:mm A");
+    } else {
+      // For daily data, just show the date
+      return pacific.format("MMM D, YYYY");
+    }
+  };
 
-  // Helper function to format tooltip values based on tab
+  const formattedDate = formatTooltipDate(label);
   const formatTooltipValue = (value, tab) => {
     switch (tab) {
       case 0: // Revenue
@@ -900,6 +911,7 @@ export default function TopProductsChart({
                     productList={productList}
                     tab={tab}
                     hoveredProductId={hoveredProductId}
+                     widgetData={widgetData} 
                   />
                 }
                 wrapperStyle={{ zIndex: 1000 }}
