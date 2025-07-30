@@ -514,6 +514,7 @@ export default function TopProductsChart({
           } else {
             // Other ranges: use date only (group by day)
             const dateKey = dateObj.startOf("day").toISOString();
+            console.log('datakey',dateKey)
             allTimestamps.add(dateKey);
 
             if (!chartDataMap[dateKey]) {
