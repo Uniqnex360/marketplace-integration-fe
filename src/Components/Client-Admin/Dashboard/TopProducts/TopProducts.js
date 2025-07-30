@@ -233,7 +233,7 @@ export default function TopProductsChart({
       }
     };
   }, []);
-
+  console.log("Received dates for X-axis:", bindGraph.map(item => item.date));
   /**
    * Handles copying the ASIN value to the clipboard using document.execCommand.
    * This method is more compatible in environments where navigator.clipboard might be restricted (e.g., iframes).
