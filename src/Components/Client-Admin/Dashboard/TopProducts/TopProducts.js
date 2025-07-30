@@ -488,14 +488,18 @@ console.log("DateEndDate",DateEndDate)
 
       const chartDataMap = {};
       const allTimestamps = new Set();
-
+      const startDateObj=dayjs(DateStartDate).startOf('day')
+      const endDateObj=dayjs(DateEndDate).endOf('day')
       const isTodayOrYesterday =
         widgetData === "Today" || widgetData === "Yesterday";
 
       products.forEach((product) => {
         Object.entries(product.chart || {}).forEach(([datetime, value]) => {
           const dateObj = dayjs.utc(datetime).tz("US/Pacific");
-
+          if(dateObj.isBefore(startDateObj)||dateObj.isAfter(endDateObj))
+          {
+            return
+          }
           if (isTodayOrYesterday) {
             // Only include data from today or yesterday
             const targetDay =
@@ -522,6 +526,16 @@ console.log("DateEndDate",DateEndDate)
             if (!chartDataMap[dateKey]) {
               chartDataMap[dateKey] = { date: dateKey };
             }
+            let currentDate=startDateObj;
+            while(currentDate.isBefore(endDateObj))
+            {
+              const dateKey=currentDate.toISOString()
+              if(!chartDataMap[dateKey])
+              {
+                chartDataMap[dateKey]={date:dateKey }
+              }
+              currentDate=currentDate.add(1,'day')
+            }
 
             chartDataMap[dateKey][product.id] = value;
           }
@@ -534,7 +548,7 @@ console.log("DateEndDate",DateEndDate)
 
       setBindGraph(sortedChartData);
     }
-  }, [apiResponse, widgetData]);
+  }, [apiResponse, widgetData,DateStartDate, DateEndDate]);
 
   const handleToggle = (id) => {
     setActiveProducts((prev) =>
@@ -868,9 +882,12 @@ console.log("DateEndDate",DateEndDate)
                 strokeDasharray="3 3"
                 vertical={false}
               />{" "}
-              {/* No vertical line on left */}
               <XAxis
                 dataKey="date"
+                domain={[
+                  dayjs(DateStartDate).startOf('day').toISOString(),
+                  dayjs(DateEndDate).endOf('day').toISOString()
+                ]}
                 tick={{ fontSize: "12px", fill: "#666" }}
                 padding={{ left: 20, right: 20 }}
                 tickFormatter={(val) => {
