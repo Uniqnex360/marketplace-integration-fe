@@ -42,8 +42,6 @@ import DottedCircleLoading from "../../../Loading/DotLoading";
 // import './Helium.css';
 dayjs.extend(utc);
 dayjs.extend(timezone);
-dayjs.tz.setDefault("US/Pacific");
-
 
 // Define a consistent set of colors
 const colors = [
@@ -463,60 +461,77 @@ export default function TopProductsChart({
   ]);
 
   useEffect(() => {
-  if (apiResponse?.data?.results?.items) {
-    const items = apiResponse.data.results.items;
+    if (apiResponse?.data?.results?.items) {
+      const items = apiResponse.data.results.items;
 
-    const products = items.map((item, index) => ({
-      id: `product_${index}`,
-      topIds: item.id,
-      name: item.product,
-      sku: item.sku,
-      asin: item.asin,
-      color: colors[index],
-      img: item.product_image || "",
-      chart: item.chart || {},
-      total_price: item.total_price,
-      total_units: item.total_units,
-      refund_qty: item.refund_qty,
-    }));
+      const products = items.map((item, index) => ({
+        id: `product_${index}`,
+        topIds: item.id,
+        name: item.product,
+        sku: item.sku,
+        asin: item.asin,
+        color: colors[index],
+        img: item.product_image || "",
+        chart: item.chart || {},
+        // Store all the data fields for easy access
+        total_price: item.total_price,
+        total_units: item.total_units,
+        refund_qty: item.refund_qty,
+      }));
 
-    setProductList(products);
-    setActiveProducts(products.map((p) => p.id));
+      console.log("grant", products);
+      setProductList(products);
+      setActiveProducts(products.map((p) => p.id));
 
-    const chartDataMap = {};
-    const allTimestamps = new Set();
+      const chartDataMap = {};
+      const allTimestamps = new Set();
 
-    products.forEach((product) => {
-      Object.entries(product.chart || {}).forEach(([datetime, value]) => {
-        // Convert to Pacific time first, then format as date string
-        const pacificDate = dayjs(datetime).tz("US/Pacific");
-        // For non-today/yesterday, use the full date in Pacific time
-        const dateKey = isTodayOrYesterday 
-          ? pacificDate.format("YYYY-MM-DD HH:mm:ss")
-          : pacificDate.format("YYYY-MM-DD");
-        
-        allTimestamps.add(dateKey);
+      const isTodayOrYesterday =
+        widgetData === "Today" || widgetData === "Yesterday";
 
-        if (!chartDataMap[dateKey]) {
-          chartDataMap[dateKey] = { 
-            date: dateKey,
-            // Store the original date for reference
-            originalDate: datetime
-          };
-        }
+      products.forEach((product) => {
+        Object.entries(product.chart || {}).forEach(([datetime, value]) => {
+          const dateObj = dayjs(datetime);
 
-        chartDataMap[dateKey][product.id] = value;
+          if (isTodayOrYesterday) {
+            // Only include data from today or yesterday
+            const targetDay =
+              widgetData === "Today" ? dayjs() : dayjs().subtract(1, "day");
+            if (!dateObj.isSame(targetDay, "day")) return;
+
+            const timeKey = dateObj
+              .minute(0)
+              .second(0)
+              .millisecond(0)
+              .toISOString(); // round to hour
+            allTimestamps.add(timeKey);
+
+            if (!chartDataMap[timeKey]) {
+              chartDataMap[timeKey] = { date: timeKey };
+            }
+
+            chartDataMap[timeKey][product.id] = value;
+          } else {
+            // Other ranges: use date only (group by day)
+            const dateKey = dateObj.startOf("day").toISOString();
+            allTimestamps.add(dateKey);
+
+            if (!chartDataMap[dateKey]) {
+              chartDataMap[dateKey] = { date: dateKey };
+            }
+
+            chartDataMap[dateKey][product.id] = value;
+          }
+        });
       });
-    });
 
-    // Sort dates correctly by converting to Date objects
-    const sortedChartData = [...allTimestamps]
-      .sort((a, b) => new Date(a) - new Date(b))
-      .map((timestamp) => chartDataMap[timestamp]);
+      const sortedChartData = [...allTimestamps]
+        .sort((a, b) => new Date(a) - new Date(b))
+        .map((timestamp) => chartDataMap[timestamp]);
 
-    setBindGraph(sortedChartData);
-  }
-}, [apiResponse, widgetData, isTodayOrYesterday]);
+      setBindGraph(sortedChartData);
+    }
+  }, [apiResponse, widgetData]);
 
   const handleToggle = (id) => {
     setActiveProducts((prev) =>
@@ -852,17 +867,16 @@ export default function TopProductsChart({
               />{" "}
               {/* No vertical line on left */}
               <XAxis
-  dataKey="date"
-  tick={{ fontSize: "12px", fill: "#666" }}
-  padding={{ left: 20, right: 20 }}
-  tickFormatter={(val) => {
-    // Use the original date but display in Pacific time
-    const dateObj = dayjs(val.originalDate || val).tz("US/Pacific");
-    return isTodayOrYesterday
-      ? dateObj.format("h:mm A")
-      : dateObj.format("MMM D");
-  }}
-/>
+                dataKey="date"
+                tick={{ fontSize: "12px", fill: "#666" }}
+                padding={{ left: 20, right: 20 }}
+                tickFormatter={(val) => {
+                  const pacific = dayjs(val).tz("US/Pacific");
+                  return isTodayOrYesterday
+                    ? pacific.format("h:mm A")
+                    : pacific.format("MMM D");
+                }}
+              />
               {/* Y Axis with dynamic formatting based on tab */}
               <YAxis
                 tick={{ fontSize: "12px", fill: "#666" }}
