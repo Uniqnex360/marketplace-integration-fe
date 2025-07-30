@@ -102,7 +102,8 @@ const CustomTooltip = ({
   // Only return null if there's nothing to display after filtering
   if (filteredPayload.length === 0) return null;
 
-  const formattedDate = dayjs(label).tz("US/Pacific").format("MMM D, h:mm A");
+  const formattedDate = dayjs(label).utc().format("MMM D, h:mm A");
+
 
   // Helper function to format tooltip values based on tab
   const formatTooltipValue = (value, tab) => {
@@ -872,7 +873,7 @@ export default function TopProductsChart({
                 tick={{ fontSize: "12px", fill: "#666" }}
                 padding={{ left: 20, right: 20 }}
                 tickFormatter={(val) => {
-                  const pacific = dayjs(val).tz("US/Pacific");
+                  const pacific = dayjs(val).utc();
                   return isTodayOrYesterday
                     ? pacific.format("h:mm A")
                     : pacific.format("MMM D");
