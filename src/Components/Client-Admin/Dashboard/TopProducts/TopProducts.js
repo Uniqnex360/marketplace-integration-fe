@@ -866,16 +866,17 @@ export default function TopProductsChart({
                 vertical={false}
               />{" "}
               {/* No vertical line on left */}
-             <XAxis
-  dataKey="date"
-  tick={{ fontSize: "12px", fill: "#666" }}
-  padding={{ left: 20, right: 20 }}
-  tickFormatter={(value) => {
-    // Value should be a string like "2025-07-06"
-    const pacific = dayjs.tz(value, "US/Pacific");
-    return pacific.isValid() ? pacific.format("MMM D") : "Invalid";
-  }}
-/>
+              <XAxis
+                dataKey="date"
+                tick={{ fontSize: "12px", fill: "#666" }}
+                padding={{ left: 20, right: 20 }}
+                tickFormatter={(val) => {
+                  const pacific = dayjs(val).tz("US/Pacific");
+                  return isTodayOrYesterday
+                    ? pacific.format("h:mm A")
+                    : pacific.format("MMM D");
+                }}
+              />
               {/* Y Axis with dynamic formatting based on tab */}
               <YAxis
                 tick={{ fontSize: "12px", fill: "#666" }}
