@@ -846,7 +846,7 @@ export default function TopProductsChart({
                 tick={{ fontSize: "12px", fill: "#666" }}
                 padding={{ left: 20, right: 20 }}
                 tickFormatter={(val) => {
-                  const pacific = dayjs(val).tz("US/Pacific");
+                  const pacific = dayjs(val);
                   return isTodayOrYesterday
                     ? pacific.format("h:mm A")
                     : pacific.format("MMM D");
