@@ -323,7 +323,7 @@ export default function TopProductsChart({
   const userId = userData?.id || "";
   const [openNote, setOpenNote] = useState(false);
   const [events, setEvents] = useState(true);
-  
+
   const runCerebro = () => {
     console.log("Running Cerebro...");
   };
@@ -388,7 +388,15 @@ export default function TopProductsChart({
         return `$${Math.round(value)}`;
     }
   };
+  const getDateDomain = () => {
+    if (!bindGraph.length) return [null, null];
 
+    const dates = bindGraph.map((item) => new Date(item.date));
+    const minDate = new Date(Math.min(...dates));
+    const maxDate = new Date(Math.max(...dates));
+
+    return [minDate.toISOString(), maxDate.toISOString()];
+  };
   const generateTickTimes = (graphData) => {
     if (!graphData || graphData.length === 0) return [];
 
@@ -416,42 +424,42 @@ export default function TopProductsChart({
   };
 
   const fetchTopProducts = async () => {
-  setLoading(true);
-  try {
-    const params = {
-      sortBy: getSortByValue(tab),
-      user_id: userId,
-      marketplace_id: marketPlaceId.id,
-      brand_id: brand_id,
-      manufacturer_name: manufacturer_name,
-      fulfillment_channel: fulfillment_channel,
-      timeZone: "US/Pacific"
-    };
+    setLoading(true);
+    try {
+      const params = {
+        sortBy: getSortByValue(tab),
+        user_id: userId,
+        marketplace_id: marketPlaceId.id,
+        brand_id: brand_id,
+        manufacturer_name: manufacturer_name,
+        fulfillment_channel: fulfillment_channel,
+        timeZone: "US/Pacific",
+      };
 
-    // Use custom dates if available, otherwise use preset
-    if (DateStartDate && DateEndDate) {
-      params.start_date = DateStartDate;
-      params.end_date = DateEndDate;
-    } else {
-      params.preset = widgetData;
+      // Use custom dates if available, otherwise use preset
+      if (DateStartDate && DateEndDate) {
+        params.start_date = DateStartDate;
+        params.end_date = DateEndDate;
+      } else {
+        params.preset = widgetData;
+      }
+
+      const response = await axios.post(
+        `${process.env.REACT_APP_IP}get_top_products/`,
+        params
+      );
+      setApiResponse(response.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
     }
-
-    const response = await axios.post(
-      `${process.env.REACT_APP_IP}get_top_products/`,
-      params
-    );
-    setApiResponse(response.data);
-  } catch (error) {
-    console.error("Error fetching data:", error);
-  } finally {
-    setLoading(false);
-  }
-};
-console.log("DateStartDate",DateStartDate)
-console.log("DateEndDate",DateStartDate)
+  };
+  console.log("DateStartDate", DateStartDate);
+  console.log("DateEndDate", DateStartDate);
 
   useEffect(() => {
-    if (widgetData||(DateStartDate && DateEndDate)) fetchTopProducts();
+    if (widgetData || (DateStartDate && DateEndDate)) fetchTopProducts();
   }, [
     tab,
     widgetData,
@@ -871,13 +879,15 @@ console.log("DateEndDate",DateStartDate)
               {/* No vertical line on left */}
               <XAxis
                 dataKey="date"
+                domain={getDateDomain()}
                 tick={{ fontSize: "12px", fill: "#666" }}
                 padding={{ left: 20, right: 20 }}
                 tickFormatter={(val) => {
-                  const pacific = dayjs(val).tz("US/Pacific");
-                  return isTodayOrYesterday
-                    ? pacific.format("h:mm A")
-                    : pacific.format("MMM D");
+                  const date = dayjs(val);
+                  if (widgetData === "Today" || widgetData === "Yesterday") {
+                    return date.format("h:mm A");
+                  }
+                  return date.format("MMM D");
                 }}
               />
               {/* Y Axis with dynamic formatting based on tab */}
