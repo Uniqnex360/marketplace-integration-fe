@@ -102,7 +102,9 @@ const CustomTooltip = ({
   // Only return null if there's nothing to display after filtering
   if (filteredPayload.length === 0) return null;
 
-  const formattedDate = dayjs(label).tz("US/Pacific").format("MMM D, h:mm A");
+   const formattedDate = label.includes(':') 
+    ? dayjs(label).format("MMM D, h:mm A")  // For hourly data
+    : dayjs(label).format("MMM D"); 
 
   // Helper function to format tooltip values based on tab
   const formatTooltipValue = (value, tab) => {
@@ -323,7 +325,7 @@ export default function TopProductsChart({
   const userId = userData?.id || "";
   const [openNote, setOpenNote] = useState(false);
   const [events, setEvents] = useState(true);
-  
+
   const runCerebro = () => {
     console.log("Running Cerebro...");
   };
@@ -416,40 +418,40 @@ export default function TopProductsChart({
   };
 
   const fetchTopProducts = async () => {
-  setLoading(true);
-  try {
-    const params = {
-      sortBy: getSortByValue(tab),
-      user_id: userId,
-      marketplace_id: marketPlaceId.id,
-      brand_id: brand_id,
-      manufacturer_name: manufacturer_name,
-      fulfillment_channel: fulfillment_channel,
-      timeZone: "US/Pacific"
-    };
+    setLoading(true);
+    try {
+      const params = {
+        sortBy: getSortByValue(tab),
+        user_id: userId,
+        marketplace_id: marketPlaceId.id,
+        brand_id: brand_id,
+        manufacturer_name: manufacturer_name,
+        fulfillment_channel: fulfillment_channel,
+        timeZone: "US/Pacific",
+      };
 
-    // Use custom dates if available, otherwise use preset
-    if (DateStartDate && DateEndDate) {
-      params.start_date = DateStartDate;
-      params.end_date = DateEndDate;
-    } else {
-      params.preset = widgetData;
+      // Use custom dates if available, otherwise use preset
+      if (DateStartDate && DateEndDate) {
+        params.start_date = DateStartDate;
+        params.end_date = DateEndDate;
+      } else {
+        params.preset = widgetData;
+      }
+
+      const response = await axios.post(
+        `${process.env.REACT_APP_IP}get_top_products/`,
+        params
+      );
+      setApiResponse(response.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
     }
-
-    const response = await axios.post(
-      `${process.env.REACT_APP_IP}get_top_products/`,
-      params
-    );
-    setApiResponse(response.data);
-  } catch (error) {
-    console.error("Error fetching data:", error);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   useEffect(() => {
-    if (widgetData||(DateStartDate && DateEndDate)) fetchTopProducts();
+    if (widgetData || (DateStartDate && DateEndDate)) fetchTopProducts();
   }, [
     tab,
     widgetData,
@@ -462,82 +464,82 @@ export default function TopProductsChart({
   ]);
 
   useEffect(() => {
-  if (apiResponse?.data?.results?.items) {
-    const items = apiResponse.data.results.items;
+    if (apiResponse?.data?.results?.items) {
+      const items = apiResponse.data.results.items;
 
-    const products = items.map((item, index) => ({
-      id: `product_${index}`,
-      topIds: item.id,
-      name: item.product,
-      sku: item.sku,
-      asin: item.asin,
-      color: colors[index],
-      img: item.product_image || "",
-      chart: item.chart || {},
-      total_price: item.total_price,
-      total_units: item.total_units,
-      refund_qty: item.refund_qty,
-    }));
+      const products = items.map((item, index) => ({
+        id: `product_${index}`,
+        topIds: item.id,
+        name: item.product,
+        sku: item.sku,
+        asin: item.asin,
+        color: colors[index],
+        img: item.product_image || "",
+        chart: item.chart || {},
+        total_price: item.total_price,
+        total_units: item.total_units,
+        refund_qty: item.refund_qty,
+      }));
 
-    setProductList(products);
-    setActiveProducts(products.map((p) => p.id));
+      setProductList(products);
+      setActiveProducts(products.map((p) => p.id));
 
-    const chartDataMap = {};
-    const allTimestamps = new Set();
+      const chartDataMap = {};
+      const allTimestamps = new Set();
 
-    const isTodayOrYesterday =
-      widgetData === "Today" || widgetData === "Yesterday";
+      const isTodayOrYesterday =
+        widgetData === "Today" || widgetData === "Yesterday";
 
-    products.forEach((product) => {
-      Object.entries(product.chart || {}).forEach(([datetime, value]) => {
-        if (isTodayOrYesterday) {
-          // For today/yesterday, convert to Pacific for hourly display
-          const pacificDate = dayjs(datetime).tz("US/Pacific");
-          const targetDay =
-            widgetData === "Today" 
-              ? dayjs().tz("US/Pacific") 
-              : dayjs().tz("US/Pacific").subtract(1, "day");
-          
-          if (!pacificDate.isSame(targetDay, "day")) return;
+      products.forEach((product) => {
+        Object.entries(product.chart || {}).forEach(([datetime, value]) => {
+          if (isTodayOrYesterday) {
+            // For today/yesterday, convert to Pacific for hourly display
+            const pacificDate = dayjs(datetime).tz("US/Pacific");
+            const targetDay =
+              widgetData === "Today"
+                ? dayjs().tz("US/Pacific")
+                : dayjs().tz("US/Pacific").subtract(1, "day");
 
-          const timeKey = pacificDate
-            .minute(0)
-            .second(0)
-            .millisecond(0)
-            .format("YYYY-MM-DD HH:mm:ss");
-          
-          allTimestamps.add(timeKey);
+            if (!pacificDate.isSame(targetDay, "day")) return;
 
-          if (!chartDataMap[timeKey]) {
-            chartDataMap[timeKey] = { date: timeKey };
+            const timeKey = pacificDate
+              .minute(0)
+              .second(0)
+              .millisecond(0)
+              .format("YYYY-MM-DD HH:mm:ss");
+
+            allTimestamps.add(timeKey);
+
+            if (!chartDataMap[timeKey]) {
+              chartDataMap[timeKey] = { date: timeKey };
+            }
+
+            chartDataMap[timeKey][product.id] = value;
+          } else {
+            // For date ranges, extract just the date part from the UTC timestamp
+            // This treats "2025-07-07 00:00:00+00:00" as July 7th
+            const dateOnly = datetime.split(" ")[0]; // Gets "2025-07-07"
+
+            allTimestamps.add(dateOnly);
+
+            if (!chartDataMap[dateOnly]) {
+              chartDataMap[dateOnly] = { date: dateOnly };
+            }
+
+            chartDataMap[dateOnly][product.id] =
+              (chartDataMap[dateOnly][product.id] || 0) + value;
           }
-
-          chartDataMap[timeKey][product.id] = value;
-        } else {
-          // For date ranges, extract just the date part from the UTC timestamp
-          // This treats "2025-07-07 00:00:00+00:00" as July 7th regardless of timezone
-          const dateOnly = datetime.split(' ')[0]; // Gets "2025-07-07"
-          
-          allTimestamps.add(dateOnly);
-
-          if (!chartDataMap[dateOnly]) {
-            chartDataMap[dateOnly] = { date: dateOnly };
-          }
-
-          chartDataMap[dateOnly][product.id] = 
-            (chartDataMap[dateOnly][product.id] || 0) + value;
-        }
+        });
       });
-    });
 
-    const sortedChartData = [...allTimestamps]
-      .sort((a, b) => dayjs(a).valueOf() - dayjs(b).valueOf())
-      .map((timestamp) => chartDataMap[timestamp]);
+      const sortedChartData = [...allTimestamps]
+        .sort((a, b) => dayjs(a).valueOf() - dayjs(b).valueOf())
+        .map((timestamp) => chartDataMap[timestamp]);
 
-    console.log("Processed chart data:", sortedChartData);
-    setBindGraph(sortedChartData);
-  }
-}, [apiResponse, widgetData]);
+      setBindGraph(sortedChartData);
+    }
+  }, [apiResponse, widgetData]);
+
   const handleToggle = (id) => {
     setActiveProducts((prev) =>
       prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]
@@ -876,10 +878,13 @@ export default function TopProductsChart({
                 tick={{ fontSize: "12px", fill: "#666" }}
                 padding={{ left: 20, right: 20 }}
                 tickFormatter={(val) => {
-                  const pacific = dayjs(val).tz("US/Pacific");
-                  return isTodayOrYesterday
-                    ? pacific.format("h:mm A")
-                    : pacific.format("MMM D");
+                  if (isTodayOrYesterday) {
+                    // For hourly data, val is already in Pacific time format
+                    return dayjs(val).format("h:mm A");
+                  } else {
+                    // For date ranges, val is just the date (YYYY-MM-DD)
+                    return dayjs(val).format("MMM D");
+                  }
                 }}
               />
               {/* Y Axis with dynamic formatting based on tab */}
