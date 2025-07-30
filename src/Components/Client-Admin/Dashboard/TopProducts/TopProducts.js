@@ -392,7 +392,7 @@ export default function TopProductsChart({
   const generateTickTimes = (graphData) => {
     if (!graphData || graphData.length === 0) return [];
 
-    const start = dayjs(graphData[0].date).startOf("day");
+    const start = dayjs(graphData[1].date).startOf("day");
     const end = dayjs(graphData[graphData.length - 1].date).endOf("day");
     const totalTicks = 7;
     const intervalMs = end.diff(start) / (totalTicks - 1);
