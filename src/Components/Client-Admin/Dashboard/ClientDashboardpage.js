@@ -1687,8 +1687,8 @@ function ClientDashboardpage() {
 )} */}
                 {tab === 1 && (
                   <TopProducts
-                    // startDate={appliedStartDateHelium}
-                    // endDate={appliedEndDateHelium}
+                    startDate={appliedStartDateHelium}
+                    endDate={appliedEndDateHelium}
                     widgetData={appliedPreset}
                     marketPlaceId={
                       selectedCategory == "all" ? selectedCategory : filterFinal
@@ -1697,8 +1697,8 @@ function ClientDashboardpage() {
                     product_id={mergedProductsFilter}
                     manufacturer_name={selectedManufacturerFilter}
                     fulfillment_channel={selectedFulfillment}
-                    DateStartDate={appliedStartDate || appliedStartDateHelium}
-                    DateEndDate={appliedEndDate || appliedEndDateHelium}
+                    DateStartDate={appliedStartDate}
+                    DateEndDate={appliedEndDate}
                   />
                 )}
                 {tab === 2 && (
