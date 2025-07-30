@@ -233,7 +233,7 @@ export default function TopProductsChart({
       }
     };
   }, []);
-  console.log("Received dates for X-axis:", bindGraph.map(item => item.date));
+
   /**
    * Handles copying the ASIN value to the clipboard using document.execCommand.
    * This method is more compatible in environments where navigator.clipboard might be restricted (e.g., iframes).
@@ -447,6 +447,7 @@ export default function TopProductsChart({
     setLoading(false);
   }
 };
+
   useEffect(() => {
     if (widgetData||(DateStartDate && DateEndDate)) fetchTopProducts();
   }, [
@@ -537,7 +538,6 @@ export default function TopProductsChart({
     setBindGraph(sortedChartData);
   }
 }, [apiResponse, widgetData]);
-
   const handleToggle = (id) => {
     setActiveProducts((prev) =>
       prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]
@@ -872,25 +872,16 @@ export default function TopProductsChart({
               />{" "}
               {/* No vertical line on left */}
               <XAxis
-  dataKey="date"
-  tick={{ fontSize: "12px", fill: "#666" }}
-  padding={{ left: 20, right: 20 }}
-  tickFormatter={(val) => {
-    if (!val) return "";
-    
-    const dateObj = dayjs(val);
-    
-    if (isTodayOrYesterday) {
-      // For hourly data, show time
-      return dateObj.format("h:mm A");
-    } else {
-      // For daily data, show date
-      return dateObj.format("MMM D");
-    }
-  }}
-  domain={['dataMin', 'dataMax']}
-  type="category"
-/>  
+                dataKey="date"
+                tick={{ fontSize: "12px", fill: "#666" }}
+                padding={{ left: 20, right: 20 }}
+                tickFormatter={(val) => {
+                  const pacific = dayjs(val).tz("US/Pacific");
+                  return isTodayOrYesterday
+                    ? pacific.format("h:mm A")
+                    : pacific.format("MMM D");
+                }}
+              />
               {/* Y Axis with dynamic formatting based on tab */}
               <YAxis
                 tick={{ fontSize: "12px", fill: "#666" }}
