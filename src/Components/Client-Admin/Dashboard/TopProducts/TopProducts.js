@@ -461,78 +461,84 @@ export default function TopProductsChart({
   ]);
 
   useEffect(() => {
-    if (apiResponse?.data?.results?.items) {
-      const items = apiResponse.data.results.items;
+  if (apiResponse?.data?.results?.items) {
+    const items = apiResponse.data.results.items;
 
-      const products = items.map((item, index) => ({
-        id: `product_${index}`,
-        topIds: item.id,
-        name: item.product,
-        sku: item.sku,
-        asin: item.asin,
-        color: colors[index],
-        img: item.product_image || "",
-        chart: item.chart || {},
-        // Store all the data fields for easy access
-        total_price: item.total_price,
-        total_units: item.total_units,
-        refund_qty: item.refund_qty,
-      }));
+    const products = items.map((item, index) => ({
+      id: `product_${index}`,
+      topIds: item.id,
+      name: item.product,
+      sku: item.sku,
+      asin: item.asin,
+      color: colors[index],
+      img: item.product_image || "",
+      chart: item.chart || {},
+      total_price: item.total_price,
+      total_units: item.total_units,
+      refund_qty: item.refund_qty,
+    }));
 
-      console.log("grant", products);
-      setProductList(products);
-      setActiveProducts(products.map((p) => p.id));
+    setProductList(products);
+    setActiveProducts(products.map((p) => p.id));
 
-      const chartDataMap = {};
-      const allTimestamps = new Set();
+    const chartDataMap = {};
+    const allTimestamps = new Set();
 
-      const isTodayOrYesterday =
-        widgetData === "Today" || widgetData === "Yesterday";
+    const isTodayOrYesterday =
+      widgetData === "Today" || widgetData === "Yesterday";
 
-      products.forEach((product) => {
-        Object.entries(product.chart || {}).forEach(([datetime, value]) => {
-          const dateObj = dayjs(datetime);
+    products.forEach((product) => {
+      Object.entries(product.chart || {}).forEach(([datetime, value]) => {
+        // Parse the UTC datetime and convert to Pacific
+        const dateObj = dayjs(datetime).tz("US/Pacific");
 
-          if (isTodayOrYesterday) {
-            // Only include data from today or yesterday
-            const targetDay =
-              widgetData === "Today" ? dayjs() : dayjs().subtract(1, "day");
-            if (!dateObj.isSame(targetDay, "day")) return;
+        if (isTodayOrYesterday) {
+          const targetDay =
+            widgetData === "Today" 
+              ? dayjs().tz("US/Pacific") 
+              : dayjs().tz("US/Pacific").subtract(1, "day");
+          
+          if (!dateObj.isSame(targetDay, "day")) return;
 
-            const timeKey = dateObj
-              .minute(0)
-              .second(0)
-              .millisecond(0)
-              .toISOString(); // round to hour
-            allTimestamps.add(timeKey);
+          // For hourly data, round to hour and keep in Pacific time
+          const timeKey = dateObj
+            .minute(0)
+            .second(0)
+            .millisecond(0)
+            .format("YYYY-MM-DD HH:mm:ss");
+          
+          allTimestamps.add(timeKey);
 
-            if (!chartDataMap[timeKey]) {
-              chartDataMap[timeKey] = { date: timeKey };
-            }
-
-            chartDataMap[timeKey][product.id] = value;
-          } else {
-            // Other ranges: use date only (group by day)
-            const dateKey = dateObj.startOf("day").toISOString();
-            console.log('datakey',dateKey)
-            allTimestamps.add(dateKey);
-
-            if (!chartDataMap[dateKey]) {
-              chartDataMap[dateKey] = { date: dateKey };
-            }
-
-            chartDataMap[dateKey][product.id] = value;
+          if (!chartDataMap[timeKey]) {
+            chartDataMap[timeKey] = { date: timeKey };
           }
-        });
+
+          chartDataMap[timeKey][product.id] = value;
+        } else {
+          // For daily data, use the date in Pacific timezone
+          const dateKey = dateObj.format("YYYY-MM-DD");
+          
+          allTimestamps.add(dateKey);
+
+          if (!chartDataMap[dateKey]) {
+            chartDataMap[dateKey] = { date: dateKey };
+          }
+
+          // Accumulate values for the same day if needed
+          chartDataMap[dateKey][product.id] = 
+            (chartDataMap[dateKey][product.id] || 0) + value;
+        }
       });
+    });
 
-      const sortedChartData = [...allTimestamps]
-        .sort((a, b) => new Date(a) - new Date(b))
-        .map((timestamp) => chartDataMap[timestamp]);
+    const sortedChartData = [...allTimestamps]
+      .sort((a, b) => dayjs(a).valueOf() - dayjs(b).valueOf())
+      .map((timestamp) => chartDataMap[timestamp]);
 
-      setBindGraph(sortedChartData);
-    }
-  }, [apiResponse, widgetData]);
+    console.log("Processed chart data:", sortedChartData);
+    setBindGraph(sortedChartData);
+  }
+}, [apiResponse, widgetData]);
 
   const handleToggle = (id) => {
     setActiveProducts((prev) =>
@@ -868,16 +874,25 @@ export default function TopProductsChart({
               />{" "}
               {/* No vertical line on left */}
               <XAxis
-                dataKey="date"
-                tick={{ fontSize: "12px", fill: "#666" }}
-                padding={{ left: 20, right: 20 }}
-                tickFormatter={(val) => {
-                  const pacific = dayjs(val).tz("US/Pacific");
-                  return isTodayOrYesterday
-                    ? pacific.format("h:mm A")
-                    : pacific.format("MMM D");
-                }}
-              />
+  dataKey="date"
+  tick={{ fontSize: "12px", fill: "#666" }}
+  padding={{ left: 20, right: 20 }}
+  tickFormatter={(val) => {
+    if (!val) return "";
+    
+    const dateObj = dayjs(val);
+    
+    if (isTodayOrYesterday) {
+      // For hourly data, show time
+      return dateObj.format("h:mm A");
+    } else {
+      // For daily data, show date
+      return dateObj.format("MMM D");
+    }
+  }}
+  domain={['dataMin', 'dataMax']}
+  type="category"
+/>  
               {/* Y Axis with dynamic formatting based on tab */}
               <YAxis
                 tick={{ fontSize: "12px", fill: "#666" }}
