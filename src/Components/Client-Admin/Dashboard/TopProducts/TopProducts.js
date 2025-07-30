@@ -42,6 +42,8 @@ import DottedCircleLoading from "../../../Loading/DotLoading";
 // import './Helium.css';
 dayjs.extend(utc);
 dayjs.extend(timezone);
+dayjs.tz.setDefault("US/Pacific");
+
 
 // Define a consistent set of colors
 const colors = [
@@ -486,27 +488,35 @@ export default function TopProductsChart({
 
     products.forEach((product) => {
       Object.entries(product.chart || {}).forEach(([datetime, value]) => {
-        // Convert the datetime to Pacific time and format without time component
-        const dateKey = dayjs(datetime).tz("US/Pacific").format('YYYY-MM-DD');
+        // Convert to Pacific time first, then format as date string
+        const pacificDate = dayjs(datetime).tz("US/Pacific");
+        // For non-today/yesterday, use the full date in Pacific time
+        const dateKey = isTodayOrYesterday 
+          ? pacificDate.format("YYYY-MM-DD HH:mm:ss")
+          : pacificDate.format("YYYY-MM-DD");
         
         allTimestamps.add(dateKey);
 
         if (!chartDataMap[dateKey]) {
-          chartDataMap[dateKey] = { date: dateKey };
+          chartDataMap[dateKey] = { 
+            date: dateKey,
+            // Store the original date for reference
+            originalDate: datetime
+          };
         }
 
         chartDataMap[dateKey][product.id] = value;
       });
     });
 
-    // Sort the dates correctly
+    // Sort dates correctly by converting to Date objects
     const sortedChartData = [...allTimestamps]
       .sort((a, b) => new Date(a) - new Date(b))
       .map((timestamp) => chartDataMap[timestamp]);
 
     setBindGraph(sortedChartData);
   }
-}, [apiResponse, widgetData]);
+}, [apiResponse, widgetData, isTodayOrYesterday]);
 
   const handleToggle = (id) => {
     setActiveProducts((prev) =>
@@ -842,16 +852,17 @@ export default function TopProductsChart({
               />{" "}
               {/* No vertical line on left */}
               <XAxis
-                dataKey="date"
-                tick={{ fontSize: "12px", fill: "#666" }}
-                padding={{ left: 20, right: 20 }}
-                tickFormatter={(val) => {
-                  const pacific = dayjs(val);
-                  return isTodayOrYesterday
-                    ? pacific.format("h:mm A")
-                    : pacific.format("MMM D");
-                }}
-              />
+  dataKey="date"
+  tick={{ fontSize: "12px", fill: "#666" }}
+  padding={{ left: 20, right: 20 }}
+  tickFormatter={(val) => {
+    // Use the original date but display in Pacific time
+    const dateObj = dayjs(val.originalDate || val).tz("US/Pacific");
+    return isTodayOrYesterday
+      ? dateObj.format("h:mm A")
+      : dateObj.format("MMM D");
+  }}
+/>
               {/* Y Axis with dynamic formatting based on tab */}
               <YAxis
                 tick={{ fontSize: "12px", fill: "#666" }}
