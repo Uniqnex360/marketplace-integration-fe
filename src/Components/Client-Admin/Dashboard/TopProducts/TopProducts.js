@@ -199,6 +199,8 @@ const CustomTooltip = ({
 };
 
 export default function TopProductsChart({
+  startDate,
+  endDate,
   widgetData,
   marketPlaceId,
   brand_id,
@@ -223,14 +225,14 @@ export default function TopProductsChart({
   const [hoveredProductId, setHoveredProductId] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // useEffect(() => {
-  //   // Cleanup function to clear the timeout if the component unmounts
-  //   return () => {
-  //     if (copyTimeoutRef.current) {
-  //       clearTimeout(copyTimeoutRef.current);
-  //     }
-  //   };
-  // }, []);
+  useEffect(() => {
+    // Cleanup function to clear the timeout if the component unmounts
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
 
   /**
    * Handles copying the ASIN value to the clipboard using document.execCommand.
@@ -414,34 +416,42 @@ export default function TopProductsChart({
   };
 
   const fetchTopProducts = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_IP}get_top_products/`,
-        {
-          sortBy: getSortByValue(tab),
-          preset: widgetData,
-          user_id: userId,
-          marketplace_id: marketPlaceId.id,
-          brand_id: brand_id,
-          manufacturer_name: manufacturer_name,
-          fulfillment_channel: fulfillment_channel,
-          start_date: DateStartDate,
-          end_date: DateEndDate,
-          timeZone: "US/Pacific",
-        }
-      );
-      console.log("get_top_products", response);
-      setApiResponse(response.data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
+  setLoading(true);
+  try {
+    const params = {
+      sortBy: getSortByValue(tab),
+      user_id: userId,
+      marketplace_id: marketPlaceId.id,
+      brand_id: brand_id,
+      manufacturer_name: manufacturer_name,
+      fulfillment_channel: fulfillment_channel,
+      timeZone: "US/Pacific"
+    };
+
+    // Use custom dates if available, otherwise use preset
+    if (DateStartDate && DateEndDate) {
+      params.start_date = DateStartDate;
+      params.end_date = DateEndDate;
+    } else {
+      params.preset = widgetData;
     }
-  };
+
+    const response = await axios.post(
+      `${process.env.REACT_APP_IP}get_top_products/`,
+      params
+    );
+    setApiResponse(response.data);
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+console.log("DateStartDate",DateStartDate)
+console.log("DateEndDate",DateEndDate)
 
   useEffect(() => {
-    if (widgetData) fetchTopProducts();
+    if (widgetData||(DateStartDate && DateEndDate)) fetchTopProducts();
   }, [
     tab,
     widgetData,
