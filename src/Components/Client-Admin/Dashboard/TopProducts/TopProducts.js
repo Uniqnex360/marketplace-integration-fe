@@ -92,7 +92,6 @@ const CustomTooltip = ({
   productList,
   tab,
   hoveredProductId,
-  widgetData
 }) => {
   if (!active || !payload || payload.length === 0) return null;
 
@@ -100,22 +99,12 @@ const CustomTooltip = ({
     ? payload.filter((entry) => entry.dataKey === hoveredProductId)
     : payload;
 
+  // Only return null if there's nothing to display after filtering
   if (filteredPayload.length === 0) return null;
-    const isTodayOrYesterday = widgetData === "Today" || widgetData === "Yesterday";
 
- const formatTooltipDate = (label) => {
-    const pacific = dayjs(label).tz("US/Pacific");
-    
-    if (isTodayOrYesterday) {
-      // For hourly data, show date and time
-      return pacific.format("MMM D, h:mm A");
-    } else {
-      // For daily data, just show the date
-      return pacific.format("MMM D, YYYY");
-    }
-  };
+  const formattedDate = dayjs(label).tz("US/Pacific").format("MMM D, h:mm A");
 
-  const formattedDate = formatTooltipDate(label);
+  // Helper function to format tooltip values based on tab
   const formatTooltipValue = (value, tab) => {
     switch (tab) {
       case 0: // Revenue
@@ -334,7 +323,7 @@ export default function TopProductsChart({
   const userId = userData?.id || "";
   const [openNote, setOpenNote] = useState(false);
   const [events, setEvents] = useState(true);
-
+  
   const runCerebro = () => {
     console.log("Running Cerebro...");
   };
@@ -427,39 +416,40 @@ export default function TopProductsChart({
   };
 
   const fetchTopProducts = async () => {
-    setLoading(true);
-    try {
-      const params = {
-        sortBy: getSortByValue(tab),
-        user_id: userId,
-        marketplace_id: marketPlaceId.id,
-        brand_id: brand_id,
-        manufacturer_name: manufacturer_name,
-        fulfillment_channel: fulfillment_channel,
-        timeZone: "US/Pacific",
-      };
+  setLoading(true);
+  try {
+    const params = {
+      sortBy: getSortByValue(tab),
+      user_id: userId,
+      marketplace_id: marketPlaceId.id,
+      brand_id: brand_id,
+      manufacturer_name: manufacturer_name,
+      fulfillment_channel: fulfillment_channel,
+      timeZone: "US/Pacific"
+    };
 
-      // Use custom dates if available, otherwise use preset
-      if (DateStartDate && DateEndDate) {
-        params.start_date = DateStartDate;
-        params.end_date = DateEndDate;
-      } else {
-        params.preset = widgetData;
-      }
-
-      const response = await axios.post(
-        `${process.env.REACT_APP_IP}get_top_products/`,
-        params
-      );
-      setApiResponse(response.data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
+    // Use custom dates if available, otherwise use preset
+    if (DateStartDate && DateEndDate) {
+      params.start_date = DateStartDate;
+      params.end_date = DateEndDate;
+    } else {
+      params.preset = widgetData;
     }
-  };
+
+    const response = await axios.post(
+      `${process.env.REACT_APP_IP}get_top_products/`,
+      params
+    );
+    console.log('gettopproducts',response)
+    setApiResponse(response.data);
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  } finally {
+    setLoading(false);
+  }
+};
   useEffect(() => {
-    if (widgetData || (DateStartDate && DateEndDate)) fetchTopProducts();
+    if (widgetData||(DateStartDate && DateEndDate)) fetchTopProducts();
   }, [
     tab,
     widgetData,
@@ -484,6 +474,7 @@ export default function TopProductsChart({
         color: colors[index],
         img: item.product_image || "",
         chart: item.chart || {},
+        // Store all the data fields for easy access
         total_price: item.total_price,
         total_units: item.total_units,
         refund_qty: item.refund_qty,
@@ -513,7 +504,7 @@ export default function TopProductsChart({
               .minute(0)
               .second(0)
               .millisecond(0)
-              .toISOString();
+              .toISOString(); // round to hour
             allTimestamps.add(timeKey);
 
             if (!chartDataMap[timeKey]) {
@@ -538,9 +529,6 @@ export default function TopProductsChart({
       const sortedChartData = [...allTimestamps]
         .sort((a, b) => new Date(a) - new Date(b))
         .map((timestamp) => chartDataMap[timestamp]);
-
-      console.log("Chart data timestamps:", [...allTimestamps]);
-      console.log("Sorted chart data:", sortedChartData);
 
       setBindGraph(sortedChartData);
     }
@@ -889,11 +877,6 @@ export default function TopProductsChart({
                     ? pacific.format("h:mm A")
                     : pacific.format("MMM D");
                 }}
-                // Add these props to control tick generation:
-                type="category"
-                scale="point"
-                interval={0} // Show all ticks based on your data
-                domain={["dataMin", "dataMax"]} // Only show range of actual data
               />
               {/* Y Axis with dynamic formatting based on tab */}
               <YAxis
@@ -911,7 +894,6 @@ export default function TopProductsChart({
                     productList={productList}
                     tab={tab}
                     hoveredProductId={hoveredProductId}
-                     widgetData={widgetData} 
                   />
                 }
                 wrapperStyle={{ zIndex: 1000 }}
