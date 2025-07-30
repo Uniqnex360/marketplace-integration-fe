@@ -199,8 +199,6 @@ const CustomTooltip = ({
 };
 
 export default function TopProductsChart({
-  startDate,
-  endDate,
   widgetData,
   marketPlaceId,
   brand_id,
@@ -225,6 +223,14 @@ export default function TopProductsChart({
   const [hoveredProductId, setHoveredProductId] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // useEffect(() => {
+  //   // Cleanup function to clear the timeout if the component unmounts
+  //   return () => {
+  //     if (copyTimeoutRef.current) {
+  //       clearTimeout(copyTimeoutRef.current);
+  //     }
+  //   };
+  // }, []);
 
   /**
    * Handles copying the ASIN value to the clipboard using document.execCommand.

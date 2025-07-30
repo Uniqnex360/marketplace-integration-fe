@@ -1687,8 +1687,8 @@ function ClientDashboardpage() {
 )} */}
                 {tab === 1 && (
                   <TopProducts
-                    startDate={appliedStartDateHelium}
-                    endDate={appliedEndDateHelium}
+                    // startDate={appliedStartDateHelium}
+                    // endDate={appliedEndDateHelium}
                     widgetData={appliedPreset}
                     marketPlaceId={
                       selectedCategory == "all" ? selectedCategory : filterFinal
