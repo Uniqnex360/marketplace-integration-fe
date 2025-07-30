@@ -489,19 +489,17 @@ export default function TopProductsChart({
 
     products.forEach((product) => {
       Object.entries(product.chart || {}).forEach(([datetime, value]) => {
-        // Parse the UTC datetime and convert to Pacific
-        const dateObj = dayjs(datetime).tz("US/Pacific");
-
         if (isTodayOrYesterday) {
+          // For today/yesterday, convert to Pacific for hourly display
+          const pacificDate = dayjs(datetime).tz("US/Pacific");
           const targetDay =
             widgetData === "Today" 
               ? dayjs().tz("US/Pacific") 
               : dayjs().tz("US/Pacific").subtract(1, "day");
           
-          if (!dateObj.isSame(targetDay, "day")) return;
+          if (!pacificDate.isSame(targetDay, "day")) return;
 
-          // For hourly data, round to hour and keep in Pacific time
-          const timeKey = dateObj
+          const timeKey = pacificDate
             .minute(0)
             .second(0)
             .millisecond(0)
@@ -515,18 +513,18 @@ export default function TopProductsChart({
 
           chartDataMap[timeKey][product.id] = value;
         } else {
-          // For daily data, use the date in Pacific timezone
-          const dateKey = dateObj.format("YYYY-MM-DD");
+          // For date ranges, extract just the date part from the UTC timestamp
+          // This treats "2025-07-07 00:00:00+00:00" as July 7th regardless of timezone
+          const dateOnly = datetime.split(' ')[0]; // Gets "2025-07-07"
           
-          allTimestamps.add(dateKey);
+          allTimestamps.add(dateOnly);
 
-          if (!chartDataMap[dateKey]) {
-            chartDataMap[dateKey] = { date: dateKey };
+          if (!chartDataMap[dateOnly]) {
+            chartDataMap[dateOnly] = { date: dateOnly };
           }
 
-          // Accumulate values for the same day if needed
-          chartDataMap[dateKey][product.id] = 
-            (chartDataMap[dateKey][product.id] || 0) + value;
+          chartDataMap[dateOnly][product.id] = 
+            (chartDataMap[dateOnly][product.id] || 0) + value;
         }
       });
     });
