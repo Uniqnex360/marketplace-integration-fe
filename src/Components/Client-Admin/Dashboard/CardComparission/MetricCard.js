@@ -1106,7 +1106,7 @@ const MetricCard = ({
 
           expenses: `-${formatCurrency(
             safeGet(periodData, "summary.expenses.current", 0)
-          ).substring(1)}`,
+          ).replace(/[^0-9.,]+/g, "")}`,
 
           netProfit: formatCurrency(
             safeGet(periodData, "summary.netProfit.current", 0)
