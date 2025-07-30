@@ -102,8 +102,7 @@ const CustomTooltip = ({
   // Only return null if there's nothing to display after filtering
   if (filteredPayload.length === 0) return null;
 
-  const formattedDate = dayjs(label).utc().format("MMM D, h:mm A");
-
+  const formattedDate = dayjs(label).tz("US/Pacific").format("MMM D, h:mm A");
 
   // Helper function to format tooltip values based on tab
   const formatTooltipValue = (value, tab) => {
@@ -441,7 +440,6 @@ export default function TopProductsChart({
       `${process.env.REACT_APP_IP}get_top_products/`,
       params
     );
-    console.log('gettopproducts',response)
     setApiResponse(response.data);
   } catch (error) {
     console.error("Error fetching data:", error);
@@ -463,77 +461,52 @@ export default function TopProductsChart({
   ]);
 
   useEffect(() => {
-    if (apiResponse?.data?.results?.items) {
-      const items = apiResponse.data.results.items;
+  if (apiResponse?.data?.results?.items) {
+    const items = apiResponse.data.results.items;
 
-      const products = items.map((item, index) => ({
-        id: `product_${index}`,
-        topIds: item.id,
-        name: item.product,
-        sku: item.sku,
-        asin: item.asin,
-        color: colors[index],
-        img: item.product_image || "",
-        chart: item.chart || {},
-        // Store all the data fields for easy access
-        total_price: item.total_price,
-        total_units: item.total_units,
-        refund_qty: item.refund_qty,
-      }));
+    const products = items.map((item, index) => ({
+      id: `product_${index}`,
+      topIds: item.id,
+      name: item.product,
+      sku: item.sku,
+      asin: item.asin,
+      color: colors[index],
+      img: item.product_image || "",
+      chart: item.chart || {},
+      total_price: item.total_price,
+      total_units: item.total_units,
+      refund_qty: item.refund_qty,
+    }));
 
-      console.log("grant", products);
-      setProductList(products);
-      setActiveProducts(products.map((p) => p.id));
+    setProductList(products);
+    setActiveProducts(products.map((p) => p.id));
 
-      const chartDataMap = {};
-      const allTimestamps = new Set();
+    const chartDataMap = {};
+    const allTimestamps = new Set();
 
-      const isTodayOrYesterday =
-        widgetData === "Today" || widgetData === "Yesterday";
+    products.forEach((product) => {
+      Object.entries(product.chart || {}).forEach(([datetime, value]) => {
+        // Convert the datetime to Pacific time and format without time component
+        const dateKey = dayjs(datetime).tz("US/Pacific").format('YYYY-MM-DD');
+        
+        allTimestamps.add(dateKey);
 
-      products.forEach((product) => {
-        Object.entries(product.chart || {}).forEach(([datetime, value]) => {
-          const dateObj = dayjs(datetime);
+        if (!chartDataMap[dateKey]) {
+          chartDataMap[dateKey] = { date: dateKey };
+        }
 
-          if (isTodayOrYesterday) {
-            // Only include data from today or yesterday
-            const targetDay =
-              widgetData === "Today" ? dayjs() : dayjs().subtract(1, "day");
-            if (!dateObj.isSame(targetDay, "day")) return;
-
-            const timeKey = dateObj
-              .minute(0)
-              .second(0)
-              .millisecond(0)
-              .toISOString(); // round to hour
-            allTimestamps.add(timeKey);
-
-            if (!chartDataMap[timeKey]) {
-              chartDataMap[timeKey] = { date: timeKey };
-            }
-
-            chartDataMap[timeKey][product.id] = value;
-          } else {
-            // Other ranges: use date only (group by day)
-            const dateKey = dateObj.startOf("day").toISOString();
-            allTimestamps.add(dateKey);
-
-            if (!chartDataMap[dateKey]) {
-              chartDataMap[dateKey] = { date: dateKey };
-            }
-
-            chartDataMap[dateKey][product.id] = value;
-          }
-        });
+        chartDataMap[dateKey][product.id] = value;
       });
+    });
 
-      const sortedChartData = [...allTimestamps]
-        .sort((a, b) => new Date(a) - new Date(b))
-        .map((timestamp) => chartDataMap[timestamp]);
+    // Sort the dates correctly
+    const sortedChartData = [...allTimestamps]
+      .sort((a, b) => new Date(a) - new Date(b))
+      .map((timestamp) => chartDataMap[timestamp]);
 
-      setBindGraph(sortedChartData);
-    }
-  }, [apiResponse, widgetData]);
+    setBindGraph(sortedChartData);
+  }
+}, [apiResponse, widgetData]);
 
   const handleToggle = (id) => {
     setActiveProducts((prev) =>
@@ -873,7 +846,7 @@ export default function TopProductsChart({
                 tick={{ fontSize: "12px", fill: "#666" }}
                 padding={{ left: 20, right: 20 }}
                 tickFormatter={(val) => {
-                  const pacific = dayjs(val).utc();
+                  const pacific = dayjs(val).tz("US/Pacific");
                   return isTodayOrYesterday
                     ? pacific.format("h:mm A")
                     : pacific.format("MMM D");
