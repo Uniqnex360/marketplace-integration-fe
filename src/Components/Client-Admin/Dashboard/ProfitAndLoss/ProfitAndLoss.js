@@ -604,11 +604,10 @@ const ProfitAndLoss = ({
       )?.toFixed(2),
     },
       {
-        label: "Expenses",
-        
-        value: formatCurrency(summaryOther?.expenses?.current),
-        delta: summary?.expenses?.delta?.toFixed(2),
-      },
+  label: "Expenses",
+  value: formatCurrency(summary?.expenses?.current),
+  delta: summary?.expenses?.delta?.toFixed(2),
+},
     {
       label: "Net Profit",
       
