@@ -585,7 +585,12 @@ const OrderDetail = () => {
                           : "N/A"}
                       </TableCell>
                       <TableCell>
-                        {(item.Pricing?.ItemPrice?.Amount || 0).toFixed(2)}
+                        {item?.Pricing?.ItemPrice?.Amount !== undefined &&
+                        item?.Pricing?.ItemPrice?.Amount !== null
+                          ? `$${Number(item.Pricing.ItemPrice.Amount).toFixed(
+                              2
+                            )}`
+                          : "N/A"}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -603,7 +608,7 @@ const OrderDetail = () => {
                     </TableCell>
                     <TableCell>$0.00</TableCell>
                   </TableRow>
-                   <TableRow>
+                  <TableRow>
                     <TableCell colSpan={4} align="right">
                       <strong>Shipping Tax:</strong>
                     </TableCell>
@@ -616,12 +621,12 @@ const OrderDetail = () => {
                     <TableCell>
                       {order?.order_items
                         ? `$${order.order_items
-                          .reduce(
-                            (total, item) =>
-                              total + (item.Pricing?.ItemTax?.Amount || 0),
-                            0
-                          )
-                          .toFixed(2)}`
+                            .reduce(
+                              (total, item) =>
+                                total + (item.Pricing?.ItemTax?.Amount || 0),
+                              0
+                            )
+                            .toFixed(2)}`
                         : "N/A"}
                     </TableCell>
                   </TableRow>
@@ -629,7 +634,12 @@ const OrderDetail = () => {
                     <TableCell colSpan={4} align="right">
                       <strong>Total:</strong>
                     </TableCell>
-                    <TableCell>{order?.order_total!==undefined && order?.order_total!==null ? `$${Number(order.order_total).toFixed(2)}` : "N/A"}</TableCell>
+                    <TableCell>
+                      {order?.order_total !== undefined &&
+                      order?.order_total !== null
+                        ? `$${Number(order.order_total).toFixed(2)}`
+                        : "N/A"}
+                    </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
