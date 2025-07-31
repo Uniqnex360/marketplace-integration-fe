@@ -597,7 +597,7 @@ const ProfitAndLoss = ({
     {
       label: "Total Tax (Cost)",
       
-      value: formatCurrency(summaryOther?.current?.totalCosts),
+      value: formatCurrency(summaryOther?.current?.totalTax),
       delta: (
         summaryOther?.current?.totalCosts -
         summaryOther?.previous?.totalTaxWithheld
@@ -606,7 +606,7 @@ const ProfitAndLoss = ({
     {
       label: "Expenses",
       
-      value: formatCurrency(summaryOther?.expenses?.current),
+      value: formatCurrency(summaryOther?.expenses?.totalCosts),
       delta: summary?.expenses?.delta?.toFixed(2),
     },
     {
