@@ -561,7 +561,7 @@ const OrderDetail = () => {
                       <strong>Unit Price</strong>
                     </TableCell>
                     <TableCell>
-                      <strong>Total</strong>
+                      <strong>Sub Total</strong>
                     </TableCell>
                   </TableRow>
                 </TableHead>
@@ -579,7 +579,9 @@ const OrderDetail = () => {
                       </TableCell>
                       <TableCell>
                         {item.Pricing?.ItemPrice?.Amount
-                          ? `${item.Pricing.ItemPrice.Amount} ${item.Pricing.ItemPrice.CurrencyCode}`
+                          ? item.Pricing.ItemPrice.CurrencyCode === "USD"
+                            ? `$${item.Pricing.ItemPrice.Amount}`
+                            : `${item.Pricing.ItemPrice.Amount} ${item.Pricing.ItemPrice.CurrencyCode}`
                           : "N/A"}
                       </TableCell>
                       <TableCell>
@@ -589,15 +591,21 @@ const OrderDetail = () => {
                   ))}
 
                   {/* Subtotal, Shipping, and Total */}
-                  <TableRow>
+                  {/* <TableRow>
                     <TableCell colSpan={4} align="right">
                       <strong>Subtotal:</strong>
                     </TableCell>
                     <TableCell>{order?.order_total || "N/A"}</TableCell>
-                  </TableRow>
+                  </TableRow> */}
                   <TableRow>
                     <TableCell colSpan={4} align="right">
                       <strong>Shipping:</strong>
+                    </TableCell>
+                    <TableCell>$0.00</TableCell>
+                  </TableRow>
+                   <TableRow>
+                    <TableCell colSpan={4} align="right">
+                      <strong>Shipping Tax:</strong>
                     </TableCell>
                     <TableCell>$0.00</TableCell>
                   </TableRow>
@@ -607,13 +615,13 @@ const OrderDetail = () => {
                     </TableCell>
                     <TableCell>
                       {order?.order_items
-                        ? order.order_items
-                            .reduce(
-                              (total, item) =>
-                                total + (item.Pricing?.ItemTax?.Amount || 0),
-                              0
-                            )
-                            .toFixed(2)
+                        ? `$${order.order_items
+                          .reduce(
+                            (total, item) =>
+                              total + (item.Pricing?.ItemTax?.Amount || 0),
+                            0
+                          )
+                          .toFixed(2)}`
                         : "N/A"}
                     </TableCell>
                   </TableRow>
@@ -621,7 +629,7 @@ const OrderDetail = () => {
                     <TableCell colSpan={4} align="right">
                       <strong>Total:</strong>
                     </TableCell>
-                    <TableCell>{order?.order_total || "N/A"}</TableCell>
+                    <TableCell>{order?.order_total!==undefined && order?.order_total!==null ? `$${Number(order.order_total).toFixed(2)}` : "N/A"}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
