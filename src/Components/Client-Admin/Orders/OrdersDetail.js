@@ -602,19 +602,7 @@ const OrderDetail = () => {
                     </TableCell>
                     <TableCell>{order?.order_total || "N/A"}</TableCell>
                   </TableRow> */}
-                  <TableRow>
-                    <TableCell colSpan={4} align="right">
-                      <strong>Shipping:</strong>
-                    </TableCell>
-                    <TableCell>$0.00</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell colSpan={4} align="right">
-                      <strong>Shipping Tax:</strong>
-                    </TableCell>
-                    <TableCell>$0.00</TableCell>
-                  </TableRow>
-                  <TableRow>
+                   <TableRow>
                     <TableCell colSpan={4} align="right">
                       <strong>Tax:</strong>
                     </TableCell>
@@ -630,6 +618,19 @@ const OrderDetail = () => {
                         : "N/A"}
                     </TableCell>
                   </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={4} align="right">
+                      <strong>Shipping:</strong>
+                    </TableCell>
+                    <TableCell>$0.00</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={4} align="right">
+                      <strong>Shipping Tax:</strong>
+                    </TableCell>
+                    <TableCell>$0.00</TableCell>
+                  </TableRow>
+                 
                   <TableRow>
                     <TableCell colSpan={4} align="right">
                       <strong>Total:</strong>
