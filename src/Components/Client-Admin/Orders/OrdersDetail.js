@@ -561,7 +561,7 @@ const OrderDetail = () => {
                       <strong>Unit Price</strong>
                     </TableCell>
                     <TableCell>
-                      <strong>Sub Total</strong>
+                      <strong>Subtotal</strong>
                     </TableCell>
                   </TableRow>
                 </TableHead>
