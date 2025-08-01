@@ -628,7 +628,10 @@ const OrderDetail = () => {
                     <TableCell colSpan={4} align="right">
                       <strong>Shipping Tax:</strong>
                     </TableCell>
-                    <TableCell>$0.00</TableCell>
+                    <TableCell>
+                      {order?.shipping_price!==undefined && order?.shipping_price!==null ?
+                     `$${Number(order.shipping_price).toFixed(2)}`:"N/A"}
+                    </TableCell>
                   </TableRow>
                  
                   <TableRow>
