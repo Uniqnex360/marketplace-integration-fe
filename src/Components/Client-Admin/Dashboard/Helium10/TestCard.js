@@ -151,6 +151,7 @@ const TestCard = ({
   fulfillment_channel,
 }) => {
   const theme = useTheme();
+const [initialized, setInitialized] = useState(false);
 
   // Combined state for dates and preset
   const [currentDates, setCurrentDates] = useState({
@@ -216,8 +217,10 @@ const TestCard = ({
 
   // Fetch data when dates change
   useEffect(() => {
+    if(!initialized)return
     fetchMetrics(currentDates.selectedDate, currentDates.displayDate);
   }, [
+    initialized,
     currentDates.selectedDate,
     currentDates.displayDate,
     currentPreset,
@@ -432,6 +435,7 @@ const TestCard = ({
     });
 
     setCurrentPreset(widgetData);
+    setInitialized(true)
   }, [widgetData, DateStartDate, DateEndDate]);
 
   const formatCurrency = (value) =>
