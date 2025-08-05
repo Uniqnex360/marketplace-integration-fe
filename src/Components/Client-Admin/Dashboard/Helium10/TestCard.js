@@ -46,6 +46,7 @@ const MetricItem = ({
   currencySymbol,
   percentSymbol,
   loading = false,
+  showSkelton=false
 }) => {
   const absValue = Math.abs(value ?? 0);
   const absChange = Math.abs(change ?? 0);
@@ -93,46 +94,58 @@ const MetricItem = ({
         opacity: loading ? 0.6 : 1,
       }}
     >
-      <CardContent sx={{ py: 0.5 }}>
+        <CardContent sx={{ py: 0.5 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography fontSize={14} color="text.secondary">
             {title}
           </Typography>
         </Box>
 
-        <Box
-          display="flex"
-          justifyContent="flex-start"
-          alignItems="center"
-          mt={0.5}
-          sx={{ paddingRight: "4px", gap: 1 }}
-        >
+        <Box display="flex" justifyContent="flex-start" alignItems="center" mt={0.5} sx={{ gap: 1 }}>
           <Tooltip title={tooltip || ""}>
-            <Typography
-              variant="subtitle2"
-              sx={{ fontSize: "20px" }}
-              fontWeight="bold"
-            >
-              {loading ? "..." : displayValue}
-            </Typography>
+            {showSkeleton ? (
+              <Box 
+                sx={{ 
+                  width: 100, 
+                  height: 24, 
+                  bgcolor: '#f5f5f5', 
+                  borderRadius: 1 
+                }} 
+              />
+            ) : (
+              <Typography variant="subtitle2" sx={{ fontSize: "20px" }} fontWeight="bold">
+                {loading ? "..." : displayValue}
+              </Typography>
+            )}
           </Tooltip>
 
           {change !== undefined && (
-            <Typography
-              fontSize={11}
-              color={isNegative ? "error.main" : "success.main"}
-              display="flex"
-              alignItems="center"
-              gap={0.5}
-            >
-              {loading ? "..." : displayChange}
-              {!loading &&
-                (isNegative ? (
-                  <ArrowDownward fontSize="inherit" />
-                ) : (
-                  <ArrowUpward fontSize="inherit" />
-                ))}
-            </Typography>
+            showSkeleton ? (
+              <Box 
+                sx={{ 
+                  width: 60, 
+                  height: 16, 
+                  bgcolor: '#f5f5f5', 
+                  borderRadius: 1 
+                }} 
+              />
+            ) : (
+              <Typography
+                fontSize={11}
+                color={isNegative ? "error.main" : "success.main"}
+                display="flex"
+                alignItems="center"
+                gap={0.5}
+              >
+                {loading ? "..." : displayChange}
+                {!loading &&
+                  (isNegative ? (
+                    <ArrowDownward fontSize="inherit" />
+                  ) : (
+                    <ArrowUpward fontSize="inherit" />
+                  ))}
+              </Typography>
+            )
           )}
         </Box>
       </CardContent>
@@ -676,27 +689,30 @@ const TestCard = ({
         py: 0.5,
       }}
     >
-      {loading ||dataLoading ? (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            width: "100%",
-          }}
-        >
-          <SkeletonLoadingUI />
-        </Box>
-      ) : (
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "flex-start",
-            width: "100%",
-            px: 2,
-          }}
-        >
+      {loading ? (
+      // Full page loading skeleton for initial load
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', px: 2 }}>
+        {[...Array(8)].map((_, i) => (
+          <Box key={i} sx={metricBlockStyle}>
+            <Card sx={{ minWidth: 200, height: 60 }}>
+              <CardContent sx={{ py: 0.5 }}>
+                <Box sx={{ width: 80, height: 16, bgcolor: '#f5f5f5', mb: 1 }} />
+                <Box sx={{ width: 120, height: 24, bgcolor: '#f5f5f5' }} />
+              </CardContent>
+            </Card>
+          </Box>
+        ))}
+      </Box>
+    ) : (
+      <Box sx={{ 
+        display: "flex",
+        flexWrap: "wrap",
+        justifyContent: "flex-start",
+        width: "100%",
+        px: 2,
+        opacity: dataLoading ? 0.7 : 1,
+        transition: 'opacity 0.3s ease'
+      }}>
           {/* Date Picker */}
           <Box
             sx={{
@@ -797,6 +813,7 @@ const TestCard = ({
                 }
                 currencySymbol="$"
                 loading={dataLoading}
+                showSkelton={loading}
               />
             </Box>
           )}
