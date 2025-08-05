@@ -194,7 +194,7 @@ const TestCard = ({
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
-    fetchMetrics(currentDates.selectedDate, currentDates.displayDate);
+    // fetchMetrics(currentDates.selectedDate, currentDates.displayDate);
   };
 
   const handleMetricToggle = (metric) => {
@@ -292,7 +292,7 @@ useEffect(() => {
       setDataLoading(false);
       setCurrentRequest(null)
     }
-  },[userId,currentPreset,marketPlaceId?.id,brand_id,product_id,manufacturer_name,fulfillment_channel,DateStartDate,DateEndDate,currentRequest])
+  },[userId,currentPreset,marketPlaceId?.id,brand_id,product_id,manufacturer_name,fulfillment_channel,DateStartDate,DateEndDate])
 
   const getDisplayDateText = (
     widgetData,
