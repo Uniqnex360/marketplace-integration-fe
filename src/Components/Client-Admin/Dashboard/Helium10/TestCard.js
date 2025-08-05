@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Box,
   Typography,
@@ -157,7 +157,6 @@ const TestCard = ({
     selectedDate: dayjs().tz(TIMEZONE),
     displayDate: dayjs().tz(TIMEZONE),
   });
-  const [currentRequest,setCurrentRequest]=useState(null)
   const formatNumber = (value) => (value ?? 0).toLocaleString("en-US");
   const [currentPreset, setCurrentPreset] = useState(widgetData);
 
@@ -171,6 +170,8 @@ const TestCard = ({
 
   const [tooltipData, setTooltipData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const cancelTokenSource = useRef(null);
+  const isInitialRender = useRef(true);
   const [dataLoading, setDataLoading] = useState(false);
 
   const userData = JSON.parse(localStorage.getItem("user") || "{}");
@@ -190,14 +191,53 @@ const TestCard = ({
     "margin",
     "business_value",
   ]);
-   const fetchMetrics = useCallback(async (selectedDate, displayDate) => {
-    if(currentRequest)
-    {
-      currentRequest.cancel()
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => {
+    setOpen(false);
+    fetchMetrics(currentDates.selectedDate, currentDates.displayDate);
+  };
+
+  const handleMetricToggle = (metric) => {
+    setVisibleMetrics((prev) =>
+      prev.includes(metric)
+        ? prev.filter((m) => m !== metric)
+        : [...prev, metric]
+    );
+  };
+
+  const handleReset = () => setVisibleMetrics([]);
+  const handleApply = () => console.log("Applied Metrics:", visibleMetrics);
+
+  useEffect(() => {
+    if (svgRef.current) {
+      const rect = svgRef.current.getBoundingClientRect();
+      setSvgOffset({ left: rect.left, top: rect.top });
     }
+  }, []);
+
+  // Fetch data when dates change
+  useEffect(() => {
+    fetchMetrics(currentDates.selectedDate, currentDates.displayDate);
+  }, [
+    currentDates.selectedDate,
+    currentDates.displayDate,
+    currentPreset,
+    brand_id,
+    product_id,
+    manufacturer_name,
+    fulfillment_channel,
+    marketPlaceId?.id,
+  ]);
+
+  const fetchMetrics = async (selectedDate, displayDate) => {
+    if (cancelTokenSource.current) {
+      cancelTokenSource.current.cancel("New request initiated");
+    }
+
+    // Create new cancel token
+    cancelTokenSource.current = axios.CancelToken.source();
     setDataLoading(true);
-    const cancelToken=axios.CancelToken.source()
-    setCurrentRequest(cancelToken)
     try {
       const payload = {
         target_date: selectedDate.format("DD/MM/YYYY"),
@@ -223,7 +263,8 @@ const TestCard = ({
 
       const response = await axios.post(
         `${process.env.REACT_APP_IP}get_metrics_by_date_range/`,
-        payload,{cancelToken:cancelToken.token}
+        payload,
+        { cancelToken: cancelTokenSource.current.token }
       );
 
       const data = response.data.data;
@@ -236,7 +277,7 @@ const TestCard = ({
           .map(([rawDate, values]) => ({
             date: rawDate,
             fullDate: rawDate,
-            dateObj: dayjs(rawDate, "MMMM DD, YYYY"),
+            dateObj: dayjs(rawDate, "MMMM DD, YYYY"), // Parse with explicit format
             revenue: values.gross_revenue,
           }))
           .sort((a, b) => a.dateObj - b.dateObj),
@@ -245,54 +286,15 @@ const TestCard = ({
       const selectedMetricKeys = Object.keys(data.targeted || {});
       setVisibleMetrics(selectedMetricKeys);
     } catch (error) {
-      if(!axios.isCancel(error))
-      {
+      if (!axios.isCancel(error)) {
         console.error("Error fetching metrics:", error);
       }
-      
     } finally {
       setDataLoading(false);
-      setCurrentRequest(null)
-    }
-  },[userId,currentPreset,marketPlaceId?.id,brand_id,product_id,manufacturer_name,fulfillment_channel,DateStartDate,DateEndDate])
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => {
-    setOpen(false);
-    // fetchMetrics(currentDates.selectedDate, currentDates.displayDate);
-  };
-
-  const handleMetricToggle = (metric) => {
-    setVisibleMetrics((prev) =>
-      prev.includes(metric)
-        ? prev.filter((m) => m !== metric)
-        : [...prev, metric]
-    );
-  };
-
-  const handleReset = () => setVisibleMetrics([]);
-  const handleApply = () => console.log("Applied Metrics:", visibleMetrics);
-
-  useEffect(() => {
-    if (svgRef.current) {
-      const rect = svgRef.current.getBoundingClientRect();
-      setSvgOffset({ left: rect.left, top: rect.top });
-    }
-  }, []);
-
-  // Fetch data when dates change
-  useEffect(() => {
-  fetchMetrics(currentDates.selectedDate, currentDates.displayDate);
-}, [fetchMetrics, currentDates.selectedDate, currentDates.displayDate]);
-
-useEffect(() => {
-  return () => {
-    if (currentRequest) {
-      currentRequest.cancel();
+      setLoading(false);
+      isInitialRender.current = false;
     }
   };
-}, [currentRequest]);
-
- 
 
   const getDisplayDateText = (
     widgetData,
@@ -444,7 +446,13 @@ useEffect(() => {
 
     setCurrentPreset(widgetData);
   }, [widgetData, DateStartDate, DateEndDate]);
-
+  useEffect(() => {
+    return () => {
+      if (cancelTokenSource.current) {
+        cancelTokenSource.current.cancel("Component unmounted");
+      }
+    };
+  }, []);
   const formatCurrency = (value) =>
     new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -461,7 +469,7 @@ useEffect(() => {
           ? `Yesterday: ${prev || "0"}`
           : `${date.subtract(1, "day").format("MMM DD")}: ${prev || "0"}`,
     },
-    
+
     total_units: {
       title: "Units Sold",
       tooltip: (date, today, prev) =>
@@ -469,15 +477,16 @@ useEffect(() => {
           ? `Yesterday: ${prev || "0"}`
           : `${date.subtract(1, "day").format("MMM DD")}: ${prev || "0"}`,
     },
-    total_tax:{
-      title:"Total Tax",
-      tooltip:(date,today,prev)=>
-         date.isSame(today, "day")
+    total_tax: {
+      title: "Total Tax",
+      tooltip: (date, today, prev) =>
+        date.isSame(today, "day")
           ? `Yesterday: ${formatCurrency(prev)}`
           : `${date.subtract(1, "day").format("MMM DD")}: ${formatCurrency(
               prev
             )}`,
-            currencySymbol:"$"},
+      currencySymbol: "$",
+    },
     refund: {
       title: "Refunds",
       tooltip: (date, today, prev) =>
@@ -986,7 +995,7 @@ useEffect(() => {
           {[
             "total_orders",
             "total_units",
-             "total_tax",
+            "total_tax",
             "refund",
             "total_cogs",
             "margin",
