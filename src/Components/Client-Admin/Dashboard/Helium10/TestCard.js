@@ -190,45 +190,7 @@ const TestCard = ({
     "margin",
     "business_value",
   ]);
-
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => {
-    setOpen(false);
-    // fetchMetrics(currentDates.selectedDate, currentDates.displayDate);
-  };
-
-  const handleMetricToggle = (metric) => {
-    setVisibleMetrics((prev) =>
-      prev.includes(metric)
-        ? prev.filter((m) => m !== metric)
-        : [...prev, metric]
-    );
-  };
-
-  const handleReset = () => setVisibleMetrics([]);
-  const handleApply = () => console.log("Applied Metrics:", visibleMetrics);
-
-  useEffect(() => {
-    if (svgRef.current) {
-      const rect = svgRef.current.getBoundingClientRect();
-      setSvgOffset({ left: rect.left, top: rect.top });
-    }
-  }, []);
-
-  // Fetch data when dates change
-  useEffect(() => {
-  fetchMetrics(currentDates.selectedDate, currentDates.displayDate);
-}, [fetchMetrics, currentDates.selectedDate, currentDates.displayDate]);
-
-useEffect(() => {
-  return () => {
-    if (currentRequest) {
-      currentRequest.cancel();
-    }
-  };
-}, [currentRequest]);
-
-  const fetchMetrics = useCallback(async (selectedDate, displayDate) => {
+   const fetchMetrics = useCallback(async (selectedDate, displayDate) => {
     if(currentRequest)
     {
       currentRequest.cancel()
@@ -293,6 +255,44 @@ useEffect(() => {
       setCurrentRequest(null)
     }
   },[userId,currentPreset,marketPlaceId?.id,brand_id,product_id,manufacturer_name,fulfillment_channel,DateStartDate,DateEndDate])
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => {
+    setOpen(false);
+    // fetchMetrics(currentDates.selectedDate, currentDates.displayDate);
+  };
+
+  const handleMetricToggle = (metric) => {
+    setVisibleMetrics((prev) =>
+      prev.includes(metric)
+        ? prev.filter((m) => m !== metric)
+        : [...prev, metric]
+    );
+  };
+
+  const handleReset = () => setVisibleMetrics([]);
+  const handleApply = () => console.log("Applied Metrics:", visibleMetrics);
+
+  useEffect(() => {
+    if (svgRef.current) {
+      const rect = svgRef.current.getBoundingClientRect();
+      setSvgOffset({ left: rect.left, top: rect.top });
+    }
+  }, []);
+
+  // Fetch data when dates change
+  useEffect(() => {
+  fetchMetrics(currentDates.selectedDate, currentDates.displayDate);
+}, [fetchMetrics, currentDates.selectedDate, currentDates.displayDate]);
+
+useEffect(() => {
+  return () => {
+    if (currentRequest) {
+      currentRequest.cancel();
+    }
+  };
+}, [currentRequest]);
+
+ 
 
   const getDisplayDateText = (
     widgetData,
