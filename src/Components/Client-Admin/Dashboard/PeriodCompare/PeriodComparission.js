@@ -461,7 +461,7 @@ function PeriodComparission({
                         color: "#485E75",
                         fontFamily:
                           "'Nunito Sans', -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif",
-                        //  textAlign: 'end', // Center-aligns the text
+                         textAlign: 'end', // Center-aligns the text
                       }}
                     >
                       $
