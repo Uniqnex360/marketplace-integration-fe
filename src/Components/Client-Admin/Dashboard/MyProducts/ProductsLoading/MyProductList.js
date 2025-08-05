@@ -1263,16 +1263,6 @@ const MyProductList = ({
               Fetching Data, Please wait a moment...
             </Typography>
 
-            {/* Timer display */}
-            <Typography
-              variant="body2"
-              sx={{
-                color: "#485E75",
-                fontStyle: "italic",
-              }}
-            >
-              {loadingTime > 0 ? `Loading (${loadingTime}s)` : "Starting..."}
-            </Typography>
           </Box>
         ) : (
           <MyProductTable
