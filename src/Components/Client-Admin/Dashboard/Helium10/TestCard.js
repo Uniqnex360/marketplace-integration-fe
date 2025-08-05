@@ -12,7 +12,6 @@ import {
 } from "@mui/material";
 import "./Helium.css";
 import SettingsIcon from "@mui/icons-material/Settings";
-
 import {
   ArrowDownward,
   ArrowUpward,
@@ -29,6 +28,7 @@ import ChooseMetrics from "./ChooseMetrics";
 import DottedCircleLoading from "../../../Loading/DotLoading";
 import SkeletonLoadingUI from "./SummaryCardLoading";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+
 dayjs.extend(customParseFormat);
 dayjs.extend(weekOfYear);
 dayjs.extend(utc);
@@ -46,27 +46,40 @@ const MetricItem = ({
   currencySymbol,
   percentSymbol,
   loading = false,
-  showSkelton=false
 }) => {
-  const absValue = Math.abs(value ?? 0);
-  const absChange = Math.abs(change ?? 0);
+  const displayValue = loading ? (
+    <Box sx={{
+      width: 100,
+      height: 24,
+      bgcolor: '#f5f5f5',
+      borderRadius: 1
+    }} />
+  ) : (
+    `${(value ?? 0) < 0 ? "-" : ""}${
+      currencySymbol
+        ? new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }).format(Math.abs(value ?? 0))
+        : percentSymbol
+        ? `${Math.abs(value ?? 0)}%`
+        : new Intl.NumberFormat("en-US", {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+          }).format(Math.abs(value ?? 0))
+    }`
+  );
 
-  const displayValue = `${(value ?? 0) < 0 ? "-" : ""}${
-    currencySymbol
-      ? new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        }).format(Math.abs(value ?? 0))
-      : percentSymbol
-      ? `${Math.abs(value ?? 0)}%`
-      : new Intl.NumberFormat("en-US", {
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 0,
-        }).format(Math.abs(value ?? 0))
-  }`;
-  const displayChange =
+  const displayChange = loading ? (
+    <Box sx={{
+      width: 60,
+      height: 16,
+      bgcolor: '#f5f5f5',
+      borderRadius: 1
+    }} />
+  ) : (
     change !== undefined
       ? `${change < 0 ? "-" : ""}${
           currencySymbol
@@ -83,7 +96,8 @@ const MetricItem = ({
                 maximumFractionDigits: 0,
               }).format(Math.abs(change ?? 0))
         }`
-      : "";
+      : ""
+  );
 
   return (
     <Card
@@ -94,7 +108,7 @@ const MetricItem = ({
         opacity: loading ? 0.6 : 1,
       }}
     >
-        <CardContent sx={{ py: 0.5 }}>
+      <CardContent sx={{ py: 0.5 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography fontSize={14} color="text.secondary">
             {title}
@@ -103,49 +117,27 @@ const MetricItem = ({
 
         <Box display="flex" justifyContent="flex-start" alignItems="center" mt={0.5} sx={{ gap: 1 }}>
           <Tooltip title={tooltip || ""}>
-            {showSkeleton ? (
-              <Box 
-                sx={{ 
-                  width: 100, 
-                  height: 24, 
-                  bgcolor: '#f5f5f5', 
-                  borderRadius: 1 
-                }} 
-              />
-            ) : (
-              <Typography variant="subtitle2" sx={{ fontSize: "20px" }} fontWeight="bold">
-                {loading ? "..." : displayValue}
-              </Typography>
-            )}
+            <Typography variant="subtitle2" sx={{ fontSize: "20px" }} fontWeight="bold">
+              {displayValue}
+            </Typography>
           </Tooltip>
 
           {change !== undefined && (
-            showSkeleton ? (
-              <Box 
-                sx={{ 
-                  width: 60, 
-                  height: 16, 
-                  bgcolor: '#f5f5f5', 
-                  borderRadius: 1 
-                }} 
-              />
-            ) : (
-              <Typography
-                fontSize={11}
-                color={isNegative ? "error.main" : "success.main"}
-                display="flex"
-                alignItems="center"
-                gap={0.5}
-              >
-                {loading ? "..." : displayChange}
-                {!loading &&
-                  (isNegative ? (
-                    <ArrowDownward fontSize="inherit" />
-                  ) : (
-                    <ArrowUpward fontSize="inherit" />
-                  ))}
-              </Typography>
-            )
+            <Typography
+              fontSize={11}
+              color={isNegative ? "error.main" : "success.main"}
+              display="flex"
+              alignItems="center"
+              gap={0.5}
+            >
+              {displayChange}
+              {!loading &&
+                (isNegative ? (
+                  <ArrowDownward fontSize="inherit" />
+                ) : (
+                  <ArrowUpward fontSize="inherit" />
+                ))}
+            </Typography>
           )}
         </Box>
       </CardContent>
@@ -165,30 +157,22 @@ const TestCard = ({
 }) => {
   const theme = useTheme();
 
-  // Combined state for dates and preset
   const [currentDates, setCurrentDates] = useState({
     selectedDate: dayjs().tz(TIMEZONE),
     displayDate: dayjs().tz(TIMEZONE),
   });
-  const formatNumber = (value) => (value ?? 0).toLocaleString("en-US");
-  const [currentPreset, setCurrentPreset] = useState(widgetData);
 
-  // Data state
+  const [currentPreset, setCurrentPreset] = useState(widgetData);
   const [dataState, setDataState] = useState({
     metrics: {},
     previous: {},
     difference: {},
     bindGraph: [],
   });
-
   const [tooltipData, setTooltipData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const cancelTokenSource = useRef(null);
-  const isInitialRender = useRef(true);
   const [dataLoading, setDataLoading] = useState(false);
-
-  const userData = JSON.parse(localStorage.getItem("user") || "{}");
-  const userId = userData?.id || "";
+  const cancelTokenSource = useRef(null);
   const graphContainerRef = useRef(null);
   const svgRef = useRef(null);
   const [svgOffset, setSvgOffset] = useState({ left: 0, top: 0 });
@@ -204,6 +188,9 @@ const TestCard = ({
     "margin",
     "business_value",
   ]);
+
+  const userData = JSON.parse(localStorage.getItem("user") || "{}");
+  const userId = userData?.id || "";
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -229,7 +216,6 @@ const TestCard = ({
     }
   }, []);
 
-  // Fetch data when dates change
   useEffect(() => {
     fetchMetrics(currentDates.selectedDate, currentDates.displayDate);
   }, [
@@ -248,15 +234,9 @@ const TestCard = ({
       cancelTokenSource.current.cancel("New request initiated");
     }
 
-    // Create new cancel token
     cancelTokenSource.current = axios.CancelToken.source();
-     setDataState({
-      metrics: {},
-      previous: {},
-      difference: {},
-      bindGraph: [],
-    });
     setDataLoading(true);
+
     try {
       const payload = {
         target_date: selectedDate.format("DD/MM/YYYY"),
@@ -278,8 +258,6 @@ const TestCard = ({
         payload.end_date = dayjs(DateEndDate).format("DD/MM/YYYY");
       }
 
-      console.log("API Payload:", payload); // Debug log
-
       const response = await axios.post(
         `${process.env.REACT_APP_IP}get_metrics_by_date_range/`,
         payload,
@@ -296,7 +274,7 @@ const TestCard = ({
           .map(([rawDate, values]) => ({
             date: rawDate,
             fullDate: rawDate,
-            dateObj: dayjs(rawDate, "MMMM DD, YYYY"), // Parse with explicit format
+            dateObj: dayjs(rawDate, "MMMM DD, YYYY"),
             revenue: values.gross_revenue,
           }))
           .sort((a, b) => a.dateObj - b.dateObj),
@@ -378,17 +356,14 @@ const TestCard = ({
     return widgetData;
   };
 
-  // Initialize dates based on widget data
   useEffect(() => {
     const today = dayjs().tz(TIMEZONE);
     let newDisplayDate, newSelectedDate;
 
-    // Handle custom date range
     if (DateStartDate && DateEndDate) {
       newDisplayDate = dayjs(DateStartDate);
       newSelectedDate = dayjs(DateEndDate);
     } else {
-      // Handle preset date ranges
       switch (widgetData) {
         case "Today":
           newDisplayDate = today;
@@ -406,7 +381,6 @@ const TestCard = ({
           newDisplayDate = today.clone().subtract(1, "week").startOf("week");
           newSelectedDate = today.clone().subtract(1, "week").endOf("week");
           break;
-
         case "Last 7 days":
           newDisplayDate = today.subtract(6, "day");
           newSelectedDate = today;
@@ -464,6 +438,7 @@ const TestCard = ({
 
     setCurrentPreset(widgetData);
   }, [widgetData, DateStartDate, DateEndDate]);
+
   useEffect(() => {
     return () => {
       if (cancelTokenSource.current) {
@@ -471,6 +446,7 @@ const TestCard = ({
       }
     };
   }, []);
+
   const formatCurrency = (value) =>
     new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -487,7 +463,6 @@ const TestCard = ({
           ? `Yesterday: ${prev || "0"}`
           : `${date.subtract(1, "day").format("MMM DD")}: ${prev || "0"}`,
     },
-
     total_units: {
       title: "Units Sold",
       tooltip: (date, today, prev) =>
@@ -566,16 +541,13 @@ const TestCard = ({
       }));
     } else {
       const newSelectedDate = currentDates.selectedDate.subtract(1, "day");
-
-      // Determine what preset this date represents
-      let newPreset = "Custom"; // Default fallback
+      let newPreset = "Custom";
 
       if (newSelectedDate.isSame(today, "day")) {
         newPreset = "Today";
       } else if (newSelectedDate.isSame(today.subtract(1, "day"), "day")) {
         newPreset = "Yesterday";
       } else {
-        // For other dates, we'll use a custom approach - keep original preset but with different target_date
         newPreset = widgetData;
       }
 
@@ -602,16 +574,13 @@ const TestCard = ({
       }));
     } else if (!currentDates.selectedDate.isSame(today, "day")) {
       const newSelectedDate = currentDates.selectedDate.add(1, "day");
-
-      // Determine what preset this date represents
-      let newPreset = "Custom"; // Default fallback
+      let newPreset = "Custom";
 
       if (newSelectedDate.isSame(today, "day")) {
         newPreset = "Today";
       } else if (newSelectedDate.isSame(today.subtract(1, "day"), "day")) {
         newPreset = "Yesterday";
       } else {
-        // For other dates, we'll use a custom approach - keep original preset but with different target_date
         newPreset = widgetData;
       }
 
@@ -687,24 +656,28 @@ const TestCard = ({
         width: "99%",
         boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
         py: 0.5,
+        position: 'relative'
       }}
     >
-      {loading ? (
-      // Full page loading skeleton for initial load
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', px: 2 }}>
-        {[...Array(8)].map((_, i) => (
-          <Box key={i} sx={metricBlockStyle}>
-            <Card sx={{ minWidth: 200, height: 60 }}>
-              <CardContent sx={{ py: 0.5 }}>
-                <Box sx={{ width: 80, height: 16, bgcolor: '#f5f5f5', mb: 1 }} />
-                <Box sx={{ width: 120, height: 24, bgcolor: '#f5f5f5' }} />
-              </CardContent>
-            </Card>
-          </Box>
-        ))}
-      </Box>
-    ) : (
-      <Box sx={{ 
+      {dataLoading && (
+        <Box sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+          zIndex: 10,
+          borderRadius: 2
+        }}>
+          <DottedCircleLoading />
+        </Box>
+      )}
+
+      <Box sx={{
         display: "flex",
         flexWrap: "wrap",
         justifyContent: "flex-start",
@@ -713,376 +686,354 @@ const TestCard = ({
         opacity: dataLoading ? 0.7 : 1,
         transition: 'opacity 0.3s ease'
       }}>
-          {/* Date Picker */}
-          <Box
-            sx={{
-              ...metricBlockStyle,
-              borderRight: "1px solid #e0e0e0",
-              borderLeft: "none",
-            }}
-          >
-            <Box display="flex" alignItems="center" gap={1}>
-              <IconButton
-                size="small"
-                onClick={handlePrevious}
-                disabled={dataLoading}
-              >
-                <ChevronLeft fontSize="small" />
-              </IconButton>
+        {/* Date Picker */}
+        <Box
+          sx={{
+            ...metricBlockStyle,
+            borderRight: "1px solid #e0e0e0",
+            borderLeft: "none",
+          }}
+        >
+          <Box display="flex" alignItems="center" gap={1}>
+            <IconButton
+              size="small"
+              onClick={handlePrevious}
+              disabled={dataLoading}
+            >
+              <ChevronLeft fontSize="small" />
+            </IconButton>
 
-              <Tooltip
-                title={`${currentDates.displayDate.format(
-                  "DD/MM/YYYY"
-                )} - ${currentDates.selectedDate.format("DD/MM/YYYY")}`}
-              >
-                <Box>
+            <Tooltip
+              title={`${currentDates.displayDate.format(
+                "DD/MM/YYYY"
+              )} - ${currentDates.selectedDate.format("DD/MM/YYYY")}`}
+            >
+              <Box>
+                <Typography
+                  fontWeight="bold"
+                  sx={{
+                    color: "#485E75",
+                    fontFamily: "'Nunito Sans', sans-serif",
+                    fontSize: 14,
+                    opacity: dataLoading ? 0.7 : 1,
+                  }}
+                >
+                  {getDisplayDateText(
+                    currentPreset,
+                    DateStartDate,
+                    DateEndDate,
+                    currentDates.displayDate,
+                    currentDates.selectedDate
+                  )}
+                </Typography>
+                <Box display="flex" justifyContent="center">
                   <Typography
-                    fontWeight="bold"
+                    variant="caption"
+                    color="text.secondary"
                     sx={{
-                      color: "#485E75",
-                      fontFamily: "'Nunito Sans', sans-serif",
-                      fontSize: 14,
-                      opacity: dataLoading ? 0.7 : 1,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      textAlign: "center",
+                      width: "100%",
                     }}
                   >
-                    {getDisplayDateText(
+                    {getSubtitleText(
                       currentPreset,
                       DateStartDate,
                       DateEndDate,
                       currentDates.displayDate,
                       currentDates.selectedDate
                     )}
-                    {dataLoading && <span style={{ marginLeft: 8 }}>...</span>}
                   </Typography>
-                  <Box display="flex" justifyContent="center">
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        textAlign: "center",
-                        width: "100%",
-                      }}
-                    >
-                      {getSubtitleText(
-                        currentPreset,
-                        DateStartDate,
-                        DateEndDate,
-                        currentDates.displayDate,
-                        currentDates.selectedDate
-                      )}
-                    </Typography>
-                  </Box>
                 </Box>
-              </Tooltip>
+              </Box>
+            </Tooltip>
 
-              {!currentDates.selectedDate.isSame(today, "day") && (
-                <IconButton
-                  size="small"
-                  onClick={handleNext}
-                  disabled={dataLoading}
-                >
-                  <ChevronRight fontSize="small" />
-                </IconButton>
-              )}
-            </Box>
+            {!currentDates.selectedDate.isSame(today, "day") && (
+              <IconButton
+                size="small"
+                onClick={handleNext}
+                disabled={dataLoading}
+              >
+                <ChevronRight fontSize="small" />
+              </IconButton>
+            )}
           </Box>
+        </Box>
 
-          {/* Gross Revenue */}
-          {visibleMetrics.includes("gross_revenue") && (
-            <Box sx={metricBlockStyle}>
-              <MetricItem
-                title="Gross Revenue"
-                value={dataState.metrics.gross_revenue}
-                change={dataState.difference.gross_revenue}
-                isNegative={String(
-                  dataState.difference.gross_revenue
-                ).startsWith("-")}
-                tooltip={
-                  currentDates.selectedDate.isSame(today, "day")
-                    ? `Yesterday: ${formatCurrency(
-                        dataState.previous.gross_revenue
-                      )}`
-                    : `${currentDates.selectedDate
-                        .subtract(1, "day")
-                        .format("MMM DD")}: ${formatCurrency(
-                        dataState.previous.gross_revenue
-                      )}`
+        {/* Gross Revenue */}
+        {visibleMetrics.includes("gross_revenue") && (
+          <Box sx={metricBlockStyle}>
+            <MetricItem
+              title="Gross Revenue"
+              value={dataState.metrics.gross_revenue}
+              change={dataState.difference.gross_revenue}
+              isNegative={String(
+                dataState.difference.gross_revenue
+              ).startsWith("-")}
+              tooltip={
+                currentDates.selectedDate.isSame(today, "day")
+                  ? `Yesterday: ${formatCurrency(
+                      dataState.previous.gross_revenue
+                    )}`
+                  : `${currentDates.selectedDate
+                      .subtract(1, "day")
+                      .format("MMM DD")}: ${formatCurrency(
+                      dataState.previous.gross_revenue
+                    )}`
+              }
+              currencySymbol="$"
+              loading={dataLoading}
+            />
+          </Box>
+        )}
+
+        {/* Chart */}
+        {visibleMetrics.includes("gross_revenue") && (
+          <Box sx={{ borderRight: "1px solid #e0e0e0" }}>
+            <Box
+              ref={graphContainerRef}
+              sx={{
+                ...metricBlockStyle,
+                position: "relative",
+                overflow: "visible",
+                flexDirection: "column",
+                opacity: dataLoading ? 0.6 : 1,
+              }}
+              onMouseLeave={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = e.clientX;
+                const y = e.clientY;
+
+                if (
+                  x < rect.left ||
+                  x > rect.right ||
+                  y < rect.top ||
+                  y > rect.bottom
+                ) {
+                  setTimeout(() => setTooltipData(null), 100);
                 }
-                currencySymbol="$"
-                loading={dataLoading}
-                showSkelton={loading}
-              />
-            </Box>
-          )}
-
-          {/* Chart */}
-          {visibleMetrics.includes("gross_revenue") && (
-            <Box sx={{ borderRight: "1px solid #e0e0e0" }}>
+              }}
+            >
               <Box
-                ref={graphContainerRef}
                 sx={{
-                  ...metricBlockStyle,
+                  width: "100%",
+                  height: 80,
                   position: "relative",
                   overflow: "visible",
-                  flexDirection: "column",
-                  opacity: dataLoading ? 0.6 : 1,
-                }}
-                onMouseLeave={(e) => {
-                  // Only clear tooltip if really leaving the container
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const x = e.clientX;
-                  const y = e.clientY;
-
-                  if (
-                    x < rect.left ||
-                    x > rect.right ||
-                    y < rect.top ||
-                    y > rect.bottom
-                  ) {
-                    setTimeout(() => setTooltipData(null), 100);
-                  }
                 }}
               >
-                <Box
-                  sx={{
-                    width: "100%",
-                    height: 80,
-                    position: "relative",
-                    overflow: "visible",
-                  }}
-                >
-                  <svg ref={svgRef} width="100%" height="60">
-                    {[20, 30, 40].map((y, idx) => (
-                      <line
-                        key={idx}
-                        x1="0"
-                        y1={y}
-                        x2="100%"
-                        y2={y}
-                        stroke="#eee"
-                        strokeWidth="1"
-                      />
-                    ))}
+                <svg ref={svgRef} width="100%" height="60">
+                  {[20, 30, 40].map((y, idx) => (
                     <line
+                      key={idx}
                       x1="0"
-                      y1="48"
+                      y1={y}
                       x2="100%"
-                      y2="48"
-                      stroke="#000"
+                      y2={y}
+                      stroke="#eee"
                       strokeWidth="1"
                     />
+                  ))}
+                  <line
+                    x1="0"
+                    y1="48"
+                    x2="100%"
+                    y2="48"
+                    stroke="#000"
+                    strokeWidth="1"
+                  />
 
-                    {!dataLoading && (
-                      <>
-                        <polyline
-                          points={getGraphPoints()}
+                  {!dataLoading && (
+                    <>
+                      <polyline
+                        points={getGraphPoints()}
+                        style={{
+                          fill: "none",
+                          stroke: theme.palette.primary.main,
+                          strokeWidth: 2,
+                        }}
+                      />
+
+                      {getCirclePoints().map((point, index) => (
+                        <circle
+                          key={index}
+                          cx={point.cx}
+                          cy={point.cy}
+                          r="8"
+                          fill="transparent"
+                          stroke="transparent"
                           style={{
-                            fill: "none",
-                            stroke: theme.palette.primary.main,
-                            strokeWidth: 2,
+                            pointerEvents: "all",
+                            cursor: "pointer",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.stopPropagation();
+                            setTooltipData({ ...point, index });
+                          }}
+                          onMouseLeave={(e) => {
+                            e.stopPropagation();
+                            setTimeout(() => setTooltipData(null), 50);
                           }}
                         />
+                      ))}
 
-                        {getCirclePoints().map((point, index) => (
+                      {tooltipData && (
+                        <>
                           <circle
-                            key={index}
-                            cx={point.cx}
-                            cy={point.cy}
-                            r="8" // Slightly smaller for better UX
-                            fill="transparent"
-                            stroke="transparent"
-                            style={{
-                              pointerEvents: "all",
-                              cursor: "pointer",
-                            }}
-                            onMouseEnter={(e) => {
-                              e.stopPropagation();
-                              setTooltipData({ ...point, index });
-                            }}
-                            onMouseLeave={(e) => {
-                              e.stopPropagation();
-                              // Small delay to prevent flickering
-                              setTimeout(() => setTooltipData(null), 50);
-                            }}
+                            cx={tooltipData.cx}
+                            cy={tooltipData.cy}
+                            r="6"
+                            fill="white"
+                            stroke={theme.palette.primary.main}
+                            strokeWidth="2"
+                            style={{ pointerEvents: "none" }}
                           />
-                        ))}
-
-                        {tooltipData && (
-                          <>
-                            <circle
-                              cx={tooltipData.cx}
-                              cy={tooltipData.cy}
-                              r="6"
-                              fill="white"
-                              stroke={theme.palette.primary.main}
-                              strokeWidth="2"
-                              style={{ pointerEvents: "none" }}
-                            />
-                            <circle
-                              cx={tooltipData.cx}
-                              cy={tooltipData.cy}
-                              r="3"
-                              fill={theme.palette.primary.main}
-                              style={{ pointerEvents: "none" }}
-                            />
-                          </>
-                        )}
-                      </>
-                    )}
-                  </svg>
-
-                  {/* Graph X-axis Dates */}
-                  {!dataLoading && (
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: 52,
-                        left: 0,
-                        right: 0,
-                        display: "flex",
-                        justifyContent: "space-between",
-                        fontSize: 11,
-                        color: "#555",
-                        px: 1,
-                        marginTop: "3px",
-                      }}
-                    >
-                      <span>{dataState.bindGraph[0]?.date}</span>
-                      <span>
-                        {
-                          dataState.bindGraph[dataState.bindGraph.length - 1]
-                            ?.date
-                        }
-                      </span>
-                    </Box>
+                          <circle
+                            cx={tooltipData.cx}
+                            cy={tooltipData.cy}
+                            r="3"
+                            fill={theme.palette.primary.main}
+                            style={{ pointerEvents: "none" }}
+                          />
+                        </>
+                      )}
+                    </>
                   )}
+                </svg>
 
-                  {dataLoading && (
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%)",
-                        fontSize: 12,
-                        color: "#666",
-                      }}
-                    >
-                      Loading...
-                    </Box>
-                  )}
-                </Box>
-
-                {/* Tooltip */}
-                {tooltipData && !dataLoading && (
+                {/* Graph X-axis Dates */}
+                {!dataLoading && (
                   <Box
                     sx={{
-                      position: "fixed",
-                      left: Math.max(
-                        10,
-                        Math.min(
-                          window.innerWidth - 160,
-                          svgOffset.left + tooltipData.cx - 80
-                        )
-                      ), // Prevent tooltip from going off-screen
-                      top: Math.max(10, svgOffset.top + tooltipData.cy - 70),
-                      backgroundColor: "white",
-                      border: "1px solid #d0d7de",
-                      borderRadius: 2,
-                      padding: "8px 12px",
-                      fontSize: 12,
-                      pointerEvents: "none", // This is crucial - prevents tooltip from interfering with mouse events
-                      zIndex: 1000,
-                      boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
-                      whiteSpace: "nowrap",
-                      maxWidth: 200,
+                      position: "absolute",
+                      top: 52,
+                      left: 0,
+                      right: 0,
+                      display: "flex",
+                      justifyContent: "space-between",
+                      fontSize: 11,
+                      color: "#555",
+                      px: 1,
+                      marginTop: "3px",
                     }}
                   >
-                    <Typography fontWeight="bold" fontSize={14} color="#485E75">
-                      {dayjs(tooltipData.fullDate).format("MMM DD, YYYY")}
-                    </Typography>
-                    <Typography fontSize={14} color="#000" fontWeight="bold">
-                      {formatCurrency(tooltipData.revenue)}
-                    </Typography>
+                    <span>{dataState.bindGraph[0]?.date}</span>
+                    <span>
+                      {
+                        dataState.bindGraph[dataState.bindGraph.length - 1]
+                          ?.date
+                      }
+                    </span>
                   </Box>
                 )}
               </Box>
-            </Box>
-          )}
 
-          {/* Other Metric Cards */}
-          {[
-            "total_orders",
-            "total_units",
-            "total_tax",
-            "refund",
-            "total_cogs",
-            "margin",
-            "business_value",
-          ].map((id, idx) => {
-            const item = METRICS_CONFIG[id];
-
-            return (
-              visibleMetrics.includes(id) && (
-                <Box key={idx} sx={metricBlockStyle}>
-                  <MetricItem
-                    title={item.title}
-                    value={dataState.metrics[id]}
-                    change={dataState.difference[id]}
-                    isNegative={String(dataState.difference[id]).startsWith(
-                      "-"
-                    )}
-                    tooltip={item.tooltip(
-                      currentDates.selectedDate,
-                      today,
-                      dataState.previous[id]
-                    )}
-                    currencySymbol={item.currencySymbol}
-                    percentSymbol={item.percentSymbol}
-                    loading={dataLoading}
-                  />
+              {/* Tooltip */}
+              {tooltipData && !dataLoading && (
+                <Box
+                  sx={{
+                    position: "fixed",
+                    left: Math.max(
+                      10,
+                      Math.min(
+                        window.innerWidth - 160,
+                        svgOffset.left + tooltipData.cx - 80
+                      )
+                    ),
+                    top: Math.max(10, svgOffset.top + tooltipData.cy - 70),
+                    backgroundColor: "white",
+                    border: "1px solid #d0d7de",
+                    borderRadius: 2,
+                    padding: "8px 12px",
+                    fontSize: 12,
+                    pointerEvents: "none",
+                    zIndex: 1000,
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+                    whiteSpace: "nowrap",
+                    maxWidth: 200,
+                  }}
+                >
+                  <Typography fontWeight="bold" fontSize={14} color="#485E75">
+                    {dayjs(tooltipData.fullDate).format("MMM DD, YYYY")}
+                  </Typography>
+                  <Typography fontSize={14} color="#000" fontWeight="bold">
+                    {formatCurrency(tooltipData.revenue)}
+                  </Typography>
                 </Box>
-              )
-            );
-          })}
-
-          {/* Settings Toggle */}
-          <Box
-            onClick={handleOpen}
-            sx={{
-              marginTop: "-1px",
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              cursor: "pointer",
-              p: 1,
-              height: "65px",
-              fontSize: 14,
-              fontWeight: 600,
-              color: "#485E75",
-            }}
-          >
-            <SettingsIcon sx={{ fontSize: 18 }} />
-            Choose Metrics
+              )}
+            </Box>
           </Box>
+        )}
 
-          {/* Settings Dialog */}
-          <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-            <DialogContent dividers>
-              <ChooseMetrics
-                selectedMetrics={visibleMetrics}
-                onChange={handleMetricToggle}
-                onReset={handleReset}
-                onClose={handleClose}
-                onApply={handleApply}
-              />
-            </DialogContent>
-          </Dialog>
+        {/* Other Metric Cards */}
+        {[
+          "total_orders",
+          "total_units",
+          "total_tax",
+          "refund",
+          "total_cogs",
+          "net_profit",
+          "margin",
+          "business_value",
+        ].map((id, idx) => {
+          const item = METRICS_CONFIG[id];
+          return (
+            visibleMetrics.includes(id) && (
+              <Box key={idx} sx={metricBlockStyle}>
+                <MetricItem
+                  title={item.title}
+                  value={dataState.metrics[id]}
+                  change={dataState.difference[id]}
+                  isNegative={String(dataState.difference[id]).startsWith("-")}
+                  tooltip={item.tooltip(
+                    currentDates.selectedDate,
+                    today,
+                    dataState.previous[id]
+                  )}
+                  currencySymbol={item.currencySymbol}
+                  percentSymbol={item.percentSymbol}
+                  loading={dataLoading}
+                />
+              </Box>
+            )
+          );
+        })}
+
+        {/* Settings Toggle */}
+        <Box
+          onClick={handleOpen}
+          sx={{
+            marginTop: "-1px",
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            cursor: "pointer",
+            p: 1,
+            height: "65px",
+            fontSize: 14,
+            fontWeight: 600,
+            color: "#485E75",
+          }}
+        >
+          <SettingsIcon sx={{ fontSize: 18 }} />
+          Choose Metrics
         </Box>
-      )}
+
+        {/* Settings Dialog */}
+        <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+          <DialogContent dividers>
+            <ChooseMetrics
+              selectedMetrics={visibleMetrics}
+              onChange={handleMetricToggle}
+              onReset={handleReset}
+              onClose={handleClose}
+              onApply={handleApply}
+            />
+          </DialogContent>
+        </Dialog>
+      </Box>
     </Box>
   );
 };
