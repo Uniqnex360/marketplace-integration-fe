@@ -158,7 +158,8 @@ const TestCard = ({
     displayDate: dayjs().tz(TIMEZONE),
   });
   const formatNumber = (value) => (value ?? 0).toLocaleString("en-US");
-  const [currentPreset, setCurrentPreset] = useState(widgetData);
+  // 
+  const currentPreset=widgetData
 
   // Data state
   const [dataState, setDataState] = useState({
@@ -189,6 +190,7 @@ const TestCard = ({
     "margin",
     "business_value",
   ]);
+  const abortControllerRef=useRef(null)
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -229,6 +231,11 @@ const TestCard = ({
   ]);
 
   const fetchMetrics = async (selectedDate, displayDate) => {
+    if(abortControllerRef.current)
+    {
+      abortControllerRef.current.abort()
+    }
+    abortControllerRef.current=new AbortController()
     setDataLoading(true);
     try {
       const payload = {
@@ -255,7 +262,7 @@ const TestCard = ({
 
       const response = await axios.post(
         `${process.env.REACT_APP_IP}get_metrics_by_date_range/`,
-        payload
+        payload,{signal:abortControllerRef.current.signal}
       );
 
       const data = response.data.data;
@@ -268,7 +275,7 @@ const TestCard = ({
           .map(([rawDate, values]) => ({
             date: rawDate,
             fullDate: rawDate,
-            dateObj: dayjs(rawDate, "MMMM DD, YYYY"), // Parse with explicit format
+            dateObj: dayjs(rawDate, "MMMM DD, YYYY"),
             revenue: values.gross_revenue,
           }))
           .sort((a, b) => a.dateObj - b.dateObj),
@@ -277,12 +284,22 @@ const TestCard = ({
       const selectedMetricKeys = Object.keys(data.targeted || {});
       setVisibleMetrics(selectedMetricKeys);
     } catch (error) {
+      if(axios.isCancel(error))
+      {
+        console.log('Request cancelled due to new props')
+      }
       console.error("Error fetching metrics:", error);
     } finally {
       setDataLoading(false);
+      abortControllerRef.current=null
     }
   };
-
+  useEffect(()=>{
+    if(abortControllerRef.current)
+    {
+      abortControllerRef.current.abort()
+    }
+  },[])
   const getDisplayDateText = (
     widgetData,
     DateStartDate,
@@ -431,7 +448,7 @@ const TestCard = ({
       selectedDate: newSelectedDate,
     });
 
-    setCurrentPreset(widgetData);
+    // setCurrentPreset(widgetData);
   }, [widgetData, DateStartDate, DateEndDate]);
 
   const formatCurrency = (value) =>
@@ -546,7 +563,7 @@ const TestCard = ({
         selectedDate: newSelectedDate,
       }));
 
-      setCurrentPreset(newPreset);
+      // setCurrentPreset(newPreset);
     }
   };
 
@@ -582,7 +599,7 @@ const TestCard = ({
         selectedDate: newSelectedDate,
       }));
 
-      setCurrentPreset(newPreset);
+      // setCurrentPreset(newPreset);
     }
   };
 
@@ -600,7 +617,7 @@ const TestCard = ({
         ...prev,
         selectedDate: today,
       }));
-      setCurrentPreset("Today");
+      // setCurrentPreset("Today");
     }
   };
 
@@ -651,7 +668,7 @@ const TestCard = ({
         py: 0.5,
       }}
     >
-      {loading ? (
+      {dataLoading||!dataState.metrics ? (
         <Box
           sx={{
             display: "flex",

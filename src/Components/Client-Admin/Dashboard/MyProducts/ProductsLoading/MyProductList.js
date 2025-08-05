@@ -1258,7 +1258,7 @@ const MyProductList = ({
                 fontWeight: 500,
                 color: "#1A2027",
                 mb: 1,
-              }}
+              }}  
             >
               Fetching Data, Please wait a moment...
             </Typography>
