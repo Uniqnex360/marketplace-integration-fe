@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -157,6 +157,7 @@ const TestCard = ({
     selectedDate: dayjs().tz(TIMEZONE),
     displayDate: dayjs().tz(TIMEZONE),
   });
+  const [currentRequest,setCurrentRequest]=useState(null)
   const formatNumber = (value) => (value ?? 0).toLocaleString("en-US");
   const [currentPreset, setCurrentPreset] = useState(widgetData);
 
@@ -215,28 +216,26 @@ const TestCard = ({
   }, []);
 
   // Fetch data when dates change
- const didMount = useRef(false);
+  useEffect(() => {
+  fetchMetrics(currentDates.selectedDate, currentDates.displayDate);
+}, [fetchMetrics, currentDates.selectedDate, currentDates.displayDate]);
 
 useEffect(() => {
-  if (didMount.current) {
-    fetchMetrics(currentDates.selectedDate, currentDates.displayDate);
-  } else {
-    didMount.current = true;
-  }
-}, [
-  currentDates.selectedDate,
-  currentDates.displayDate,
-  currentPreset,
-  brand_id,
-  product_id,
-  manufacturer_name,
-  fulfillment_channel,
-  marketPlaceId?.id,
-]);
+  return () => {
+    if (currentRequest) {
+      currentRequest.cancel();
+    }
+  };
+}, [currentRequest]);
 
-
-  const fetchMetrics = async (selectedDate, displayDate) => {
+  const fetchMetrics = useCallback(async (selectedDate, displayDate) => {
+    if(currentRequest)
+    {
+      currentRequest.cancel()
+    }
     setDataLoading(true);
+    const cancelToken=axios.CancelToken.source()
+    setCurrentRequest(cancelToken)
     try {
       const payload = {
         target_date: selectedDate.format("DD/MM/YYYY"),
@@ -262,7 +261,7 @@ useEffect(() => {
 
       const response = await axios.post(
         `${process.env.REACT_APP_IP}get_metrics_by_date_range/`,
-        payload
+        payload,{cancelToken:cancelToken.token}
       );
 
       const data = response.data.data;
@@ -275,7 +274,7 @@ useEffect(() => {
           .map(([rawDate, values]) => ({
             date: rawDate,
             fullDate: rawDate,
-            dateObj: dayjs(rawDate, "MMMM DD, YYYY"), // Parse with explicit format
+            dateObj: dayjs(rawDate, "MMMM DD, YYYY"),
             revenue: values.gross_revenue,
           }))
           .sort((a, b) => a.dateObj - b.dateObj),
@@ -284,11 +283,16 @@ useEffect(() => {
       const selectedMetricKeys = Object.keys(data.targeted || {});
       setVisibleMetrics(selectedMetricKeys);
     } catch (error) {
-      console.error("Error fetching metrics:", error);
+      if(!axios.isCancel(error))
+      {
+        console.error("Error fetching metrics:", error);
+      }
+      
     } finally {
       setDataLoading(false);
+      setCurrentRequest(null)
     }
-  };
+  },[userId,currentPreset,marketPlaceId?.id,brand_id,product_id,manufacturer_name,fulfillment_channel,DateStartDate,DateEndDate,currentRequest])
 
   const getDisplayDateText = (
     widgetData,
