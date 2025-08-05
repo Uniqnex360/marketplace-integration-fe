@@ -215,18 +215,25 @@ const TestCard = ({
   }, []);
 
   // Fetch data when dates change
-  useEffect(() => {
+ const didMount = useRef(false);
+
+useEffect(() => {
+  if (didMount.current) {
     fetchMetrics(currentDates.selectedDate, currentDates.displayDate);
-  }, [
-    currentDates.selectedDate,
-    currentDates.displayDate,
-    currentPreset,
-    brand_id,
-    product_id,
-    manufacturer_name,
-    fulfillment_channel,
-    marketPlaceId?.id,
-  ]);
+  } else {
+    didMount.current = true;
+  }
+}, [
+  currentDates.selectedDate,
+  currentDates.displayDate,
+  currentPreset,
+  brand_id,
+  product_id,
+  manufacturer_name,
+  fulfillment_channel,
+  marketPlaceId?.id,
+]);
+
 
   const fetchMetrics = async (selectedDate, displayDate) => {
     setDataLoading(true);
