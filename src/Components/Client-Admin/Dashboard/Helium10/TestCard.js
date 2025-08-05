@@ -237,6 +237,12 @@ const TestCard = ({
 
     // Create new cancel token
     cancelTokenSource.current = axios.CancelToken.source();
+     setDataState({
+      metrics: {},
+      previous: {},
+      difference: {},
+      bindGraph: [],
+    });
     setDataLoading(true);
     try {
       const payload = {
@@ -292,7 +298,6 @@ const TestCard = ({
     } finally {
       setDataLoading(false);
       setLoading(false);
-      isInitialRender.current = false;
     }
   };
 
@@ -671,7 +676,7 @@ const TestCard = ({
         py: 0.5,
       }}
     >
-      {loading ? (
+      {loading ||dataLoading ? (
         <Box
           sx={{
             display: "flex",
