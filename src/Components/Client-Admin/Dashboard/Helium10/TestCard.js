@@ -705,7 +705,7 @@ const TestCard = ({
             width: "100%",
           }}
         >
-          <SkeletonLoadingUI />
+          <DottedCircleLoading />
         </Box>
       ) : (
         <Box
