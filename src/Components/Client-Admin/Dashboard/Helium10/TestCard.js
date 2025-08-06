@@ -45,7 +45,7 @@ const MetricItem = ({
   tooltip,
   currencySymbol,
   percentSymbol,
-  loading = false,
+  loading = true,
 }) => {
   const absValue = Math.abs(value ?? 0);
   const absChange = Math.abs(change ?? 0);
