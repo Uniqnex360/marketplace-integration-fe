@@ -290,13 +290,13 @@ const TestCard = ({
       setVisibleMetrics(selectedMetricKeys);
     } catch (error) {
       if (axios.isCancel?.(error) || error.name === "CanceledError") {
-        // Request was cancelled, do nothing
+        setDataLoading(false);
         return;
       }
       console.error("Error fetching metrics:", error);
     } finally {
       setLoading(false);
-      setDataLoading(false);
+      
     }
   };
 
