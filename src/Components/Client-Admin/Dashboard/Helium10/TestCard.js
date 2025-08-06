@@ -235,6 +235,7 @@ const TestCard = ({
 ]);
 
   const fetchMetrics = async (selectedDate, displayDate, signal) => {
+    setLoading(true)
   setDataLoading(true);
   try {
     const payload = {
@@ -289,6 +290,7 @@ const TestCard = ({
     }
     console.error("Error fetching metrics:", error);
   } finally {
+    setLoading(false)
     setDataLoading(false);
   }
 };
