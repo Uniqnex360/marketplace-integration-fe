@@ -162,8 +162,7 @@ const TestCard = ({
   const [currentPreset, setCurrentPreset] = useState(widgetData);
 
   // Data state
-    const [dataState, setDataState] = useState(null);
-
+  const [dataState, setDataState] = useState(null);
 
   const [tooltipData, setTooltipData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -213,85 +212,88 @@ const TestCard = ({
 
   // Fetch data when dates change
   useEffect(() => {
-  const controller = new AbortController();
-  setLoading(true)
-  fetchMetrics(currentDates.selectedDate, currentDates.displayDate, controller.signal);
-
-  return () => {
-    controller.abort(); // Cancel previous request if dependencies change or component unmounts
-  };
-}, [
-  currentDates.selectedDate,
-  currentDates.displayDate,
-  currentPreset,
-  brand_id,
-  product_id,
-  manufacturer_name,
-  fulfillment_channel,
-  marketPlaceId?.id,
-  widgetData
-]);
-
-  const fetchMetrics = async (selectedDate, displayDate, signal) => {
-    setLoading(true)
-  setDataLoading(true);
-  try {
-    const payload = {
-      target_date: selectedDate.format("DD/MM/YYYY"),
-      user_id: userId,
-      preset: currentPreset,
-      marketplace_id: marketPlaceId.id,
-      brand_id: brand_id,
-      product_id: product_id,
-      manufacturer_name: manufacturer_name,
-      fulfillment_channel: fulfillment_channel,
-      timezone: TIMEZONE,
-    };
-
-    if (DateStartDate && dayjs(DateStartDate).isValid()) {
-      payload.start_date = dayjs(DateStartDate).format("DD/MM/YYYY");
-    }
-    if (DateEndDate && dayjs(DateEndDate).isValid()) {
-      payload.end_date = dayjs(DateEndDate).format("DD/MM/YYYY");
-    }
-
-    const response = await axios.post(
-      `${process.env.REACT_APP_IP}get_metrics_by_date_range/`,
-      payload,
-      { signal } // Pass the signal here!
+    const controller = new AbortController();
+    setLoading(true);
+    fetchMetrics(
+      currentDates.selectedDate,
+      currentDates.displayDate,
+      controller.signal
     );
 
-    const data = response.data.data;
+    return () => {
+      controller.abort(); // Cancel previous request if dependencies change or component unmounts
+    };
+  }, [
+    currentDates.selectedDate,
+    currentDates.displayDate,
+    currentPreset,
+    brand_id,
+    product_id,
+    manufacturer_name,
+    fulfillment_channel,
+    marketPlaceId?.id,
+    widgetData,
+  ]);
 
-    setDataState({
-      metrics: data.targeted || {},
-      previous: data.previous || {},
-      difference: data.difference || {},
-      bindGraph: Object.entries(data.graph_data || {})
-        .map(([rawDate, values]) => ({
-          date: rawDate,
-          fullDate: rawDate,
-          dateObj: dayjs(rawDate, "MMMM DD, YYYY"),
-          revenue: values.gross_revenue,
-        }))
-        .sort((a, b) => a.dateObj - b.dateObj),
-    });
+  const fetchMetrics = async (selectedDate, displayDate, signal) => {
+    setLoading(true);
+    setDataLoading(true);
+    try {
+      const payload = {
+        target_date: selectedDate.format("DD/MM/YYYY"),
+        user_id: userId,
+        preset: currentPreset,
+        marketplace_id: marketPlaceId.id,
+        brand_id: brand_id,
+        product_id: product_id,
+        manufacturer_name: manufacturer_name,
+        fulfillment_channel: fulfillment_channel,
+        timezone: TIMEZONE,
+      };
 
-    // Only set visibleMetrics if you want to update it every fetch
-    const selectedMetricKeys = Object.keys(data.targeted || {});
-    setVisibleMetrics(selectedMetricKeys);
+      if (DateStartDate && dayjs(DateStartDate).isValid()) {
+        payload.start_date = dayjs(DateStartDate).format("DD/MM/YYYY");
+      }
+      if (DateEndDate && dayjs(DateEndDate).isValid()) {
+        payload.end_date = dayjs(DateEndDate).format("DD/MM/YYYY");
+      }
 
-  } catch (error) {
-    if (axios.isCancel?.(error) || error.name === "CanceledError") {
-      // Request was cancelled, do nothing
-      return;
+      const response = await axios.post(
+        `${process.env.REACT_APP_IP}get_metrics_by_date_range/`,
+        payload,
+        { signal } // Pass the signal here!
+      );
+
+      const data = response.data.data;
+
+      setDataState({
+        metrics: data.targeted || {},
+        previous: data.previous || {},
+        difference: data.difference || {},
+        bindGraph: Object.entries(data.graph_data || {})
+          .map(([rawDate, values]) => ({
+            date: rawDate,
+            fullDate: rawDate,
+            dateObj: dayjs(rawDate, "MMMM DD, YYYY"),
+            revenue: values.gross_revenue,
+          }))
+          .sort((a, b) => a.dateObj - b.dateObj),
+      });
+
+      // Only set visibleMetrics if you want to update it every fetch
+      const selectedMetricKeys = Object.keys(data.targeted || {});
+      setVisibleMetrics(selectedMetricKeys);
+    } catch (error) {
+      if (axios.isCancel?.(error) || error.name === "CanceledError") {
+        // Request was cancelled, do nothing
+        return;
+      }
+      console.error("Error fetching metrics:", error);
+    } finally {
+      setLoading(false);
+      setDataLoading(false);
     }
-    console.error("Error fetching metrics:", error);
-  } finally {
-    setLoading(false)
-    setDataLoading(false);
-  }
-};
+  };
 
   const getDisplayDateText = (
     widgetData,
@@ -460,7 +462,7 @@ const TestCard = ({
           ? `Yesterday: ${prev || "0"}`
           : `${date.subtract(1, "day").format("MMM DD")}: ${prev || "0"}`,
     },
-    
+
     total_units: {
       title: "Units Sold",
       tooltip: (date, today, prev) =>
@@ -468,15 +470,16 @@ const TestCard = ({
           ? `Yesterday: ${prev || "0"}`
           : `${date.subtract(1, "day").format("MMM DD")}: ${prev || "0"}`,
     },
-    total_tax:{
-      title:"Total Tax",
-      tooltip:(date,today,prev)=>
-         date.isSame(today, "day")
+    total_tax: {
+      title: "Total Tax",
+      tooltip: (date, today, prev) =>
+        date.isSame(today, "day")
           ? `Yesterday: ${formatCurrency(prev)}`
           : `${date.subtract(1, "day").format("MMM DD")}: ${formatCurrency(
               prev
             )}`,
-            currencySymbol:"$"},
+      currencySymbol: "$",
+    },
     refund: {
       title: "Refunds",
       tooltip: (date, today, prev) =>
@@ -661,7 +664,7 @@ const TestCard = ({
         py: 0.5,
       }}
     >
-      {loading || !dataState ?(
+      {loading || !dataState ? (
         <Box
           sx={{
             display: "flex",
@@ -985,7 +988,7 @@ const TestCard = ({
           {[
             "total_orders",
             "total_units",
-             "total_tax",
+            "total_tax",
             "refund",
             "total_cogs",
             "margin",
