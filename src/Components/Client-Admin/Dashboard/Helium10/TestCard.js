@@ -216,72 +216,82 @@ const TestCard = ({
 
   // Fetch data when dates change
   useEffect(() => {
-    fetchMetrics(currentDates.selectedDate, currentDates.displayDate);
-  }, [
-    currentDates.selectedDate,
-    currentDates.displayDate,
-    currentPreset,
-    brand_id,
-    product_id,
-    manufacturer_name,
-    fulfillment_channel,
-    marketPlaceId?.id,
-  ]);
+  const controller = new AbortController();
 
-  const fetchMetrics = async (selectedDate, displayDate) => {
-    setDataLoading(true);
-    try {
-      const payload = {
-        target_date: selectedDate.format("DD/MM/YYYY"),
-        user_id: userId,
-        preset: currentPreset,
-        marketplace_id: marketPlaceId.id,
-        brand_id: brand_id,
-        product_id: product_id,
-        manufacturer_name: manufacturer_name,
-        fulfillment_channel: fulfillment_channel,
-        timezone: TIMEZONE,
-      };
+  fetchMetrics(currentDates.selectedDate, currentDates.displayDate, controller.signal);
 
-      if (DateStartDate && dayjs(DateStartDate).isValid()) {
-        payload.start_date = dayjs(DateStartDate).format("DD/MM/YYYY");
-      }
-
-      if (DateEndDate && dayjs(DateEndDate).isValid()) {
-        payload.end_date = dayjs(DateEndDate).format("DD/MM/YYYY");
-      }
-
-      console.log("API Payload:", payload); // Debug log
-
-      const response = await axios.post(
-        `${process.env.REACT_APP_IP}get_metrics_by_date_range/`,
-        payload
-      );
-
-      const data = response.data.data;
-
-      setDataState({
-        metrics: data.targeted || {},
-        previous: data.previous || {},
-        difference: data.difference || {},
-        bindGraph: Object.entries(data.graph_data || {})
-          .map(([rawDate, values]) => ({
-            date: rawDate,
-            fullDate: rawDate,
-            dateObj: dayjs(rawDate, "MMMM DD, YYYY"), // Parse with explicit format
-            revenue: values.gross_revenue,
-          }))
-          .sort((a, b) => a.dateObj - b.dateObj),
-      });
-
-      const selectedMetricKeys = Object.keys(data.targeted || {});
-      setVisibleMetrics(selectedMetricKeys);
-    } catch (error) {
-      console.error("Error fetching metrics:", error);
-    } finally {
-      setDataLoading(false);
-    }
+  return () => {
+    controller.abort(); // Cancel previous request if dependencies change or component unmounts
   };
+}, [
+  currentDates.selectedDate,
+  currentDates.displayDate,
+  currentPreset,
+  brand_id,
+  product_id,
+  manufacturer_name,
+  fulfillment_channel,
+  marketPlaceId?.id,
+]);
+
+  const fetchMetrics = async (selectedDate, displayDate, signal) => {
+  setDataLoading(true);
+  try {
+    const payload = {
+      target_date: selectedDate.format("DD/MM/YYYY"),
+      user_id: userId,
+      preset: currentPreset,
+      marketplace_id: marketPlaceId.id,
+      brand_id: brand_id,
+      product_id: product_id,
+      manufacturer_name: manufacturer_name,
+      fulfillment_channel: fulfillment_channel,
+      timezone: TIMEZONE,
+    };
+
+    if (DateStartDate && dayjs(DateStartDate).isValid()) {
+      payload.start_date = dayjs(DateStartDate).format("DD/MM/YYYY");
+    }
+    if (DateEndDate && dayjs(DateEndDate).isValid()) {
+      payload.end_date = dayjs(DateEndDate).format("DD/MM/YYYY");
+    }
+
+    const response = await axios.post(
+      `${process.env.REACT_APP_IP}get_metrics_by_date_range/`,
+      payload,
+      { signal } // Pass the signal here!
+    );
+
+    const data = response.data.data;
+
+    setDataState({
+      metrics: data.targeted || {},
+      previous: data.previous || {},
+      difference: data.difference || {},
+      bindGraph: Object.entries(data.graph_data || {})
+        .map(([rawDate, values]) => ({
+          date: rawDate,
+          fullDate: rawDate,
+          dateObj: dayjs(rawDate, "MMMM DD, YYYY"),
+          revenue: values.gross_revenue,
+        }))
+        .sort((a, b) => a.dateObj - b.dateObj),
+    });
+
+    // Only set visibleMetrics if you want to update it every fetch
+    const selectedMetricKeys = Object.keys(data.targeted || {});
+    setVisibleMetrics(selectedMetricKeys);
+
+  } catch (error) {
+    if (axios.isCancel?.(error) || error.name === "CanceledError") {
+      // Request was cancelled, do nothing
+      return;
+    }
+    console.error("Error fetching metrics:", error);
+  } finally {
+    setDataLoading(false);
+  }
+};
 
   const getDisplayDateText = (
     widgetData,
