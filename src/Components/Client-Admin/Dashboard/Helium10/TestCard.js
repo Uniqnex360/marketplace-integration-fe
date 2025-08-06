@@ -193,7 +193,7 @@ const TestCard = ({
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
-    fetchMetrics(currentDates.selectedDate, currentDates.displayDate);
+    // fetchMetrics(currentDates.selectedDate, currentDates.displayDate);
   };
 
   const handleMetricToggle = (metric) => {
@@ -783,7 +783,7 @@ const TestCard = ({
                       )}`
                 }
                 currencySymbol="$"
-                loading={dataLoading}
+                loading={loading}
               />
             </Box>
           )}
