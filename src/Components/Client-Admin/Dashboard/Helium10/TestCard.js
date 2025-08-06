@@ -45,8 +45,9 @@ const MetricItem = ({
   tooltip,
   currencySymbol,
   percentSymbol,
-  loading = true,
+  loading = false,
 }) => {
+  const isLoading = loading || value === undefined;
   const absValue = Math.abs(value ?? 0);
   const absChange = Math.abs(change ?? 0);
 
@@ -161,16 +162,12 @@ const TestCard = ({
   const [currentPreset, setCurrentPreset] = useState(widgetData);
 
   // Data state
-  const [dataState, setDataState] = useState({
-    metrics: {},
-    previous: {},
-    difference: {},
-    bindGraph: [],
-  });
+    const [dataState, setDataState] = useState(null);
+
 
   const [tooltipData, setTooltipData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [dataLoading, setDataLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
 
   const userData = JSON.parse(localStorage.getItem("user") || "{}");
   const userId = userData?.id || "";
@@ -217,7 +214,7 @@ const TestCard = ({
   // Fetch data when dates change
   useEffect(() => {
   const controller = new AbortController();
-
+  setLoading(true)
   fetchMetrics(currentDates.selectedDate, currentDates.displayDate, controller.signal);
 
   return () => {
@@ -232,6 +229,7 @@ const TestCard = ({
   manufacturer_name,
   fulfillment_channel,
   marketPlaceId?.id,
+  widgetData
 ]);
 
   const fetchMetrics = async (selectedDate, displayDate, signal) => {
@@ -663,7 +661,7 @@ const TestCard = ({
         py: 0.5,
       }}
     >
-      {loading ? (
+      {loading || !dataState ?(
         <Box
           sx={{
             display: "flex",
@@ -672,7 +670,7 @@ const TestCard = ({
             width: "100%",
           }}
         >
-          <SkeletonLoadingUI />
+          <DottedCircleLoading />
         </Box>
       ) : (
         <Box
