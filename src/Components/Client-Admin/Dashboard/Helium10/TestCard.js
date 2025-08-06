@@ -227,6 +227,7 @@ const TestCard = ({
     currentDates.selectedDate,
     currentDates.displayDate,
     currentPreset,
+    preset,
     brand_id,
     product_id,
     manufacturer_name,
