@@ -213,57 +213,31 @@ const TestCard = ({
     }
   }, []);
 
+  // Fetch data when dates change
   useEffect(() => {
-    let isMounted = true;
     const controller = new AbortController();
-    
-    const fetchData = async () => {
-      try {
-        if (isMounted) {
-          setLoading(true);
-          setDataLoading(true);
-        }
-
-        await fetchMetrics(
-          currentDates.selectedDate,
-          currentDates.displayDate,
-          controller.signal
-        );
-
-        if (isMounted) {
-          setInitialLoad(false);
-          setHasLoadedData(true);
-        }
-      } catch (error) {
-        if (isMounted && !(axios.isCancel?.(error) || error.name === "CanceledError")) {
-          console.error("Error fetching metrics:", error);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-          setDataLoading(false);
-        }
-      }
-    };
-
-    fetchData();
+    setLoading(true);
+    fetchMetrics(
+      currentDates.selectedDate,
+      currentDates.displayDate,
+      controller.signal
+    );
 
     return () => {
-      isMounted = false;
-      controller.abort();
+      controller.abort(); // Cancel previous request if dependencies change or component unmounts
     };
   }, [
     currentDates.selectedDate,
     currentDates.displayDate,
     currentPreset,
     brand_id,
-    product_id,
+    product_id, 
     manufacturer_name,
     fulfillment_channel,
     marketPlaceId?.id,
     widgetData,
-    DateStartDate,  // Add these to dependencies
-    DateEndDate     // Add these to dependencies
+    DateStartDate,  
+    DateEndDate  
   ]);
 
   const fetchMetrics = async (selectedDate, displayDate, signal) => {
@@ -475,7 +449,6 @@ const TestCard = ({
     });
 
     setCurrentPreset(widgetData);
-    setLoading(true)
   }, [widgetData, DateStartDate, DateEndDate]);
 
   const formatCurrency = (value) =>
@@ -696,7 +669,7 @@ const TestCard = ({
         py: 0.5,
       }}
     >
-      {loading || !dataState ? (
+      {loading || !dataState ||dataLoading? (
         <Box
           sx={{
             display: "flex",
