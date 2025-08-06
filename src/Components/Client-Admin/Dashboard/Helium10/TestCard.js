@@ -153,7 +153,8 @@ const TestCard = ({
 }) => {
   const theme = useTheme();
 
-  // Combined state for dates and preset
+  const [initialLoad, setInitialLoad] = useState(true);
+
   const [currentDates, setCurrentDates] = useState({
     selectedDate: dayjs().tz(TIMEZONE),
     displayDate: dayjs().tz(TIMEZONE),
@@ -167,6 +168,8 @@ const TestCard = ({
   const [tooltipData, setTooltipData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [dataLoading, setDataLoading] = useState(true);
+  const [hasLoadedData, setHasLoadedData] = useState(false);
+
 
   const userData = JSON.parse(localStorage.getItem("user") || "{}");
   const userId = userData?.id || "";
@@ -210,18 +213,44 @@ const TestCard = ({
     }
   }, []);
 
-  // Fetch data when dates change
   useEffect(() => {
+    let isMounted = true;
     const controller = new AbortController();
-    setLoading(true);
-    fetchMetrics(
-      currentDates.selectedDate,
-      currentDates.displayDate,
-      controller.signal
-    );
+    
+    const fetchData = async () => {
+      try {
+        if (isMounted) {
+          setLoading(true);
+          setDataLoading(true);
+        }
+
+        await fetchMetrics(
+          currentDates.selectedDate,
+          currentDates.displayDate,
+          controller.signal
+        );
+
+        if (isMounted) {
+          setInitialLoad(false);
+          setHasLoadedData(true);
+        }
+      } catch (error) {
+        if (isMounted && !(axios.isCancel?.(error) || error.name === "CanceledError")) {
+          console.error("Error fetching metrics:", error);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+          setDataLoading(false);
+        }
+      }
+    };
+
+    fetchData();
 
     return () => {
-      controller.abort(); // Cancel previous request if dependencies change or component unmounts
+      isMounted = false;
+      controller.abort();
     };
   }, [
     currentDates.selectedDate,
@@ -233,6 +262,8 @@ const TestCard = ({
     fulfillment_channel,
     marketPlaceId?.id,
     widgetData,
+    DateStartDate,  // Add these to dependencies
+    DateEndDate     // Add these to dependencies
   ]);
 
   const fetchMetrics = async (selectedDate, displayDate, signal) => {
@@ -444,6 +475,7 @@ const TestCard = ({
     });
 
     setCurrentPreset(widgetData);
+    setLoading(true)
   }, [widgetData, DateStartDate, DateEndDate]);
 
   const formatCurrency = (value) =>
@@ -673,7 +705,7 @@ const TestCard = ({
             width: "100%",
           }}
         >
-          <DottedCircleLoading />
+          <SkeletonLoadingUI />
         </Box>
       ) : (
         <Box
