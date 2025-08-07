@@ -573,7 +573,8 @@ const CompareChart = ({
 
     // **Updated Order of keys for display to match the image precisely**
     const orderedKeys = [
-      "Gross Revenue",
+      "Gross Revenue (With Tax)",
+      "Gross Revenue (Without Tax)",
       "Profit Margin",
       "Net Profit",
       "Orders",
@@ -639,7 +640,10 @@ const CompareChart = ({
           const currentItem = currentData[key];
           const compareItem = compareData[key];
 
-          const currentValue = currentItem?.value;
+          const currentValue =
+            currentItem?.value !== undefined
+              ? currentItem.value
+              : currentData[key];
           const compareValue = compareItem?.value;
           const color = currentItem?.color || "#000";
 
