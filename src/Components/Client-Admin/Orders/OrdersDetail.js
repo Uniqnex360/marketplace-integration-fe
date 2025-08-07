@@ -602,7 +602,7 @@ const OrderDetail = () => {
                     </TableCell>
                     <TableCell>{order?.order_total || "N/A"}</TableCell>
                   </TableRow> */}
-                   <TableRow>
+                  <TableRow>
                     <TableCell colSpan={4} align="right">
                       <strong>Tax:</strong>
                     </TableCell>
@@ -623,18 +623,19 @@ const OrderDetail = () => {
                       <strong>Shipping:</strong>
                     </TableCell>
                     <TableCell>
-                      {order?.shipping_price!==undefined && order?.shipping_price!==null ?
-                     `$${Number(order.shipping_price).toFixed(2)}`:"N/A"}
+                      {order?.shipping_price !== undefined &&
+                      order?.shipping_price !== null
+                        ? `$${Number(order.shipping_price).toFixed(2)}`
+                        : "N/A"}
                     </TableCell>
-                   
                   </TableRow>
                   <TableRow>
                     <TableCell colSpan={4} align="right">
                       <strong>Shipping Tax:</strong>
                     </TableCell>
-                     <TableCell>$0.00</TableCell>
+                    <TableCell>$0.00</TableCell>
                   </TableRow>
-                 
+
                   <TableRow>
                     <TableCell colSpan={4} align="right">
                       <strong>Total:</strong>
@@ -643,7 +644,26 @@ const OrderDetail = () => {
                       {order?.order_total !== undefined &&
                       order?.order_total !== null
                         ? `$${Number(order.order_total).toFixed(2)}`
-                        : "N/A"}
+                        : `$${(
+                            (order?.order_items
+                              ? order.order_items.reduce(
+                                  (sum, item) =>
+                                    sum +
+                                    Number(
+                                      item.Pricing?.ItemPrice?.Amount || 0
+                                    ) *
+                                      Number(
+                                        item.ProductDetails?.QuantityOrdered ||
+                                          0
+                                      ) +
+                                    Number(item.Pricing?.ItemTax?.Amount || 0),
+                                  0
+                                )
+                              : 0) +
+                            Number(order?.shipping_price || 0) +
+                            0
+                          ) // shipping tax, if any
+                            .toFixed(2)}`}
                     </TableCell>
                   </TableRow>
                 </TableBody>
