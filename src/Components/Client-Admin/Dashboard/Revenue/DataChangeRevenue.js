@@ -591,15 +591,17 @@ const CompareChart = ({
     });
 
     // **Updated Order of keys for display to match the image precisely**
-    const orderedKeys = [
-      "Gross Revenue",
-      "Profit Margin",
-      "Net Profit",
-      "Orders",
-      "Units Sold",
-      "Refund Amount",
-      "Refund Quantity",
-    ];
+   const orderedKeys = [
+  "Gross Revenue",
+  "Gross Revenue (With Tax)",
+  "Gross Revenue (Without Tax)",
+  "Profit Margin",
+  "Net Profit",
+  "Orders",
+  "Units Sold",
+  "Refund Amount",
+  "Refund Quantity",
+];
 
     // Determine if compare graph is active. This is now based on whether compareDateForHeader exists.
     const CompareGraph = !!compareDateForHeader;
@@ -1305,6 +1307,56 @@ const CompareChart = ({
                     yAxisId="right-percentage"
                   />
                 )}
+                {visibleMetrics.includes("gross_revenue_with_tax") && (
+  <Line
+    type="monotone"
+    dataKey="grossRevenueWithTax"
+    dot={false}
+    stroke={metricColors.gross_revenue_with_tax}
+    strokeWidth={2}
+    name={metricLabels.gross_revenue_with_tax}
+    yAxisId="left"
+  />
+)}
+
+{visibleMetrics.includes("gross_revenue_without_tax") && (
+  <Line
+    type="monotone"
+    dataKey="grossRevenueWithoutTax"
+    dot={false}
+    stroke={metricColors.gross_revenue_without_tax}
+    strokeWidth={2}
+    name={metricLabels.gross_revenue_without_tax}
+    yAxisId="left"
+  />
+)}
+
+{/* Optional: add comparison lines */}
+{visibleMetrics.includes("gross_revenue_with_tax") && (
+  <Line
+    type="monotone"
+    dataKey="compareGrossRevenueWithTax"
+    dot={false}
+    strokeDasharray="5 5"
+    stroke={metricColors.gross_revenue_with_tax}
+    strokeWidth={2}
+    name={`Compare ${metricLabels.gross_revenue_with_tax}`}
+    yAxisId="left"
+  />
+)}
+
+{visibleMetrics.includes("gross_revenue_without_tax") && (
+  <Line
+    type="monotone"
+    dataKey="compareGrossRevenueWithoutTax"
+    dot={false}
+    strokeDasharray="5 5"
+    stroke={metricColors.gross_revenue_without_tax}
+    strokeWidth={2}
+    name={`Compare ${metricLabels.gross_revenue_without_tax}`}
+    yAxisId="left"
+  />
+)}
                 {visibleMetrics.includes("profit_margin") && (
                   <Line
                     type="monotone"
