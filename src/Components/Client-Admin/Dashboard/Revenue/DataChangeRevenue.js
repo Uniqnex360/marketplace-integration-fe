@@ -71,7 +71,7 @@ const initialMetricConfig = [
     isNegativeChange: false,
     color: "#00b894",
     show: false,
-    isCurrency: true
+    isCurrency: true,
   },
   {
     id: "gross_revenue_without_tax",
@@ -81,7 +81,7 @@ const initialMetricConfig = [
     isNegativeChange: false,
     color: "#00b894",
     show: false,
-    isCurrency: true
+    isCurrency: true,
   },
   {
     id: "net_profit",
@@ -140,10 +140,9 @@ const initialMetricConfig = [
     show: false,
   },
 ];
-
 const metricLabels = {
-  gross_revenue: "Gross Revenue(With Tax)",
-  gross_revenue: "Gross Revenue(Without Tax)",
+  gross_revenue_with_tax: "Gross Revenue (With Tax)",
+  gross_revenue_without_tax: "Gross Revenue (Without Tax)",
   net_profit: "Net Profit",
   profit_margin: "Profit Margin",
   orders: "Orders",
@@ -241,7 +240,6 @@ const CompareChart = ({
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       };
 
-      // You have a mocked response here. For a real API call, uncomment the axios.post line:
       const response = await axios.post(
         `${process.env.REACT_APP_IP}updatedRevenueWidgetAPIView/`,
         payload
@@ -484,7 +482,8 @@ const CompareChart = ({
       date: item.current_date,
       compareDate: item.compare_date,
 
-      grossRevenue: item.gross_revenue_without_tax ?? 0,
+      grossRevenueWithTax: item.gross_revenue_with_tax ?? 0,
+      grossRevenueWithoutTax: item.gross_revenue_without_tax ?? 0,
       netProfit: item.net_profit ?? 0,
       profitMargin: item.profit_margin ?? 0,
       orders: item.orders ?? 0,
@@ -1252,14 +1251,25 @@ const CompareChart = ({
                 {/* Pass a function to the content prop of Tooltip */}
                 <Tooltip content={<CustomTooltip />} />
 
-                {visibleMetrics.includes("gross_revenue") && (
+                {visibleMetrics.includes("gross_revenue_with_tax") && (
                   <Line
                     type="monotone"
-                    dataKey="grossRevenue"
+                    dataKey="grossRevenueWithTax"
                     dot={false}
-                    stroke={metricColors.gross_revenue}
+                    stroke="#00b894"
                     strokeWidth={2}
-                    name={metricLabels.gross_revenue}
+                    name={metricLabels.gross_revenue_with_tax}
+                    yAxisId="left"
+                  />
+                )}
+                {visibleMetrics.includes("gross_revenue_without_tax") && (
+                  <Line
+                    type="monotone"
+                    dataKey="grossRevenueWithoutTax"
+                    dot={false}
+                    stroke="#0984e3"
+                    strokeWidth={2}
+                    name={metricLabels.gross_revenue_without_tax}
                     yAxisId="left"
                   />
                 )}
