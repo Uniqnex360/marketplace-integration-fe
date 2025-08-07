@@ -77,24 +77,6 @@ const OrderDetail = () => {
       );
     }
   };
-  const subtotal = order?.order_items?.reduce(
-    (acc, item) => acc + (item.Pricing?.ItemPrice?.Amount || 0),
-    0
-  );
-
-  const taxTotal = order?.order_items?.reduce(
-    (acc, item) => acc + (item.Pricing?.ItemTax?.Amount || 0),
-    0
-  );
-
-  const shippingCost =
-    order?.shipping_price !== undefined && order?.shipping_price !== null
-      ? Number(order.shipping_price)
-      : 0;
-
-  const shippingTax = 0; // Replace with real field if available
-
-  const total = subtotal + taxTotal + shippingCost + shippingTax;
 
   // Fetch Order Details
   useEffect(() => {
@@ -622,37 +604,55 @@ const OrderDetail = () => {
                   </TableRow> */}
                   <TableRow>
                     <TableCell colSpan={4} align="right">
-                      <strong>Subtotal:</strong>
-                    </TableCell>
-                    <TableCell>${subtotal.toFixed(2)}</TableCell>
-                  </TableRow>
-
-                  <TableRow>
-                    <TableCell colSpan={4} align="right">
                       <strong>Tax:</strong>
                     </TableCell>
-                    <TableCell>${taxTotal.toFixed(2)}</TableCell>
+                    <TableCell>
+                      {order?.order_items
+                        ? `$${order.order_items
+                            .reduce(
+                              (total, item) =>
+                                total + (item.Pricing?.ItemTax?.Amount || 0),
+                              0
+                            )
+                            .toFixed(2)}`
+                        : "N/A"}
+                    </TableCell>
                   </TableRow>
-
                   <TableRow>
                     <TableCell colSpan={4} align="right">
                       <strong>Shipping:</strong>
                     </TableCell>
-                    <TableCell>${shippingCost.toFixed(2)}</TableCell>
+                    <TableCell>
+                      {order?.shipping_price !== undefined &&
+                      order?.shipping_price !== null
+                        ? `$${Number(order.shipping_price).toFixed(2)}`
+                        : "N/A"}
+                    </TableCell>
                   </TableRow>
-
                   <TableRow>
                     <TableCell colSpan={4} align="right">
                       <strong>Shipping Tax:</strong>
                     </TableCell>
-                    <TableCell>${shippingTax.toFixed(2)}</TableCell>
+                    <TableCell>$0.00</TableCell>
                   </TableRow>
 
                   <TableRow>
                     <TableCell colSpan={4} align="right">
                       <strong>Total:</strong>
                     </TableCell>
-                    <TableCell>${total.toFixed(2)}</TableCell>
+                    <TableCell>
+                      {order?.order_items
+                        ? `$${(
+                            order.order_items.reduce(
+                              (total, item) =>
+                                total +
+                                (item?.Pricing?.ItemPrice?.Amount || 0) +
+                                (item?.Pricing?.ItemTax?.Amount || 0),
+                              0
+                            ) + (order?.shipping_price || 0)
+                          ).toFixed(2)}`
+                        : "N/A"}
+                    </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
