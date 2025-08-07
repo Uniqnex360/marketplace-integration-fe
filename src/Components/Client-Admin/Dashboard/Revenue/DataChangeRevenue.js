@@ -54,6 +54,8 @@ import DottedCircleLoading from "../../../Loading/DotLoading";
 
 const metricColors = {
   gross_revenue: "#00b894",
+  gross_revenue_with_tax: "#2ecc71",
+  gross_revenue_without_tax: "#d35400",
   net_profit: "#6629b3",
   profit_margin: "#0984e3",
   orders: "#f14682",
@@ -61,6 +63,7 @@ const metricColors = {
   refund_amount: "#e6770d",
   refund_quantity: "#600101",
 };
+
 
 const initialMetricConfig = [
   {
@@ -70,6 +73,26 @@ const initialMetricConfig = [
     change: null,
     isNegativeChange: false,
     color: "#00b894",
+    show: false,
+    isCurrency: true,
+  },
+  {
+    id: "gross_revenue_with_tax",
+    label: "Gross Revenue (With Tax)",
+    value: null,
+    change: null,
+    isNegativeChange: false,
+    color: "#2ecc71",
+    show: false,
+    isCurrency: true,
+  },
+  {
+    id: "gross_revenue_without_tax",
+    label: "Gross Revenue (Without Tax)",
+    value: null,
+    change: null,
+    isNegativeChange: false,
+    color: "#d35400",
     show: false,
     isCurrency: true,
   },
@@ -133,6 +156,8 @@ const initialMetricConfig = [
 
 const metricLabels = {
   gross_revenue: "Gross Revenue",
+  gross_revenue_with_tax: "Gross Revenue (With Tax)",
+  gross_revenue_without_tax: "Gross Revenue (Without Tax)",
   net_profit: "Net Profit",
   profit_margin: "Profit Margin",
   orders: "Orders",
@@ -474,6 +499,8 @@ const CompareChart = ({
       compareDate: item.compare_date,
 
       grossRevenue: item.gross_revenue ?? 0,
+       grossRevenueWithTax: item.gross_revenue_with_tax ?? 0,
+  grossRevenueWithoutTax: item.gross_revenue_without_tax ?? 0,
       netProfit: item.net_profit ?? 0,
       profitMargin: item.profit_margin ?? 0,
       orders: item.orders ?? 0,
@@ -482,6 +509,8 @@ const CompareChart = ({
       refundQuantity: item.refund_quantity ?? 0,
 
       compareGrossRevenue: item.compare_gross_revenue ?? null,
+        compareGrossRevenueWithTax: item.compare_gross_revenue_with_tax ?? null,
+  compareGrossRevenueWithoutTax: item.compare_gross_revenue_without_tax ?? null,
       compareNetProfit: item.compare_net_profit ?? null,
       compareProfitMargin: item.compare_profit_margin ?? null,
       compareOrders: item.compare_orders ?? null,
