@@ -64,14 +64,24 @@ const metricColors = {
 
 const initialMetricConfig = [
   {
-    id: "gross_revenue",
-    label: "Gross Revenue",
+    id: "gross_revenue_with_tax",
+    label: "Gross Revenue (With Tax)",
     value: null,
     change: null,
     isNegativeChange: false,
     color: "#00b894",
     show: false,
-    isCurrency: true,
+    isCurrency: true
+  },
+  {
+    id: "gross_revenue_without_tax",
+    label: "Gross Revenue (Without Tax)",
+    value: null,
+    change: null,
+    isNegativeChange: false,
+    color: "#00b894",
+    show: false,
+    isCurrency: true
   },
   {
     id: "net_profit",
@@ -132,7 +142,8 @@ const initialMetricConfig = [
 ];
 
 const metricLabels = {
-  gross_revenue: "Gross Revenue",
+  gross_revenue: "Gross Revenue(With Tax)",
+  gross_revenue: "Gross Revenue(Without Tax)",
   net_profit: "Net Profit",
   profit_margin: "Profit Margin",
   orders: "Orders",
@@ -473,7 +484,7 @@ const CompareChart = ({
       date: item.current_date,
       compareDate: item.compare_date,
 
-      grossRevenue: item.gross_revenue ?? 0,
+      grossRevenue: item.gross_revenue_without_tax ?? 0,
       netProfit: item.net_profit ?? 0,
       profitMargin: item.profit_margin ?? 0,
       orders: item.orders ?? 0,
