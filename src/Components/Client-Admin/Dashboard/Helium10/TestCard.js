@@ -180,7 +180,8 @@ const TestCard = ({
   const [open, setOpen] = useState(false);
 
   const [visibleMetrics, setVisibleMetrics] = useState([
-    "gross_revenue",
+   "gross_revenue_without_tax",
+    "gross_revenue_with_tax",
     "total_orders",
     "total_units",
     "refund",
@@ -274,7 +275,8 @@ const fetchMetrics = async (selectedDate, displayDate) => {
             date: rawDate,
             fullDate: rawDate,
             dateObj: dayjs(rawDate, "MMMM DD, YYYY"),
-            revenue: values.gross_revenue,
+            gross_revenue_without_tax: values.gross_revenue_without_tax,
+    gross_revenue_with_tax: values.gross_revenue_with_tax,
           }))
           .sort((a, b) => a.dateObj - b.dateObj),
       });
@@ -453,6 +455,22 @@ const fetchMetrics = async (selectedDate, displayDate) => {
     }).format(value ?? 0);
 
   const METRICS_CONFIG = {
+      gross_revenue_without_tax: {
+    title: "Gross Revenue (No Tax)",
+    tooltip: (date, today, prev) =>
+      date.isSame(today, "day")
+        ? `Yesterday: ${formatCurrency(prev)}`
+        : `${date.subtract(1, "day").format("MMM DD")}: ${formatCurrency(prev)}`,
+    currencySymbol: "$",
+  },
+  gross_revenue_with_tax: {
+    title: "Gross Revenue (With Tax)",
+    tooltip: (date, today, prev) =>
+      date.isSame(today, "day")
+        ? `Yesterday: ${formatCurrency(prev)}`
+        : `${date.subtract(1, "day").format("MMM DD")}: ${formatCurrency(prev)}`,
+    currencySymbol: "$",
+  },
     total_orders: {
       title: "Orders",
       tooltip: (date, today, prev) =>
@@ -614,31 +632,32 @@ const fetchMetrics = async (selectedDate, displayDate) => {
     }
   };
 
-  const getGraphPoints = () => {
-    const maxRevenue = Math.max(
-      ...dataState.bindGraph.map((d) => d.revenue),
-      1
-    );
-    return dataState.bindGraph
-      .map((item, index) => {
-        const x = (index / (dataState.bindGraph.length - 1)) * 280 + 10;
-        const y = 50 - (item.revenue / maxRevenue) * 30;
-        return `${x},${y}`;
-      })
-      .join(" ");
-  };
+  const getGraphPoints = (metric = "gross_revenue_without_tax") => {
+  const maxValue = Math.max(
+    ...dataState.bindGraph.map((d) => d[metric]),
+    1
+  );
+  return dataState.bindGraph
+    .map((item, index) => {
+      const x = (index / (dataState.bindGraph.length - 1)) * 280 + 10;
+      const y = 50 - (item[metric] / maxValue) * 30;
+      return `${x},${y}`;
+    })
+    .join(" ");
+};
 
-  const getCirclePoints = () => {
-    const maxRevenue = Math.max(
-      ...dataState.bindGraph.map((d) => d.revenue),
-      1
-    );
-    return dataState.bindGraph.map((item, index) => ({
-      ...item,
-      cx: (index / (dataState.bindGraph.length - 1)) * 280 + 10,
-      cy: 50 - (item.revenue / maxRevenue) * 30,
-    }));
-  };
+const getCirclePoints = (metric = "gross_revenue_without_tax") => {
+  const maxValue = Math.max(
+    ...dataState.bindGraph.map((d) => d[metric]),
+    1
+  );
+  return dataState.bindGraph.map((item, index) => ({
+    ...item,
+    cx: (index / (dataState.bindGraph.length - 1)) * 280 + 10,
+    cy: 50 - (item[metric] / maxValue) * 30,
+    value: item[metric],
+  }));
+};  
 
   const metricBlockStyle = {
     flex: "0 0 180px",
@@ -760,24 +779,22 @@ const fetchMetrics = async (selectedDate, displayDate) => {
           </Box>
 
           {/* Gross Revenue */}
-          {visibleMetrics.includes("gross_revenue") && (
-            <Box sx={metricBlockStyle}>
-              <MetricItem
-                title="Gross Revenue"
-                value={dataState.metrics.gross_revenue}
-                change={dataState.difference.gross_revenue}
-                isNegative={String(
-                  dataState.difference.gross_revenue
-                ).startsWith("-")}
+          {visibleMetrics.includes("gross_revenue_without_tax") && (
+  <Box sx={metricBlockStyle}>
+    <MetricItem
+      title="Gross Revenue (No Tax)"
+      value={dataState.metrics.gross_revenue_without_tax}
+      change={dataState.difference.gross_revenue_without_tax}
+      isNegative={String(dataState.difference.gross_revenue_without_tax).startsWith("-")}
                 tooltip={
                   currentDates.selectedDate.isSame(today, "day")
                     ? `Yesterday: ${formatCurrency(
-                        dataState.previous.gross_revenue
+                        dataState.previous.gross_revenue_without_tax
                       )}`
                     : `${currentDates.selectedDate
                         .subtract(1, "day")
                         .format("MMM DD")}: ${formatCurrency(
-                        dataState.previous.gross_revenue
+                        dataState.previous.gross_revenue_without_tax
                       )}`
                 }
                 currencySymbol="$"
@@ -785,9 +802,32 @@ const fetchMetrics = async (selectedDate, displayDate) => {
               />
             </Box>
           )}
+          {visibleMetrics.includes("gross_revenue_with_tax") && (
+  <Box sx={metricBlockStyle}>
+    <MetricItem
+      title="Gross Revenue (With Tax)"
+      value={dataState.metrics.gross_revenue_with_tax}
+      change={dataState.difference.gross_revenue_with_tax}
+      isNegative={String(dataState.difference.gross_revenue_with_tax).startsWith("-")}
+      tooltip={
+                  currentDates.selectedDate.isSame(today, "day")
+                    ? `Yesterday: ${formatCurrency(
+                        dataState.previous.gross_revenue_with_tax
+                      )}`
+                    : `${currentDates.selectedDate
+                        .subtract(1, "day")
+                        .format("MMM DD")}: ${formatCurrency(
+                        dataState.previous.gross_revenue_with_tax
+                      )}`
+                }
+      currencySymbol="$"
+      loading={dataLoading}
+    />
+  </Box>
+)}
 
           {/* Chart */}
-          {visibleMetrics.includes("gross_revenue") && (
+          {(visibleMetrics.includes("gross_revenue_without_tax") || visibleMetrics.includes("gross_revenue_with_tax")) && (
             <Box sx={{ borderRight: "1px solid #e0e0e0" }}>
               <Box
                 ref={graphContainerRef}
@@ -846,37 +886,61 @@ const fetchMetrics = async (selectedDate, displayDate) => {
                     {!dataLoading && (
                       <>
                         <polyline
-                          points={getGraphPoints()}
+                              points={getGraphPoints("gross_revenue_without_tax")}
+
                           style={{
                             fill: "none",
                             stroke: theme.palette.primary.main,
                             strokeWidth: 2,
                           }}
                         />
+                         <polyline
+    points={getGraphPoints("gross_revenue_with_tax")}
+    style={{
+      fill: "none",
+      stroke: "#FF9800", // Use a different color
+      strokeWidth: 2,
+    }}
+  />
 
-                        {getCirclePoints().map((point, index) => (
-                          <circle
-                            key={index}
-                            cx={point.cx}
-                            cy={point.cy}
-                            r="8" // Slightly smaller for better UX
-                            fill="transparent"
-                            stroke="transparent"
-                            style={{
-                              pointerEvents: "all",
-                              cursor: "pointer",
-                            }}
-                            onMouseEnter={(e) => {
-                              e.stopPropagation();
-                              setTooltipData({ ...point, index });
-                            }}
-                            onMouseLeave={(e) => {
-                              e.stopPropagation();
-                              // Small delay to prevent flickering
-                              setTimeout(() => setTooltipData(null), 50);
-                            }}
-                          />
-                        ))}
+                        {getCirclePoints("gross_revenue_without_tax").map((point, index) => (
+  <circle
+    key={`no-tax-${index}`}
+    cx={point.cx}
+    cy={point.cy}
+    r="8"
+    fill="transparent"
+    stroke="transparent"
+    style={{ pointerEvents: "all", cursor: "pointer" }}
+    onMouseEnter={(e) => {
+      e.stopPropagation();
+      setTooltipData({ ...point, index });
+    }}
+    onMouseLeave={(e) => {
+      e.stopPropagation();
+      setTimeout(() => setTooltipData(null), 50);
+    }}
+  />
+))}
+{getCirclePoints("gross_revenue_with_tax").map((point, index) => (
+  <circle
+    key={`with-tax-${index}`}
+    cx={point.cx}
+    cy={point.cy}
+    r="8"
+    fill="transparent"
+    stroke="transparent"
+    style={{ pointerEvents: "all", cursor: "pointer" }}
+    onMouseEnter={(e) => {
+      e.stopPropagation();
+      setTooltipData({ ...point, index });
+    }}
+    onMouseLeave={(e) => {
+      e.stopPropagation();
+      setTimeout(() => setTooltipData(null), 50);
+    }}
+  />
+))}
 
                         {tooltipData && (
                           <>
@@ -970,11 +1034,14 @@ const fetchMetrics = async (selectedDate, displayDate) => {
                     }}
                   >
                     <Typography fontWeight="bold" fontSize={14} color="#485E75">
-                      {dayjs(tooltipData.fullDate).format("MMM DD, YYYY")}
-                    </Typography>
-                    <Typography fontSize={14} color="#000" fontWeight="bold">
-                      {formatCurrency(tooltipData.revenue)}
-                    </Typography>
+      {dayjs(tooltipData.fullDate).format("MMM DD, YYYY")}
+    </Typography>
+    <Typography fontSize={14} color={theme.palette.primary.main} fontWeight="bold">
+      No Tax: {formatCurrency(tooltipData.gross_revenue_without_tax)}
+    </Typography>
+    <Typography fontSize={14} color="#FF9800" fontWeight="bold">
+      With Tax: {formatCurrency(tooltipData.gross_revenue_with_tax)}
+    </Typography>
                   </Box>
                 )}
               </Box>
