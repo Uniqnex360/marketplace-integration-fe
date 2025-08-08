@@ -64,7 +64,6 @@ const metricColors = {
   refund_quantity: "#600101",
 };
 
-
 const initialMetricConfig = [
   {
     id: "gross_revenue",
@@ -73,26 +72,6 @@ const initialMetricConfig = [
     change: null,
     isNegativeChange: false,
     color: "#00b894",
-    show: false,
-    isCurrency: true,
-  },
-  {
-    id: "gross_revenue_with_tax",
-    label: "Gross Revenue (With Tax)",
-    value: null,
-    change: null,
-    isNegativeChange: false,
-    color: "#2ecc71",
-    show: false,
-    isCurrency: true,
-  },
-  {
-    id: "gross_revenue_without_tax",
-    label: "Gross Revenue (Without Tax)",
-    value: null,
-    change: null,
-    isNegativeChange: false,
-    color: "#d35400",
     show: false,
     isCurrency: true,
   },
@@ -498,9 +477,7 @@ const CompareChart = ({
       date: item.current_date,
       compareDate: item.compare_date,
 
-      grossRevenue: item.gross_revenue ?? 0,
-       grossRevenueWithTax: item.gross_revenue_with_tax ?? 0,
-  grossRevenueWithoutTax: item.gross_revenue_without_tax ?? 0,
+      grossRevenue: item.gross_revenue_with_tax ?? 0,
       netProfit: item.net_profit ?? 0,
       profitMargin: item.profit_margin ?? 0,
       orders: item.orders ?? 0,
@@ -508,9 +485,7 @@ const CompareChart = ({
       refundAmount: item.refund_amount ?? 0,
       refundQuantity: item.refund_quantity ?? 0,
 
-      compareGrossRevenue: item.compare_gross_revenue ?? null,
-        compareGrossRevenueWithTax: item.compare_gross_revenue_with_tax ?? null,
-  compareGrossRevenueWithoutTax: item.compare_gross_revenue_without_tax ?? null,
+      compareGrossRevenue: item.compare_gross_revenue_with_tax ?? null,
       compareNetProfit: item.compare_net_profit ?? null,
       compareProfitMargin: item.compare_profit_margin ?? null,
       compareOrders: item.compare_orders ?? null,
@@ -591,17 +566,15 @@ const CompareChart = ({
     });
 
     // **Updated Order of keys for display to match the image precisely**
-   const orderedKeys = [
-  "Gross Revenue",
-  "Gross Revenue (With Tax)",
-  "Gross Revenue (Without Tax)",
-  "Profit Margin",
-  "Net Profit",
-  "Orders",
-  "Units Sold",
-  "Refund Amount",
-  "Refund Quantity",
-];
+    const orderedKeys = [
+      "Gross Revenue",
+      "Profit Margin",
+      "Net Profit",
+      "Orders",
+      "Units Sold",
+      "Refund Amount",
+      "Refund Quantity",
+    ];
 
     // Determine if compare graph is active. This is now based on whether compareDateForHeader exists.
     const CompareGraph = !!compareDateForHeader;
@@ -1308,55 +1281,55 @@ const CompareChart = ({
                   />
                 )}
                 {visibleMetrics.includes("gross_revenue_with_tax") && (
-  <Line
-    type="monotone"
-    dataKey="grossRevenueWithTax"
-    dot={false}
-    stroke={metricColors.gross_revenue_with_tax}
-    strokeWidth={2}
-    name={metricLabels.gross_revenue_with_tax}
-    yAxisId="left"
-  />
-)}
+                  <Line
+                    type="monotone"
+                    dataKey="grossRevenueWithTax"
+                    dot={false}
+                    stroke={metricColors.gross_revenue_with_tax}
+                    strokeWidth={2}
+                    name={metricLabels.gross_revenue_with_tax}
+                    yAxisId="left"
+                  />
+                )}
 
-{visibleMetrics.includes("gross_revenue_without_tax") && (
-  <Line
-    type="monotone"
-    dataKey="grossRevenueWithoutTax"
-    dot={false}
-    stroke={metricColors.gross_revenue_without_tax}
-    strokeWidth={2}
-    name={metricLabels.gross_revenue_without_tax}
-    yAxisId="left"
-  />
-)}
+                {visibleMetrics.includes("gross_revenue_without_tax") && (
+                  <Line
+                    type="monotone"
+                    dataKey="grossRevenueWithoutTax"
+                    dot={false}
+                    stroke={metricColors.gross_revenue_without_tax}
+                    strokeWidth={2}
+                    name={metricLabels.gross_revenue_without_tax}
+                    yAxisId="left"
+                  />
+                )}
 
-{/* Optional: add comparison lines */}
-{visibleMetrics.includes("gross_revenue_with_tax") && (
-  <Line
-    type="monotone"
-    dataKey="compareGrossRevenueWithTax"
-    dot={false}
-    strokeDasharray="5 5"
-    stroke={metricColors.gross_revenue_with_tax}
-    strokeWidth={2}
-    name={`Compare ${metricLabels.gross_revenue_with_tax}`}
-    yAxisId="left"
-  />
-)}
+                {/* Optional: add comparison lines */}
+                {visibleMetrics.includes("gross_revenue_with_tax") && (
+                  <Line
+                    type="monotone"
+                    dataKey="compareGrossRevenueWithTax"
+                    dot={false}
+                    strokeDasharray="5 5"
+                    stroke={metricColors.gross_revenue_with_tax}
+                    strokeWidth={2}
+                    name={`Compare ${metricLabels.gross_revenue_with_tax}`}
+                    yAxisId="left"
+                  />
+                )}
 
-{visibleMetrics.includes("gross_revenue_without_tax") && (
-  <Line
-    type="monotone"
-    dataKey="compareGrossRevenueWithoutTax"
-    dot={false}
-    strokeDasharray="5 5"
-    stroke={metricColors.gross_revenue_without_tax}
-    strokeWidth={2}
-    name={`Compare ${metricLabels.gross_revenue_without_tax}`}
-    yAxisId="left"
-  />
-)}
+                {visibleMetrics.includes("gross_revenue_without_tax") && (
+                  <Line
+                    type="monotone"
+                    dataKey="compareGrossRevenueWithoutTax"
+                    dot={false}
+                    strokeDasharray="5 5"
+                    stroke={metricColors.gross_revenue_without_tax}
+                    strokeWidth={2}
+                    name={`Compare ${metricLabels.gross_revenue_without_tax}`}
+                    yAxisId="left"
+                  />
+                )}
                 {visibleMetrics.includes("profit_margin") && (
                   <Line
                     type="monotone"
