@@ -136,7 +136,7 @@ function PeriodComparission({
         responseData = {};
       }
     }
-      const periods = response.data || {};
+const periods = responseData || {};
 
       const formattedData = Object.keys(periods)
         .filter((key) => periods[key]?.label)
