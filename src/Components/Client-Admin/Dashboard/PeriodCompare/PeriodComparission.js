@@ -104,73 +104,157 @@ function PeriodComparission({
   };
 
   const fetchPeriodComparission = async () => {
-    setLoading(true);
-    try {
-      const userData = JSON.parse(localStorage.getItem("user") || "{}");
-      const userId = userData?.id || "";
+  setLoading(true);
+  try {
+    const userData = JSON.parse(localStorage.getItem("user") || "{}");
+    const userId = userData?.id || "";
 
-      const response = await axios.post(
-        `${process.env.REACT_APP_IP}getPeriodWiseData/`,
-        {
-          user_id: userId,
-          marketplace_id: marketPlaceId.id,
-          brand_id: brand_id,
-          product_id: product_id,
-          manufacturer_name: manufacturer_name,
-          fulfillment_channel: fulfillment_channel,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        }
-      );
-      console.log('getPeriodWise',response)
+    const response = await axios.post(
+      `${process.env.REACT_APP_IP}getPeriodWiseData/`,
+      {
+        user_id: userId,
+        marketplace_id: marketPlaceId.id,
+        brand_id: brand_id,
+        product_id: product_id,
+        manufacturer_name: manufacturer_name,
+        fulfillment_channel: fulfillment_channel,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      }
+    );
 
-      const periods = JSON.parse(response.data.data) || {};
+    console.log('Full Response:', response);
+    console.log('Response Data:', response.data);
+    console.log('Response Data Type:', typeof response.data);
 
-      const formattedData = Object.keys(periods)
-        .filter((key) => periods[key]?.label)
-        .map((key) => {
-          const item = periods[key];
-
-          // Format as per UTC, but only take the date part
-          const currentDateFrom = dayjs
-            .utc(item.period.current.from)
-            .format("MMM D");
-          const currentDateTo = dayjs
-            .utc(item.period.current.to)
-            .format("MMM D, YYYY");
-
-          return {
-            period: item.label || "",
-            dateRange: `${currentDateFrom} - ${currentDateTo}`,
-            grossRevenue: item.grossRevenue?.current || 0,
-            expenses: item.expenses?.current || 0,
-            netProfit: item.netProfit?.current || 0,
-            margin: item.margin?.current || 0,
-            roi: item.roi?.current || 0,
-            refunds: item.refunds?.current || 0,
-            unitsSold: item.unitsSold?.current || 0,
-            skuCount: item.skuCount?.current || 0,
-            pageViews: item.pageViews?.current || 0,
-            sessions: item.sessions?.current || 0,
-            unitsessions: item.unitSessionPercentage?.current || 0,
-            conversionRate: item.unitSessionPercentage?.current || 0,
-            grossRevenuePrev: item.grossRevenue?.previous || 0,
-            netProfitPrev: item.netProfit?.previous || 0,
-            marginPrev: item.margin?.previous || 0,
-            grossRevenueDelta: item.grossRevenue?.delta || 0,
-            netProfitDelta: item.netProfit?.delta || 0,
-            marginDelta: item.margin?.delta || 0,
-          };
-        });
-
-      setPeriodData(formattedData);
-      console.log("Formatted Period Data:", formattedData);
-    } catch (error) {
-      console.error("Error fetching metrics:", error);
-      setPeriodData([]);
-    } finally {
-      setLoading(false);
+    // Handle different response formats
+    let periods = {};
+    
+    if (typeof response.data === 'string') {
+      // Case 1: Direct JSON string
+      periods = JSON.parse(response.data);
+    } else if (response.data && typeof response.data.data === 'string') {
+      // Case 2: JSON string nested in data property
+      periods = JSON.parse(response.data.data);
+    } else if (response.data && typeof response.data === 'object') {
+      // Case 3: Direct object (expected format)
+      periods = response.data;
+    } else {
+      console.error('Unexpected response format:', response.data);
+      throw new Error('Invalid response format');
     }
-  };
+
+    console.log('Parsed periods:', periods);
+    console.log('Period keys:', Object.keys(periods));
+
+    // Check if periods has expected structure
+    if (!periods || typeof periods !== 'object') {
+      throw new Error('Invalid periods data structure');
+    }
+
+    // Debug each period
+    Object.keys(periods).forEach(key => {
+      console.log(`Period "${key}":`, {
+        hasLabel: !!periods[key]?.label,
+        label: periods[key]?.label,
+        structure: periods[key]
+      });
+    });
+
+    // Helper function to safely handle NaN and null values
+    const safeNumber = (value) => {
+      if (value === null || value === undefined) return 0;
+      if (typeof value === 'string') {
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? 0 : parsed;
+      }
+      if (isNaN(value)) return 0;
+      return value || 0;
+    };
+
+    // Filter and process periods
+    const validKeys = Object.keys(periods).filter((key) => {
+      const hasLabel = periods[key]?.label;
+      console.log(`Key "${key}" validation:`, { hasLabel, label: periods[key]?.label });
+      return hasLabel;
+    });
+
+    console.log('Valid keys with labels:', validKeys);
+
+    if (validKeys.length === 0) {
+      console.warn('No valid periods found with labels');
+      setPeriodData([]);
+      return;
+    }
+
+    const formattedData = validKeys.map((key) => {
+      const item = periods[key];
+      console.log(`Processing period "${key}":`, item);
+
+      // Safely format dates
+      let currentDateFrom = '';
+      let currentDateTo = '';
+      
+      try {
+        if (item.period?.current?.from && item.period?.current?.to) {
+          currentDateFrom = dayjs.utc(item.period.current.from).format("MMM D");
+          currentDateTo = dayjs.utc(item.period.current.to).format("MMM D, YYYY");
+        } else {
+          console.warn(`Missing date info for period "${key}":`, item.period);
+          currentDateFrom = 'N/A';
+          currentDateTo = 'N/A';
+        }
+      } catch (dateError) {
+        console.error(`Date formatting error for period "${key}":`, dateError);
+        currentDateFrom = 'N/A';
+        currentDateTo = 'N/A';
+      }
+
+      const processedRow = {
+        period: item.label || "",
+        dateRange: `${currentDateFrom} - ${currentDateTo}`,
+        grossRevenue: safeNumber(item.grossRevenue?.current),
+        expenses: safeNumber(item.expenses?.current),
+        netProfit: safeNumber(item.netProfit?.current),
+        margin: safeNumber(item.margin?.current),
+        roi: safeNumber(item.roi?.current),
+        refunds: safeNumber(item.refunds?.current),
+        unitsSold: safeNumber(item.unitsSold?.current),
+        skuCount: safeNumber(item.skuCount?.current),
+        pageViews: safeNumber(item.pageViews?.current),
+        sessions: safeNumber(item.sessions?.current),
+        unitsessions: safeNumber(item.unitSessionPercentage?.current),
+        conversionRate: safeNumber(item.unitSessionPercentage?.current),
+        grossRevenuePrev: safeNumber(item.grossRevenue?.previous),
+        netProfitPrev: safeNumber(item.netProfit?.previous),
+        marginPrev: safeNumber(item.margin?.previous),
+        grossRevenueDelta: safeNumber(item.grossRevenue?.delta),
+        netProfitDelta: safeNumber(item.netProfit?.delta),
+        marginDelta: safeNumber(item.margin?.delta),
+      };
+      
+      console.log(`Processed row for "${key}":`, processedRow);
+      return processedRow;
+    });
+
+    console.log("Final formatted data:", formattedData);
+    setPeriodData(formattedData);
+
+    if (formattedData.length === 0) {
+      console.warn('No data was processed successfully');
+    }
+
+  } catch (error) {
+    console.error("Error in fetchPeriodComparission:", error);
+    console.error("Error stack:", error.stack);
+    setPeriodData([]);
+    
+    // You might want to show an error state to the user
+    // setError(error.message);
+    
+  } finally {
+    setLoading(false);
+  }
+};  
 
   let lastParamsRef = useRef("");
 
