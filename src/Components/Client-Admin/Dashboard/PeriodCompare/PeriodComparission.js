@@ -121,6 +121,7 @@ function PeriodComparission({
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         }
       );
+      console.log('getPeriodWise',response)
 
       const periods = response.data || {};
 
@@ -138,27 +139,27 @@ function PeriodComparission({
             .format("MMM D, YYYY");
 
           return {
-  period: item.label || "",
-  dateRange: `${currentDateFrom} - ${currentDateTo}`,
-  grossRevenue: isNaN(item.grossRevenue?.current) ? 0 : (item.grossRevenue?.current || 0),
-  expenses: isNaN(item.expenses?.current) ? 0 : (item.expenses?.current || 0),
-  netProfit: isNaN(item.netProfit?.current) ? 0 : (item.netProfit?.current || 0),
-  margin: isNaN(item.margin?.current) ? 0 : (item.margin?.current || 0),
-  roi: isNaN(item.roi?.current) ? 0 : (item.roi?.current || 0),
-  refunds: isNaN(item.refunds?.current) ? 0 : (item.refunds?.current || 0),
-  unitsSold: isNaN(item.unitsSold?.current) ? 0 : (item.unitsSold?.current || 0),
-  skuCount: isNaN(item.skuCount?.current) ? 0 : (item.skuCount?.current || 0),
-  pageViews: isNaN(item.pageViews?.current) ? 0 : (item.pageViews?.current || 0),
-  sessions: isNaN(item.sessions?.current) ? 0 : (item.sessions?.current || 0),
-  unitsessions: isNaN(item.unitSessionPercentage?.current) ? 0 : (item.unitSessionPercentage?.current || 0),
-  conversionRate: isNaN(item.unitSessionPercentage?.current) ? 0 : (item.unitSessionPercentage?.current || 0),
-  grossRevenuePrev: isNaN(item.grossRevenue?.previous) ? 0 : (item.grossRevenue?.previous || 0),
-  netProfitPrev: isNaN(item.netProfit?.previous) ? 0 : (item.netProfit?.previous || 0),
-  marginPrev: isNaN(item.margin?.previous) ? 0 : (item.margin?.previous || 0),
-  grossRevenueDelta: isNaN(item.grossRevenue?.delta) ? 0 : (item.grossRevenue?.delta || 0),
-  netProfitDelta: isNaN(item.netProfit?.delta) ? 0 : (item.netProfit?.delta || 0),
-  marginDelta: isNaN(item.margin?.delta) ? 0 : (item.margin?.delta || 0),
-};
+            period: item.label || "",
+            dateRange: `${currentDateFrom} - ${currentDateTo}`,
+            grossRevenue: item.grossRevenue?.current || 0,
+            expenses: item.expenses?.current || 0,
+            netProfit: item.netProfit?.current || 0,
+            margin: item.margin?.current || 0,
+            roi: item.roi?.current || 0,
+            refunds: item.refunds?.current || 0,
+            unitsSold: item.unitsSold?.current || 0,
+            skuCount: item.skuCount?.current || 0,
+            pageViews: item.pageViews?.current || 0,
+            sessions: item.sessions?.current || 0,
+            unitsessions: item.unitSessionPercentage?.current || 0,
+            conversionRate: item.unitSessionPercentage?.current || 0,
+            grossRevenuePrev: item.grossRevenue?.previous || 0,
+            netProfitPrev: item.netProfit?.previous || 0,
+            marginPrev: item.margin?.previous || 0,
+            grossRevenueDelta: item.grossRevenue?.delta || 0,
+            netProfitDelta: item.netProfit?.delta || 0,
+            marginDelta: item.margin?.delta || 0,
+          };
         });
 
       setPeriodData(formattedData);
