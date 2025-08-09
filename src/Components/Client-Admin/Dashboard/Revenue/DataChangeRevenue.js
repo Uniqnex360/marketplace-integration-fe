@@ -55,7 +55,6 @@ import DottedCircleLoading from "../../../Loading/DotLoading";
 const metricColors = {
   gross_revenue: "#00b894",
   gross_revenue_with_tax: "#2ecc71",
-  gross_revenue_without_tax: "#d35400",
   net_profit: "#6629b3",
   profit_margin: "#0984e3",
   orders: "#f14682",
@@ -66,7 +65,7 @@ const metricColors = {
 
 const initialMetricConfig = [
   {
-    id: "gross_revenue",
+    id: "gross_revenue_with_tax",
     label: "Gross Revenue",
     value: null,
     change: null,
@@ -136,7 +135,6 @@ const initialMetricConfig = [
 const metricLabels = {
   gross_revenue: "Gross Revenue",
   gross_revenue_with_tax: "Gross Revenue (With Tax)",
-  gross_revenue_without_tax: "Gross Revenue (Without Tax)",
   net_profit: "Net Profit",
   profit_margin: "Profit Margin",
   orders: "Orders",
@@ -1245,17 +1243,6 @@ const CompareChart = ({
                 {/* Pass a function to the content prop of Tooltip */}
                 <Tooltip content={<CustomTooltip />} />
 
-                {visibleMetrics.includes("gross_revenue") && (
-                  <Line
-                    type="monotone"
-                    dataKey="grossRevenue"
-                    dot={false}
-                    stroke={metricColors.gross_revenue}
-                    strokeWidth={2}
-                    name={metricLabels.gross_revenue}
-                    yAxisId="left"
-                  />
-                )}
 
                 {visibleMetrics.includes("gross_revenue") && (
                   <Line
@@ -1283,7 +1270,7 @@ const CompareChart = ({
                 {visibleMetrics.includes("gross_revenue_with_tax") && (
                   <Line
                     type="monotone"
-                    dataKey="grossRevenueWithTax"
+                    dataKey="grossRevenue"
                     dot={false}
                     stroke={metricColors.gross_revenue_with_tax}
                     strokeWidth={2}
@@ -1292,23 +1279,12 @@ const CompareChart = ({
                   />
                 )}
 
-                {visibleMetrics.includes("gross_revenue_without_tax") && (
-                  <Line
-                    type="monotone"
-                    dataKey="grossRevenueWithoutTax"
-                    dot={false}
-                    stroke={metricColors.gross_revenue_without_tax}
-                    strokeWidth={2}
-                    name={metricLabels.gross_revenue_without_tax}
-                    yAxisId="left"
-                  />
-                )}
 
                 {/* Optional: add comparison lines */}
                 {visibleMetrics.includes("gross_revenue_with_tax") && (
                   <Line
                     type="monotone"
-                    dataKey="compareGrossRevenueWithTax"
+                    dataKey="compareGrossRevenue"
                     dot={false}
                     strokeDasharray="5 5"
                     stroke={metricColors.gross_revenue_with_tax}
@@ -1318,18 +1294,7 @@ const CompareChart = ({
                   />
                 )}
 
-                {visibleMetrics.includes("gross_revenue_without_tax") && (
-                  <Line
-                    type="monotone"
-                    dataKey="compareGrossRevenueWithoutTax"
-                    dot={false}
-                    strokeDasharray="5 5"
-                    stroke={metricColors.gross_revenue_without_tax}
-                    strokeWidth={2}
-                    name={`Compare ${metricLabels.gross_revenue_without_tax}`}
-                    yAxisId="left"
-                  />
-                )}
+               
                 {visibleMetrics.includes("profit_margin") && (
                   <Line
                     type="monotone"
