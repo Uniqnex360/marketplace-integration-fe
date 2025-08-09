@@ -123,7 +123,7 @@ function PeriodComparission({
       );
       console.log('getPeriodWise',response)
 
-      const periods = response.data || {};
+      const periods = JSON.parse(response.data.data) || {};
 
       const formattedData = Object.keys(periods)
         .filter((key) => periods[key]?.label)
