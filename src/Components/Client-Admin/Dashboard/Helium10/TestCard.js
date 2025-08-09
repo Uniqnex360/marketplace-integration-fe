@@ -805,7 +805,7 @@ const getCirclePoints = (metric = "gross_revenue_without_tax") => {
           {visibleMetrics.includes("gross_revenue_with_tax") && (
   <Box sx={metricBlockStyle}>
     <MetricItem
-      title="Gross Revenue (With Tax)"
+      title="Gross Revenue"
       value={dataState.metrics.gross_revenue_with_tax}
       change={dataState.difference.gross_revenue_with_tax}
       isNegative={String(dataState.difference.gross_revenue_with_tax).startsWith("-")}
@@ -1035,9 +1035,6 @@ const getCirclePoints = (metric = "gross_revenue_without_tax") => {
                   >
                     <Typography fontWeight="bold" fontSize={14} color="#485E75">
       {dayjs(tooltipData.fullDate).format("MMM DD, YYYY")}
-    </Typography>
-    <Typography fontSize={14} color={theme.palette.primary.main} fontWeight="bold">
-      No Tax: {formatCurrency(tooltipData.gross_revenue_without_tax)}
     </Typography>
     <Typography fontSize={14} color="#FF9800" fontWeight="bold">
       With Tax: {formatCurrency(tooltipData.gross_revenue_with_tax)}
